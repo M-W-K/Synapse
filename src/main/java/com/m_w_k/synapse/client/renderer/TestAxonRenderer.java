@@ -1,8 +1,7 @@
 package com.m_w_k.synapse.client.renderer;
 
 import com.m_w_k.synapse.SynapseMod;
-import com.m_w_k.synapse.block.entity.TestBlockEntity;
-import com.mojang.blaze3d.systems.RenderSystem;
+import com.m_w_k.synapse.block.entity.DistributorBlockEntity;
 import com.mojang.blaze3d.vertex.*;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.LevelRenderer;
@@ -13,22 +12,16 @@ import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.Mth;
 import net.minecraft.world.inventory.InventoryMenu;
-import net.minecraft.world.item.ItemDisplayContext;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
-import net.minecraft.world.level.LightLayer;
-import net.minecraft.world.level.levelgen.structure.BoundingBox;
-import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import org.jetbrains.annotations.NotNull;
-import org.joml.Matrix4f;
+
+import java.nio.ByteBuffer;
 
 @OnlyIn(Dist.CLIENT)
-public class TestAxonRenderer implements BlockEntityRenderer<TestBlockEntity> {
+public class TestAxonRenderer implements BlockEntityRenderer<DistributorBlockEntity> {
 
     private static final ResourceLocation testTex = new ResourceLocation(SynapseMod.MODID, "block/test_texture");
     private static final Vec3 UP = new Vec3(0, 1, 0);
@@ -36,7 +29,7 @@ public class TestAxonRenderer implements BlockEntityRenderer<TestBlockEntity> {
     public TestAxonRenderer(BlockEntityRendererProvider.Context context) {}
 
     @Override
-    public void render(@NotNull TestBlockEntity be, float partialTicks, @NotNull PoseStack pose, @NotNull MultiBufferSource bufferSource, int light, int overlay) {
+    public void render(@NotNull DistributorBlockEntity be, float partialTicks, @NotNull PoseStack pose, @NotNull MultiBufferSource bufferSource, int light, int overlay) {
         if (Minecraft.getInstance().getCameraEntity() == null || be.getLevel() == null) return;
         pose.pushPose();
         BlockPos pos = be.getBlockPos();
@@ -60,14 +53,12 @@ public class TestAxonRenderer implements BlockEntityRenderer<TestBlockEntity> {
 //        bufferbuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
 
         VertexConsumer buffer = bufferSource.getBuffer(RenderType.solid());
-//        Vec3 camera = Minecraft.getInstance().getCameraEntity().getEyePosition(partialTicks);
         for (int i = 0; i < points - 1; i++) {
             Vec3 start = ropePoints[i];
             Vec3 end = ropePoints[i + 1];
 
             Vec3 midpoint = start.lerp(end, 0.5);
             int sectionLight = LevelRenderer.getLightColor(be.getLevel(), BlockPos.containing(midpoint.x, midpoint.y, midpoint.z));
-//            Vec3 cam = camera.subtract(midpoint).normalize();
 
             Vec3 rope = end.subtract(start);
             Vec3 ropePrev = i > 0 ? start.subtract(ropePoints[i - 1]).add(rope) : rope;

@@ -16,10 +16,12 @@ public abstract class SynapseCreativeTabsRegistry {
 
     public static final RegistryObject<CreativeModeTab> SYNAPSE_TAB = CREATIVE_MODE_TABS.register("synapse_tab", () -> CreativeModeTab.builder()
             .title(Component.translatable("itemGroup.synapse"))
-            .withTabsBefore(CreativeModeTabs.COMBAT)
-            .icon(() -> new ItemStack(SynapseBlockRegistry.TEST_BLOCK.get().asItem()))
+            .withTabsBefore(CreativeModeTabs.REDSTONE_BLOCKS)
+            .icon(() -> new ItemStack(SynapseBlockRegistry.DISTRIBUTOR_BLOCK_1.get().asItem()))
             .displayItems((parameters, output) -> {
-                output.accept(SynapseBlockRegistry.TEST_BLOCK.get());
+                output.accept(SynapseBlockRegistry.DISTRIBUTOR_BLOCK_1.get());
+                output.accept(SynapseBlockRegistry.DISTRIBUTOR_BLOCK_2.get());
+                output.accept(SynapseBlockRegistry.DISTRIBUTOR_BLOCK_3.get());
             }).build());
 
     public static void init(IEventBus bus) {
