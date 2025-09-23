@@ -19,9 +19,8 @@ public abstract class SynapseCreativeTabsRegistry {
             .withTabsBefore(CreativeModeTabs.REDSTONE_BLOCKS)
             .icon(() -> new ItemStack(SynapseBlockRegistry.DISTRIBUTOR_BLOCK_1.get().asItem()))
             .displayItems((parameters, output) -> {
-                output.accept(SynapseBlockRegistry.DISTRIBUTOR_BLOCK_1.get());
-                output.accept(SynapseBlockRegistry.DISTRIBUTOR_BLOCK_2.get());
-                output.accept(SynapseBlockRegistry.DISTRIBUTOR_BLOCK_3.get());
+                output.acceptAll(SynapseBlockRegistry.BLOCKS.getEntries().stream().map(r -> new ItemStack(r.get())).toList());
+                output.acceptAll(SynapseItemRegistry.ITEMS.getEntries().stream().map(r -> new ItemStack(r.get())).toList());
             }).build());
 
     public static void init(IEventBus bus) {

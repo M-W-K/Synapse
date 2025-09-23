@@ -1,9 +1,8 @@
 package com.m_w_k.synapse.registry;
 
 import com.m_w_k.synapse.SynapseMod;
-import com.m_w_k.synapse.api.connect.ConnectionTier;
-import com.m_w_k.synapse.block.DistributorBlock;
-import com.m_w_k.synapse.block.entity.DistributorBlockEntity;
+import com.m_w_k.synapse.common.block.DistributorBlock;
+import com.m_w_k.synapse.common.block.entity.DistributorBlockEntity;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraftforge.eventbus.api.IEventBus;

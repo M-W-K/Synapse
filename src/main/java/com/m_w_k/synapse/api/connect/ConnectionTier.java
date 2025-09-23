@@ -32,6 +32,11 @@ public enum ConnectionTier implements StringRepresentable, IExtensibleEnum {
         return prio;
     }
 
+    /**
+     * Gets the relative connection type to another tier
+     * @param other the other tier
+     * @return the connection type of any connection that runs from this to {@code other}.
+     */
     public @NotNull Type typeOf(@NotNull ConnectionTier other) {
         if (Double.isFinite(this.getPrio()) && Double.isFinite(other.getPrio())) {
             if (this.getPrio() == other.getPrio()) {
@@ -41,17 +46,33 @@ public enum ConnectionTier implements StringRepresentable, IExtensibleEnum {
             }
             return Type.DOWNSTREAM;
         }
+        if (this.getPrio() < other.getPrio()) {
+            return Type.UNKNOWN_UP;
+        } else if (this.getPrio() > other.getPrio()) {
+            return Type.UNKNOWN_DOWN;
+        }
         return Type.UNKNOWN;
     }
 
     public enum Type {
-        UPSTREAM, DOWNSTREAM, EQUAL, UNKNOWN;
+        UPSTREAM, DOWNSTREAM, EQUAL, UNKNOWN_UP, UNKNOWN_DOWN, UNKNOWN;
 
         public boolean upstream() {
-            return this == UPSTREAM;
+            return this == UPSTREAM || this == UNKNOWN_UP;
         }
+
         public boolean downstream() {
-            return this == DOWNSTREAM;
+            return this == DOWNSTREAM || this == UNKNOWN_DOWN;
+        }
+
+        public @NotNull Type flip() {
+            return switch (this) {
+                case UPSTREAM -> DOWNSTREAM;
+                case DOWNSTREAM -> UPSTREAM;
+                case UNKNOWN_UP -> UNKNOWN_DOWN;
+                case UNKNOWN_DOWN -> UNKNOWN_UP;
+                default -> this;
+            };
         }
     }
 }

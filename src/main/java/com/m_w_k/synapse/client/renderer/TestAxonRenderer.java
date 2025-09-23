@@ -1,7 +1,8 @@
 package com.m_w_k.synapse.client.renderer;
 
 import com.m_w_k.synapse.SynapseMod;
-import com.m_w_k.synapse.block.entity.DistributorBlockEntity;
+import com.m_w_k.synapse.common.block.entity.AxonBlockEntity;
+import com.m_w_k.synapse.common.connect.LocalAxonConnection;
 import com.mojang.blaze3d.vertex.*;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.LevelRenderer;
@@ -18,10 +19,9 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import org.jetbrains.annotations.NotNull;
 
-import java.nio.ByteBuffer;
-
+// TODO replace BER with custom baked model and baked rendering data using IForgeBlockEntity#getModelData()
 @OnlyIn(Dist.CLIENT)
-public class TestAxonRenderer implements BlockEntityRenderer<DistributorBlockEntity> {
+public class TestAxonRenderer implements BlockEntityRenderer<AxonBlockEntity> {
 
     private static final ResourceLocation testTex = new ResourceLocation(SynapseMod.MODID, "block/test_texture");
     private static final Vec3 UP = new Vec3(0, 1, 0);
@@ -29,41 +29,40 @@ public class TestAxonRenderer implements BlockEntityRenderer<DistributorBlockEnt
     public TestAxonRenderer(BlockEntityRendererProvider.Context context) {}
 
     @Override
-    public void render(@NotNull DistributorBlockEntity be, float partialTicks, @NotNull PoseStack pose, @NotNull MultiBufferSource bufferSource, int light, int overlay) {
+    public void render(@NotNull AxonBlockEntity be, float partialTicks, @NotNull PoseStack pose, @NotNull MultiBufferSource bufferSource, int light, int overlay) {
         if (Minecraft.getInstance().getCameraEntity() == null || be.getLevel() == null) return;
         pose.pushPose();
         BlockPos pos = be.getBlockPos();
         Vec3 testSource = be.getBlockPos().getCenter();
         pose.translate(-pos.getX(), -pos.getY(), -pos.getZ());
-        Vec3 testTarget = be.getBlockPos().north(15).west(5).above(5).getCenter();
-        int points = 1 + (int) (curveLength(testSource, testTarget) * 2);
-        Vec3[] ropePoints = new Vec3[points];
-        for (int i = 0; i < points; i++) {
-            double lerp = (double) i / points;
-            double ylerp = testTarget.y > testSource.y ? lerp : (lerp - 1);
-            ropePoints[i] = new Vec3(testSource.x + lerp * (testTarget.x - testSource.x),
-                    testSource.y + ylerp * ylerp * (testTarget.y - testSource.y),
-                    testSource.z + lerp * (testTarget.z - testSource.z));
-        }
-        TextureAtlasSprite sprite = Minecraft.getInstance().getModelManager().getAtlas(InventoryMenu.BLOCK_ATLAS).getSprite(testTex);
-        float minU = sprite.getU(0);
-        float maxU = sprite.getU(16);
-//        Tesselator tesselator = RenderSystem.renderThreadTesselator();
-//        BufferBuilder bufferbuilder = tesselator.getBuilder();
-//        bufferbuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
+        for (LocalAxonConnection connected : be.getUpstream().values()) {
+            Vec3 testTarget = connected.getTargetPos().getCenter();
+            int points = 1 + (int) (curveLength(testSource, testTarget) * 2);
+            Vec3[] ropePoints = new Vec3[points];
+            for (int i = 0; i < points; i++) {
+                double lerp = (double) i / points;
+                double ylerped = testTarget.y > testSource.y
+                        ? testSource.y + lerp * lerp * (testTarget.y - testSource.y)
+                        : testTarget.y + (1 - lerp) * (1 - lerp) * (testSource.y - testTarget.y);
+                ropePoints[i] = new Vec3(testSource.x + lerp * (testTarget.x - testSource.x),
+                        ylerped,
+                        testSource.z + lerp * (testTarget.z - testSource.z));
+            }
+            TextureAtlasSprite sprite = Minecraft.getInstance().getModelManager().getAtlas(InventoryMenu.BLOCK_ATLAS).getSprite(testTex);
 
-        VertexConsumer buffer = bufferSource.getBuffer(RenderType.solid());
-        for (int i = 0; i < points - 1; i++) {
-            Vec3 start = ropePoints[i];
-            Vec3 end = ropePoints[i + 1];
+            VertexConsumer buffer = bufferSource.getBuffer(RenderType.solid());
+            for (int i = 0; i < points - 1; i++) {
+                Vec3 start = ropePoints[i];
+                Vec3 end = ropePoints[i + 1];
 
-            Vec3 midpoint = start.lerp(end, 0.5);
-            int sectionLight = LevelRenderer.getLightColor(be.getLevel(), BlockPos.containing(midpoint.x, midpoint.y, midpoint.z));
+                Vec3 midpoint = start.lerp(end, 0.5);
+                int sectionLight = LevelRenderer.getLightColor(be.getLevel(), BlockPos.containing(midpoint.x, midpoint.y, midpoint.z));
 
-            Vec3 rope = end.subtract(start);
-            Vec3 ropePrev = i > 0 ? start.subtract(ropePoints[i - 1]).add(rope) : rope;
-            Vec3 ropeNext = i < points - 2 ? ropePoints[i + 2].subtract(end).add(rope) : rope;
-            box(buffer, pose, start, end, ropeNext, ropePrev, sprite, i, sectionLight, overlay);
+                Vec3 rope = end.subtract(start);
+                Vec3 ropePrev = i > 0 ? start.subtract(ropePoints[i - 1]).add(rope) : rope;
+                Vec3 ropeNext = i < points - 2 ? ropePoints[i + 2].subtract(end).add(rope) : rope;
+                box(buffer, pose, start, end, ropeNext, ropePrev, sprite, i, sectionLight, overlay);
+            }
         }
         pose.popPose();
     }
@@ -72,6 +71,7 @@ public class TestAxonRenderer implements BlockEntityRenderer<DistributorBlockEnt
         double dx = Math.abs(target.x - source.x);
         double dy = Math.abs(target.y - source.y);
         double dz = Math.abs(target.z - source.z);
+        if (Math.abs(dy) < 1e-10) return Math.sqrt(dx * dx + dz * dz);
 
         // position x/z = source + t * (target - source)
         // position y = source + t^2 * (target - source) (or (t-1)^2)
@@ -81,10 +81,9 @@ public class TestAxonRenderer implements BlockEntityRenderer<DistributorBlockEnt
         // magnitude = sqrt(dx^2 + 4t^2*(dy)^2 + dz^2)
 
         // integral from 0 to 1
-        double dxz = dx + dz;
-        double sqrtDy = Math.sqrt(dy);
-        double sqrt4 = Math.sqrt(dx + 4 * dy + dz);
-        return dxz * (Math.log((sqrt4 + 2 * sqrtDy) / Math.sqrt(dxz))) / (4 * sqrtDy) + sqrt4 / 2;
+        double dxz = dx * dx + dz * dz;
+        double sqrt4 = Math.sqrt(dxz + 4 * dy * dy);
+        return dxz * (Math.log((sqrt4 + 2 * dy) / Math.sqrt(dxz))) / (4 * dy) + sqrt4 / 2;
     }
 
     private static void box(VertexConsumer b, PoseStack mat, Vec3 start, Vec3 end, Vec3 ropeNext, Vec3 ropePrev, TextureAtlasSprite sprite, int position, int light, int overlay) {

@@ -2,7 +2,7 @@ package com.m_w_k.synapse.registry;
 
 import com.m_w_k.synapse.SynapseMod;
 import com.m_w_k.synapse.api.connect.ConnectionTier;
-import com.m_w_k.synapse.block.DistributorBlock;
+import com.m_w_k.synapse.common.block.DistributorBlock;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
