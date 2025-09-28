@@ -11,26 +11,42 @@ import java.util.Comparator;
 import java.util.Map;
 import java.util.function.UnaryOperator;
 
-public final class AxonAddress extends Object2ShortRBTreeMap<ConnectionTier> {
+public final class AxonAddress extends Object2ShortRBTreeMap<ConnectorLevel> {
 
-    public static final Codec<AxonAddress> CODEC = Codec.unboundedMap(ConnectionTier.CODEC, Codec.SHORT).xmap(AxonAddress::new, UnaryOperator.identity());
+    public static final Codec<AxonAddress> CODEC = Codec.unboundedMap(ConnectorLevel.CODEC, Codec.SHORT).xmap(AxonAddress::new, UnaryOperator.identity());
 
     public static final short WILDCARD = -1;
     public static final short UNIVERSAL_WILDCARD = -2;
     public static final short EMPTY = -3;
 
     public AxonAddress() {
-        super(Comparator.comparingDouble(ConnectionTier::getPrio));
+        super(Comparator.comparingDouble(ConnectorLevel::getPrio));
         defaultReturnValue(EMPTY);
     }
 
-    public AxonAddress(Map<ConnectionTier, Short> map) {
+    public AxonAddress(Map<ConnectorLevel, Short> map) {
         this();
         putAll(map);
     }
 
-    public AxonAddress copy() {
+    public @NotNull AxonAddress copy() {
         return new AxonAddress(this);
+    }
+
+    public void copyAbove(@NotNull AxonAddress source, @NotNull ConnectorLevel level) {
+        for (var entry : source.object2ShortEntrySet()) {
+            if (entry.getKey().getPrio() > level.getPrio()) {
+                this.put(entry.getKey(), entry.getShortValue());
+            }
+        }
+    }
+
+    public void clearAbove(@NotNull ConnectorLevel level) {
+        for (var entry : object2ShortEntrySet()) {
+            if (entry.getKey().getPrio() > level.getPrio()) {
+                removeShort(level);
+            }
+        }
     }
 
     /**
@@ -45,16 +61,16 @@ public final class AxonAddress extends Object2ShortRBTreeMap<ConnectionTier> {
     }
 
     public boolean hasPort() {
-        return this.containsKey(ConnectionTier.ENDPOINT);
+        return this.containsKey(ConnectorLevel.ENDPOINT);
     }
 
     public short getPort() {
-        return this.getShort(ConnectionTier.ENDPOINT);
+        return this.getShort(ConnectorLevel.ENDPOINT);
     }
 
     public short[] getAddress() {
         ShortList list = new ShortArrayList(this.size());
-        for (ConnectionTier tier : ConnectionTier.values()) {
+        for (ConnectorLevel tier : ConnectorLevel.values()) {
             if (!Double.isFinite(tier.getPrio())) continue;
             list.add(this.getShort(tier));
         }
@@ -63,15 +79,15 @@ public final class AxonAddress extends Object2ShortRBTreeMap<ConnectionTier> {
 
     public boolean matches(AxonAddress other) {
         if (other == this) return true;
-        for (ConnectionTier tier : ConnectionTier.values()) {
+        for (ConnectorLevel tier : ConnectorLevel.values()) {
             if (!matchesAt(other, tier)) return false;
         }
         return true;
     }
 
-    public boolean matchesAtAndAbove(@NotNull AxonAddress other, @NotNull ConnectionTier tier) {
+    public boolean matchesAtAndAbove(@NotNull AxonAddress other, @NotNull ConnectorLevel tier) {
         if (other == this) return true;
-        for (ConnectionTier t : ConnectionTier.values()) {
+        for (ConnectorLevel t : ConnectorLevel.values()) {
             if (Double.isFinite(tier.getPrio()) && t.getPrio() >= tier.getPrio() && !matchesAt(other, t)) {
                 return false;
             }
@@ -79,7 +95,7 @@ public final class AxonAddress extends Object2ShortRBTreeMap<ConnectionTier> {
         return true;
     }
 
-    public boolean matchesAt(@NotNull AxonAddress other, @NotNull ConnectionTier tier) {
+    public boolean matchesAt(@NotNull AxonAddress other, @NotNull ConnectorLevel tier) {
         short us = this.getShort(tier);
         if (us == UNIVERSAL_WILDCARD) return true;
         short them = other.getShort(tier);
@@ -101,10 +117,10 @@ public final class AxonAddress extends Object2ShortRBTreeMap<ConnectionTier> {
             AxonAddress buildingAddress = new AxonAddress();
             if (split.length == 2) {
                 short port = Short.parseShort(split[1], 16);
-                buildingAddress.put(ConnectionTier.ENDPOINT, port);
+                buildingAddress.put(ConnectorLevel.ENDPOINT, port);
             }
             split = split[0].split("\\.");
-            ConnectionTier[] tiers = ConnectionTier.values();
+            ConnectorLevel[] tiers = ConnectorLevel.values();
             if (split.length > tiers.length - 2) {
                 return Either.right(ParseFailure.TOO_LONG);
             }
@@ -152,7 +168,7 @@ public final class AxonAddress extends Object2ShortRBTreeMap<ConnectionTier> {
     public boolean equals(Object o) {
         if (o == this) return true;
         if (!(o instanceof AxonAddress a)) return false;
-        for (ConnectionTier tier : ConnectionTier.values()) {
+        for (ConnectorLevel tier : ConnectorLevel.values()) {
             if (this.getShort(tier) != a.getShort(tier)) return false;
         }
         return true;
@@ -161,7 +177,7 @@ public final class AxonAddress extends Object2ShortRBTreeMap<ConnectionTier> {
     @Override
     public int hashCode() {
         int cumulative = 0;
-        for (ConnectionTier tier : ConnectionTier.values()) {
+        for (ConnectorLevel tier : ConnectorLevel.values()) {
             cumulative *= 127;
             cumulative += this.getShort(tier);
         }

@@ -1,7 +1,7 @@
 package com.m_w_k.synapse.common.connect;
 
 import com.m_w_k.synapse.api.connect.AxonType;
-import com.m_w_k.synapse.api.connect.ConnectionTier;
+import com.m_w_k.synapse.api.connect.ConnectionType;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.nbt.CompoundTag;
@@ -18,33 +18,33 @@ public sealed class AxonConnection permits LocalAxonConnection {
             instance.group(
                     AxonType.CODEC.fieldOf("axonType").forGetter(AxonConnection::getAxonType),
                     CompoundTag.CODEC.fieldOf("data").forGetter(AxonConnection::getData),
-                    Codec.INT.xmap(i -> ConnectionTier.CONNECTION_TYPES[i], ConnectionTier.Type::ordinal).fieldOf("connectionType").forGetter(AxonConnection::getConnectionType)
+                    Codec.INT.xmap(i -> ConnectionType.TYPES[i], ConnectionType::ordinal).fieldOf("connectionType").forGetter(AxonConnection::getConnectionType)
             ).apply(instance, AxonConnection::new));
 
     private final @NotNull AxonType axonType;
     private @NotNull CompoundTag data;
 
-    private @NotNull ConnectionTier.Type connectionType;
+    private final @NotNull ConnectionType connectionType;
 
     public AxonConnection(@NotNull AxonType axonType) {
         this(axonType, null);
     }
 
-    public AxonConnection(@NotNull AxonType axonType, ConnectionTier.@Nullable Type connectionType) {
+    public AxonConnection(@NotNull AxonType axonType, @Nullable ConnectionType connectionType) {
         this(axonType, new CompoundTag(), connectionType);
     }
 
-    protected AxonConnection(@NotNull AxonType axonType, CompoundTag tag, ConnectionTier.@Nullable Type connectionType) {
+    protected AxonConnection(@NotNull AxonType axonType, CompoundTag tag, @Nullable ConnectionType connectionType) {
         this.axonType = axonType;
         this.data = tag;
-        this.connectionType = connectionType == null ? ConnectionTier.Type.UNKNOWN : connectionType;
+        this.connectionType = connectionType == null ? ConnectionType.UNKNOWN : connectionType;
     }
 
     public long getCapacity(Level level, long requested, boolean simulate) {
         long tick = level.getGameTime();
         long prev = data.getLong("LastTick");
         long cap = axonType.getProvider().getCapacity(requested, data, (int) (tick - prev), simulate);
-        data.putLong("LastTick", tick);
+        if (!simulate) data.putLong("LastTick", tick);
         return cap;
     }
 
@@ -56,11 +56,7 @@ public sealed class AxonConnection permits LocalAxonConnection {
         return axonType;
     }
 
-    public void updateConnectionType(@NotNull ConnectionTier.Type connectionType) {
-        this.connectionType = connectionType;
-    }
-
-    public @NotNull ConnectionTier.Type getConnectionType() {
+    public @NotNull ConnectionType getConnectionType() {
         return connectionType;
     }
 }

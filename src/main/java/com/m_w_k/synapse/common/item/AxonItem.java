@@ -123,11 +123,13 @@ public class AxonItem extends Item {
      * Called to determine if a connection should be allowed, and to consume items if allowed.
      * @param placing the connection currently being placed
      * @param stack the itemstack doing the placing
+     * @param player the player doing the placing
+     * @param consume whether consumptions should occur.
      * @return whether the connection should be allowed
      */
-    public boolean consumeToPlace(@NotNull LocalAxonConnection placing, @NotNull ItemStack stack, @NotNull Player player) {
+    public boolean consumeToPlace(@NotNull LocalAxonConnection placing, @NotNull ItemStack stack, @NotNull Player player, boolean consume) {
         if (stack.isEmpty()) return false;
-        if (!player.isCreative()) stack.shrink(1);
+        if (consume && !player.isCreative()) stack.shrink(1);
         return true;
     }
 }

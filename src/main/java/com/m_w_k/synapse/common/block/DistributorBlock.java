@@ -1,17 +1,16 @@
 package com.m_w_k.synapse.common.block;
 
-import com.m_w_k.synapse.api.connect.ConnectionTier;
+import com.m_w_k.synapse.api.connect.ConnectorLevel;
 import com.m_w_k.synapse.common.block.entity.DistributorBlockEntity;
 import net.minecraft.core.BlockPos;
-import net.minecraft.world.level.block.BaseEntityBlock;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.NotNull;
 
 public class DistributorBlock extends AxonBlock {
-    private final @NotNull ConnectionTier tier;
+    private final @NotNull ConnectorLevel tier;
 
-    public DistributorBlock(Properties p_49795_, @NotNull ConnectionTier tier) {
+    public DistributorBlock(Properties p_49795_, @NotNull ConnectorLevel tier) {
         super(p_49795_);
         this.tier = tier;
     }

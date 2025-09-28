@@ -2,12 +2,9 @@ package com.m_w_k.synapse.registry;
 
 import com.m_w_k.synapse.SynapseMod;
 import com.m_w_k.synapse.api.connect.AxonType;
-import com.m_w_k.synapse.api.connect.ConnectionTier;
-import com.m_w_k.synapse.common.block.DistributorBlock;
 import com.m_w_k.synapse.common.item.AxonItem;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.RegistryObject;
