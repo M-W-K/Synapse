@@ -1,7 +1,10 @@
 {
   "itemGroup.synapse": "Synapse",
+
   "synapse.menu.title.basic_connector": "Addressing",
   "synapse.menu.search": "Search",
-  "synapse.menu.address_config": "Device ID"
-
+  "synapse.menu.address_config": "Device ID",
+  "synapse.menu.id.fail": "Unknown Failure",
+  "synapse.menu.id.fail_code": "Invalid ID",
+  "synapse.menu.id.fail_conflict": "ID is taken"
 }

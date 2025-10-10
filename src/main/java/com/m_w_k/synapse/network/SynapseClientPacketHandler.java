@@ -22,7 +22,9 @@ public class SynapseClientPacketHandler {
             menu.setActiveDevices(packet.getActiveDevices());
             menu.setSelectedDevice(packet.getSlot());
             menu.setSelectedAddress(packet.getAddress());
+            menu.setSelectedLevel(packet.getLevel());
             menu.setSelectedID(packet.getId());
+            menu.setSetResult(packet.getSetResult());
             menu.onSync();
         }
     }

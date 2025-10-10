@@ -3,11 +3,13 @@ package com.m_w_k.synapse.client.gui;
 import com.m_w_k.synapse.SynapseMod;
 import com.m_w_k.synapse.api.connect.AxonAddress;
 import com.m_w_k.synapse.common.menu.BasicConnectorMenu;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
@@ -59,8 +61,8 @@ public class BasicConnectorScreen extends AbstractContainerScreen<BasicConnector
 
     protected void updateSelectedDeviceScreen() {
         if (selected != null && getMenu().getSelectedAddress() != null) {
-            selectedAddress = getMenu().getSelectedAddress().toString();
-            lastDeviceID = AxonAddress.toHex(getMenu().getSelectedID(), false);
+            selectedAddress = getMenu().getSelectedAddress().toString(getMenu().getSelectedLevel());
+            lastDeviceID = AxonAddress.toHex(getMenu().getSelectedID());
             if (!addressConfig.getValue().isEmpty() && !lastDeviceID.equals(addressConfig.getValue())) {
                 addressConfig.setValue(lastDeviceID);
             }
@@ -76,6 +78,10 @@ public class BasicConnectorScreen extends AbstractContainerScreen<BasicConnector
     protected void renderSelectedDeviceScreen(@NotNull GuiGraphics graphics, float partial, int mouseX, int mouseY) {
         if (selected != null) {
             graphics.drawString(getFontRenderer(), selectedAddress, adjX(85), adjY(12), 0xFFFFFF, false);
+            if (getMenu().getSetResult() != null && !getMenu().getSetResult().success()) {
+                graphics.drawString(getFontRenderer(), ChatFormatting.RED + I18n.get(getMenu().getSetResult().failTranslation()),
+                        adjX(85 + 40), adjY(24), 0xFFFFFF, false);
+            }
         }
     }
 
@@ -94,7 +100,7 @@ public class BasicConnectorScreen extends AbstractContainerScreen<BasicConnector
         addRenderableWidget(addressConfig);
         addressConfig.setValue("0");
         addressConfig.setMaxLength(4);
-        addressConfig.setFilter(s -> s.chars().allMatch(c -> Character.digit(c, 16) != -1));
+        addressConfig.setFilter(s -> s.chars().allMatch(c -> Character.digit(c, 16) >= 0));
 //        addressConfig.setFilter(s -> s.equals("**") || s.equals("*") ||
 //                s.chars().allMatch(c -> Character.digit(c, 16) != -1));
         addressConfig.setVisible(false);
@@ -135,7 +141,12 @@ public class BasicConnectorScreen extends AbstractContainerScreen<BasicConnector
         if (!addressConfig.getValue().equals(lastDeviceID)) {
             lastDeviceID = addressConfig.getValue();
             if (!lastDeviceID.isEmpty()) {
-                getMenu().sendSelectedID(AxonAddress.fromHex(lastDeviceID));
+                try {
+                    getMenu().sendSelectedID(AxonAddress.fromHex(lastDeviceID));
+                } catch (NumberFormatException ignored) {
+                    addressConfig.setValue("0");
+                    lastDeviceID = "0";
+                }
             }
         }
     }

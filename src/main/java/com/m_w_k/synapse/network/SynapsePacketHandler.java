@@ -1,6 +1,7 @@
 package com.m_w_k.synapse.network;
 
 import com.m_w_k.synapse.SynapseMod;
+import com.m_w_k.synapse.api.connect.IDSetResult;
 import com.m_w_k.synapse.common.menu.BasicConnectorMenu;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.api.distmarker.Dist;
@@ -40,7 +41,7 @@ public final class SynapsePacketHandler {
             ServerPlayer sender = ctx.get().getSender();
             if (sender == null) return;
             if (sender.containerMenu instanceof BasicConnectorMenu menu) {
-                menu.sendToClient(sender, packet.getSlot());
+                menu.sendToClient(sender, packet.getSlot(), IDSetResult.SUCCESS);
             }
         });
         ctx.get().setPacketHandled(true);

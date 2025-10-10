@@ -281,7 +281,7 @@ public class AxonTree<T> extends SavedData {
         private final @NotNull Map<UUID, ConnectorData> downstream;
 
         public ConnectorData(short id, @NotNull ConnectorLevel level) {
-            this.address = new AxonAddress().setWildcards(false);
+            this.address = new AxonAddress();
             this.address.put(level, id);
             this.level = level;
             this.upstream = NO_UPSTREAM;
@@ -298,21 +298,20 @@ public class AxonTree<T> extends SavedData {
         /**
          * Changes the ID of this connector. Updates downstream addresses accordingly.
          * @param id the new id.
-         * @return whether the ID of this connector is now set to {@code id}. Fails if
-         * the new ID would conflict with another connector under our upstream.
+         * @return the result of this ID set operation
          */
-        public boolean setId(@Range(from = 0, to = Short.MAX_VALUE) short id) {
-            if (id == AxonAddress.EMPTY) return false;
-            if (this.getId() == id) return true;
+        public @NotNull IDSetResult setId(@Range(from = 0, to = Short.MAX_VALUE) short id) {
+            if (AxonAddress.isSpecialCharacter(id)) return IDSetResult.FAIL_SPECIAL_CODE;
+            if (this.getId() == id) return IDSetResult.SUCCESS_UNCHANGED;
             if (hasUpstream()) {
                 for (@NotNull Iterator<ConnectorData> it = getUpstream().downstream(); it.hasNext(); ) {
                     ConnectorData conflictCandidate = it.next();
-                    if (id == conflictCandidate.getId()) return false;
+                    if (id == conflictCandidate.getId()) return IDSetResult.FAIL_CHILD_CONFLICT;
                 }
             }
             updateCascade(level, id);
             setDirty();
-            return true;
+            return IDSetResult.SUCCESS;
         }
 
         /**
