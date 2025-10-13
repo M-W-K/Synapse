@@ -21,7 +21,6 @@ public final class AxonAddress extends Object2ShortRBTreeMap<ConnectorLevel> {
     public static final short UNIVERSAL_WILDCARD = -2;
     public static final short EMPTY = 0;
 
-
     public AxonAddress() {
         super(Comparator.comparingDouble(ConnectorLevel::getPrio));
         defaultReturnValue(EMPTY);
@@ -75,7 +74,7 @@ public final class AxonAddress extends Object2ShortRBTreeMap<ConnectorLevel> {
         return list.toShortArray();
     }
 
-    public boolean matches(AxonAddress other) {
+    public boolean matches(@NotNull AxonAddress other) {
         if (other == this) return true;
         for (ConnectorLevel tier : ConnectorLevel.values()) {
             if (!matchesAt(other, tier)) return false;
@@ -139,13 +138,13 @@ public final class AxonAddress extends Object2ShortRBTreeMap<ConnectorLevel> {
             if (split.length == 2) {
                 buildingAddress.put(ConnectorLevel.ENDPOINT, fromHex(split[1]));
             }
-            split = split[0].split("\\.");
+            split = split[0].split("\\.", -1);
             ConnectorLevel[] tiers = ConnectorLevel.values();
             if (split.length > tiers.length - 2) {
                 return Either.right(ParseFailure.TOO_LONG);
             }
             for (int i = 0; i < split.length; i++) {
-                buildingAddress.put(tiers[i + 2], fromHex(split[i]));
+                buildingAddress.put(tiers[i + 2], fromHex(split[split.length - i - 1]));
             }
             return Either.left(buildingAddress);
         } catch (NumberFormatException e) {
