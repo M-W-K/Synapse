@@ -19,7 +19,6 @@ import org.jetbrains.annotations.Nullable;
  * Relays are a critical component of any large network that allows extending the effective
  * connection length of a distributor.
  */
-// TODO NYI
 public class RelayBlockEntity extends AxonBlockEntity {
 
     public RelayBlockEntity(BlockPos pos, BlockState state) {
