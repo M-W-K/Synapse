@@ -13,7 +13,9 @@ import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Mth;
 import net.minecraft.world.inventory.InventoryMenu;
+import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -35,39 +37,92 @@ public class TestAxonRenderer implements BlockEntityRenderer<AxonBlockEntity> {
         BlockPos pos = be.getBlockPos();
         Vec3 source = be.getBlockPos().getCenter();
         pose.translate(-pos.getX(), -pos.getY(), -pos.getZ());
+        VertexConsumer buffer = bufferSource.getBuffer(RenderType.solid());
         for (int i = 0; i < be.getSlots(); i++) {
             LocalAxonConnection connected = be.getBySlot(i).upstream();
             if (connected == null) continue;
-            Vec3 testSource = source.add(connected.getSourceRenderOffset());
-            Vec3 testTarget = connected.getTargetPos().getCenter().add(connected.getTargetRenderOffset());
-            int points = 1 + (int) (curveLength(testSource, testTarget) * 2);
-            Vec3[] ropePoints = new Vec3[points];
-            for (int j = 0; j < points; j++) {
-                double lerp = (double) j / points;
-                double ylerped = testTarget.y > testSource.y
-                        ? testSource.y + lerp * lerp * (testTarget.y - testSource.y)
-                        : testTarget.y + (1 - lerp) * (1 - lerp) * (testSource.y - testTarget.y);
-                ropePoints[j] = new Vec3(testSource.x + lerp * (testTarget.x - testSource.x),
-                        ylerped,
-                        testSource.z + lerp * (testTarget.z - testSource.z));
-            }
-            TextureAtlasSprite sprite = Minecraft.getInstance().getModelManager().getAtlas(InventoryMenu.BLOCK_ATLAS).getSprite(testTex);
-
-            VertexConsumer buffer = bufferSource.getBuffer(RenderType.solid());
-            for (int j = 0; j < points - 1; j++) {
-                Vec3 start = ropePoints[j];
-                Vec3 end = ropePoints[j + 1];
-
-                Vec3 midpoint = start.lerp(end, 0.5);
-                int sectionLight = LevelRenderer.getLightColor(be.getLevel(), BlockPos.containing(midpoint.x, midpoint.y, midpoint.z));
-
-                Vec3 rope = end.subtract(start);
-                Vec3 ropePrev = j > 0 ? start.subtract(ropePoints[j - 1]).add(rope) : rope;
-                Vec3 ropeNext = j < points - 2 ? ropePoints[j + 2].subtract(end).add(rope) : rope;
-                box(buffer, pose, start, end, ropeNext, ropePrev, sprite, j, sectionLight, overlay);
-            }
+            renderConnection(source, connected, pose, be.getLevel(), buffer, overlay);
         }
         pose.popPose();
+    }
+
+    protected void renderConnection(@NotNull Vec3 sourcePos, @NotNull LocalAxonConnection connected,
+                                    PoseStack pose, BlockAndTintGetter level,
+                                    @NotNull VertexConsumer buffer, int overlay) {
+        Vec3 testSource = sourcePos.add(connected.getSourceRenderOffset());
+        Vec3 sourceOffset = testSource.add(connected.getSourceRenderDirection());
+        Vec3 testTarget = connected.getTargetPos().getCenter().add(connected.getTargetRenderOffset());
+        Vec3 targetOffset = testTarget.add(connected.getTargetRenderDirection());
+        int points = 1 + (int) (splineLength(testSource, sourceOffset, testTarget, targetOffset) * 2);
+        Vec3[] ropePoints = new Vec3[points + 1];
+        for (int j = 0; j <= points; j++) {
+            double t = (double) j / points;
+            // three stage lerp with most lerps along a special curve
+            Vec3 step1_1 = testSource.lerp(sourceOffset, t);
+            Vec3 step1_2 = curveInterpolate(sourceOffset, targetOffset, t);
+            Vec3 step1_3 = targetOffset.lerp(testTarget, t);
+            Vec3 step2_1 = curveInterpolate(step1_1, step1_2, t);
+            Vec3 step2_2 = curveInterpolate(step1_2, step1_3, t);
+            ropePoints[j] = curveInterpolate(step2_1, step2_2, t);
+        }
+        TextureAtlasSprite sprite = Minecraft.getInstance().getModelManager().getAtlas(InventoryMenu.BLOCK_ATLAS).getSprite(testTex);
+
+        for (int j = 0; j < points; j++) {
+            Vec3 start = ropePoints[j];
+            Vec3 end = ropePoints[j + 1];
+
+            Vec3 midpoint = start.lerp(end, 0.5);
+            int sectionLight = LevelRenderer.getLightColor(level, BlockPos.containing(midpoint.x, midpoint.y, midpoint.z));
+
+            Vec3 rope = end.subtract(start);
+            Vec3 ropePrev = j > 0 ? start.subtract(ropePoints[j - 1]).add(rope) : rope;
+            Vec3 ropeNext = j < points - 2 ? ropePoints[j + 2].subtract(end).add(rope) : rope;
+            box(buffer, pose, start, end, ropeNext, ropePrev, sprite, j, sectionLight, overlay);
+        }
+    }
+
+    protected Vec3 curveInterpolate(Vec3 a, Vec3 b, double t) {
+        double ylerped = b.y > a.y ? Mth.lerp(t * t, a.y, b.y) : Mth.lerp((1 - t) * (1 - t), b.y, a.y);
+        return new Vec3(Mth.lerp(t, a.x, b.x), ylerped, Mth.lerp(t, a.z, b.z));
+    }
+
+//    protected void renderConnectionOld(@NotNull Vec3 sourcePos, @NotNull LocalAxonConnection connected,
+//                                    PoseStack pose, BlockAndTintGetter level,
+//                                    @NotNull VertexConsumer buffer, int overlay) {
+//        Vec3 testSource = sourcePos.add(connected.getSourceRenderOffset());
+//        Vec3 testTarget = connected.getTargetPos().getCenter().add(connected.getTargetRenderOffset());
+//        int points = 1 + (int) (curveLength(testSource, testTarget) * 2);
+//        Vec3[] ropePoints = new Vec3[points];
+//        for (int j = 0; j < points; j++) {
+//            double lerp = (double) j / points;
+//            double ylerped = testTarget.y > testSource.y
+//                    ? testSource.y + lerp * lerp * (testTarget.y - testSource.y)
+//                    : testTarget.y + (1 - lerp) * (1 - lerp) * (testSource.y - testTarget.y);
+//            ropePoints[j] = new Vec3(testSource.x + lerp * (testTarget.x - testSource.x),
+//                    ylerped,
+//                    testSource.z + lerp * (testTarget.z - testSource.z));
+//        }
+//        TextureAtlasSprite sprite = Minecraft.getInstance().getModelManager().getAtlas(InventoryMenu.BLOCK_ATLAS).getSprite(testTex);
+//
+//        for (int j = 0; j < points - 1; j++) {
+//            Vec3 start = ropePoints[j];
+//            Vec3 end = ropePoints[j + 1];
+//
+//            Vec3 midpoint = start.lerp(end, 0.5);
+//            int sectionLight = LevelRenderer.getLightColor(level, BlockPos.containing(midpoint.x, midpoint.y, midpoint.z));
+//
+//            Vec3 rope = end.subtract(start);
+//            Vec3 ropePrev = j > 0 ? start.subtract(ropePoints[j - 1]).add(rope) : rope;
+//            Vec3 ropeNext = j < points - 2 ? ropePoints[j + 2].subtract(end).add(rope) : rope;
+//            box(buffer, pose, start, end, ropeNext, ropePrev, sprite, j, sectionLight, overlay);
+//        }
+//    }
+
+    private double splineLength(Vec3 sourcePos, Vec3 sourceOffset, Vec3 targetPos, Vec3 targetOffset) {
+        // TODO replace this with an actual calculation of spline length
+        return sourcePos.subtract(sourceOffset).length()
+                + curveLength(sourceOffset, targetOffset)
+                + targetPos.subtract(targetOffset).length();
     }
 
     private double curveLength(Vec3 source, Vec3 target) {
