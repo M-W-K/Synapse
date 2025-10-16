@@ -5,6 +5,7 @@ import com.m_w_k.synapse.api.connect.ConnectorLevel;
 import com.m_w_k.synapse.api.connect.DeviceDataKey;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.NotNull;
 
 public final class SynapseUtil {
@@ -35,5 +36,9 @@ public final class SynapseUtil {
             return a.getLevel().typeOf(b.getLevel());
         }
         return type;
+    }
+
+    public static ResourceLocation resLoc(String path) {
+        return new ResourceLocation(SynapseMod.MODID, path);
     }
 }

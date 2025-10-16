@@ -1,7 +1,7 @@
 package com.m_w_k.synapse.client.gui;
 
 import com.google.common.collect.ImmutableList;
-import com.m_w_k.synapse.SynapseMod;
+import com.m_w_k.synapse.SynapseUtil;
 import com.m_w_k.synapse.api.block.ruleset.*;
 import com.m_w_k.synapse.api.block.ruleset.FluidTransferRuleset;
 import com.m_w_k.synapse.api.connect.AxonAddress;
@@ -21,7 +21,6 @@ import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.InventoryMenu;
-import net.minecraft.world.item.BucketItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.client.extensions.common.IClientFluidTypeExtensions;
 import net.minecraftforge.common.capabilities.ForgeCapabilities;
@@ -34,7 +33,7 @@ import java.util.List;
 import java.util.function.BooleanSupplier;
 
 public class FluidRulesetWidget extends AbstractContainerEventHandler implements RulesetWidget {
-    static final ResourceLocation TEX_LOCATION = SynapseMod.resLoc("textures/gui/container/ruleset.png");
+    static final ResourceLocation TEX_LOCATION = SynapseUtil.resLoc("textures/gui/container/ruleset.png");
     static final int TEX_WIDTH = 128;
     static final int TEX_HEIGHT = 128;
 

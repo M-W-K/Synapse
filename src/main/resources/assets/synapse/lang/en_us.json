@@ -30,5 +30,12 @@
   "item.synapse.wetware_chip": "Primitive Wetware Chip",
   "item.synapse.piezoelectric_crystal": "Piezoelectric Crystal",
   "item.synapse.magma_crystal": "Magma Crystal",
-  "item.synapse.ender_crystal": "Ender Crystal"
+  "item.synapse.ender_crystal": "Ender Crystal",
+  "item.synapse.axon.item": "Item Axon",
+  "item.synapse.axon.fluid": "Fluid Axon",
+  "item.synapse.axon.energy": "Energy Axon",
+
+  "block.synapse.distributor_block_1": "Mk1 Distributor",
+  "block.synapse.distributor_block_2": "Mk2 Distributor",
+  "block.synapse.distributor_block_3": "Mk3 Distributor"
 }

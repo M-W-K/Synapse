@@ -1,17 +1,14 @@
 package com.m_w_k.synapse.data;
 
-import com.m_w_k.synapse.SynapseMod;
+import com.m_w_k.synapse.SynapseUtil;
 import net.minecraft.advancements.*;
 import net.minecraft.advancements.critereon.InventoryChangeTrigger;
 import net.minecraft.advancements.critereon.ItemPredicate;
-import net.minecraft.advancements.critereon.ItemUsedOnLocationTrigger;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.DataProvider;
 import net.minecraft.data.PackOutput;
-import net.minecraft.data.advancements.AdvancementSubProvider;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.level.ItemLike;
 import net.minecraftforge.common.data.ExistingFileHelper;
 import net.minecraftforge.common.data.ForgeAdvancementProvider;
@@ -114,7 +111,7 @@ public final class SynapseAdvancementGen implements DataProvider.Factory<ForgeAd
                     toast,
                     chat,
                     hidden
-            ).save(writer, SynapseMod.resLoc(name), existingFileHelper);
+            ).save(writer, SynapseUtil.resLoc(name), existingFileHelper);
         }
     }
 }

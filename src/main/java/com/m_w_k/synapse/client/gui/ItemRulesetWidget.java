@@ -1,7 +1,7 @@
 package com.m_w_k.synapse.client.gui;
 
 import com.google.common.collect.ImmutableList;
-import com.m_w_k.synapse.SynapseMod;
+import com.m_w_k.synapse.SynapseUtil;
 import com.m_w_k.synapse.api.block.ruleset.ItemRuleAccess;
 import com.m_w_k.synapse.api.block.ruleset.ItemTransferRuleset;
 import com.m_w_k.synapse.api.block.ruleset.RuleAction;
@@ -25,7 +25,7 @@ import java.util.List;
 import java.util.function.BooleanSupplier;
 
 public class ItemRulesetWidget extends AbstractContainerEventHandler implements RulesetWidget {
-    static final ResourceLocation TEX_LOCATION = SynapseMod.resLoc("textures/gui/container/ruleset.png");
+    static final ResourceLocation TEX_LOCATION = SynapseUtil.resLoc("textures/gui/container/ruleset.png");
     static final int TEX_WIDTH = 128;
     static final int TEX_HEIGHT = 128;
 
