@@ -208,6 +208,31 @@ public abstract class AxonBlockEntity extends BlockEntity implements IAxonBlockE
     }
 
     @Override
+    public boolean removeUpstreamFrom(int slot) {
+        if (getLevel() == null) return false;
+        LocalConnectorDevice device = getBySlot(slot);
+        LocalAxonConnection connection = device.upstream();
+        if (connection == null) return false;
+        BlockEntity be = getLevel().getBlockEntity(connection.getTargetPos());
+        Block.popResource(getLevel(), getBlockPos(), connection.getItem().getItemWhenRemoved(connection));
+        clientSyncDataChanged();
+        device.setUpstream(null);
+        if ((be instanceof IAxonBlockEntity a) && !be.isRemoved()) {
+            AxonTree.load(getLevel(), connection.getAxonType(), connection.getAxonType().getCapability())
+                    .ifPresent(tree -> tree.removeConnection(device.treeID(), null, a.getBySlot(connection.getTargetSlot()).treeID(), null));
+            boolean noOthers = true;
+            for (LocalConnectorDevice d : devices) {
+                if (d.upstream() != null && d.upstream().getTargetPos().equals(connection.getTargetPos())) {
+                    noOthers = false;
+                    break;
+                }
+            }
+            if (noOthers) a.removeDownstream(this.getBlockPos());
+        }
+        return true;
+    }
+
+    @Override
     public @Nullable Packet<ClientGamePacketListener> getUpdatePacket() {
         return ClientboundBlockEntityDataPacket.create(this);
     }

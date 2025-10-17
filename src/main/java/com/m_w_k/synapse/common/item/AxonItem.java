@@ -65,6 +65,7 @@ public class AxonItem extends Item {
      * @return the block pos to connect to
      */
     public @Nullable BlockPos getConnectPos(@NotNull ItemStack stack) {
+        if (!hasConnectData(stack)) return null;
         CompoundTag tag = connectTag(stack);
         if (!tag.contains("Pos")) return null;
         return NbtUtils.readBlockPos(tag.getCompound("Pos"));

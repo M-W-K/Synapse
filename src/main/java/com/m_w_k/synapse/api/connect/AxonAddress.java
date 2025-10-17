@@ -35,6 +35,10 @@ public final class AxonAddress extends Object2ShortRBTreeMap<ConnectorLevel> {
         return new AxonAddress(this);
     }
 
+    public boolean containsAbove(@NotNull ConnectorLevel level) {
+        return keySet().stream().anyMatch(l -> l.getPrio() > level.getPrio());
+    }
+
     public void copyAtAndAbove(@NotNull AxonAddress source, @NotNull ConnectorLevel level) {
         for (var entry : source.object2ShortEntrySet()) {
             if (entry.getKey().getPrio() >= level.getPrio()) {

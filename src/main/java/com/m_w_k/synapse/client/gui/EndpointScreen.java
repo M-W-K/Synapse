@@ -1,6 +1,7 @@
 package com.m_w_k.synapse.client.gui;
 
 import com.m_w_k.synapse.api.block.ruleset.TransferRuleset;
+import com.m_w_k.synapse.client.gui.ruleset.RulesetWidget;
 import com.m_w_k.synapse.common.menu.EndpointMenu;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
