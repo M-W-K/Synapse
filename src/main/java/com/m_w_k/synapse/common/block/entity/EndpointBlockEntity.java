@@ -6,6 +6,7 @@ import com.m_w_k.synapse.api.block.ruleset.TransferRuleset;
 import com.m_w_k.synapse.api.connect.AxonType;
 import com.m_w_k.synapse.api.connect.ConnectorLevel;
 import com.m_w_k.synapse.common.block.EndpointBlock;
+import com.m_w_k.synapse.common.connect.AbstractExposer;
 import com.m_w_k.synapse.common.connect.IEndpointCapability;
 import com.m_w_k.synapse.common.connect.LocalAxonConnection;
 import com.m_w_k.synapse.common.connect.LocalConnectorDevice;
@@ -140,7 +141,7 @@ public class EndpointBlockEntity extends AxonBlockEntity implements IFacedAxonBl
             device.ensureRegistered(getLevel()); // wipe capability data
             if (be != null) {
                 // update capability data if present
-                be.getCapability(cap, side.getOpposite()).ifPresent(t -> device.ensureRegistered(getLevel(), cap, t));
+                be.getCapability(cap, side.getOpposite()).filter(t -> !(t instanceof AbstractExposer<?,?,?>)).ifPresent(t -> device.ensureRegistered(getLevel(), cap, t));
             }
         }
     }

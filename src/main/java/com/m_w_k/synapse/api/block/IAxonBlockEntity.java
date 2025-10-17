@@ -42,4 +42,6 @@ public interface IAxonBlockEntity extends ICapabilityProvider, IForgeBlockEntity
     boolean addDownstream(@NotNull BlockPos pos);
 
     void onUpstreamRemoved();
+
+    boolean removeUpstreamFrom(int slot);
 }
