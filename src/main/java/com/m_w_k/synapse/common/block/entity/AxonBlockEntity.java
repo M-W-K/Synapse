@@ -8,6 +8,7 @@ import com.mojang.serialization.Codec;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.network.protocol.Packet;
@@ -50,8 +51,28 @@ public abstract class AxonBlockEntity extends BlockEntity implements IAxonBlockE
         return devices.get(slot);
     }
 
-    public @NotNull Vec3 renderOffsetForSlot(int slot) {
+    public @NotNull Vec3 renderOffsetForSlot(int slot, AxonBlockEntity other) {
         return Vec3.ZERO;
+    }
+
+    public @NotNull Vec3 renderDirectionForSlot(int slot, AxonBlockEntity other) {
+        BlockPos offset = other.getBlockPos().subtract(this.getBlockPos());
+        Direction.Axis axis = null;
+        int val = 0;
+        for (Direction.Axis a : Direction.Axis.values()) {
+            int o = offset.get(a);
+            if (a == Direction.Axis.Y) {
+                if (o < 0) o = -o * o - 1;
+                else o = (int) Math.sqrt(o - 1);
+            }
+            if (Math.abs(o) > Math.abs(val)) {
+                axis = a;
+                val = o;
+            }
+        }
+        if (axis == null) return Vec3.ZERO;
+        val = Integer.signum(val);
+        return new Vec3(axis == Direction.Axis.X ? val : 0, axis == Direction.Axis.Y ? val : 0, axis == Direction.Axis.Z ? val : 0);
     }
 
     public @Nullable LocalAxonConnection setUpstream(@NotNull LocalAxonConnection connection, boolean dropOld) {

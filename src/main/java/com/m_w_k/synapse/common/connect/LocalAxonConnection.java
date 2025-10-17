@@ -23,9 +23,11 @@ public final class LocalAxonConnection extends AxonConnection {
                     ForgeRegistries.ITEMS.getCodec().xmap(i -> (AxonItem) i, i -> i).fieldOf("item").forGetter(LocalAxonConnection::getItem),
                     Codec.INT.fieldOf("sourceSlot").forGetter(LocalAxonConnection::getSourceSlot),
                     Vec3.CODEC.fieldOf("sourceRenderOffset").forGetter(LocalAxonConnection::getSourceRenderOffset),
+                    Vec3.CODEC.fieldOf("sourceRenderDirection").forGetter(LocalAxonConnection::getSourceRenderDirection),
                     BlockPos.CODEC.fieldOf("targetPos").forGetter(LocalAxonConnection::getTargetPos),
                     Codec.INT.fieldOf("targetSlot").forGetter(LocalAxonConnection::getTargetSlot),
                     Vec3.CODEC.fieldOf("targetRenderOffset").forGetter(LocalAxonConnection::getTargetRenderOffset),
+                    Vec3.CODEC.fieldOf("targetRenderDirection").forGetter(LocalAxonConnection::getTargetRenderDirection),
                     AxonType.CODEC.fieldOf("axonType").forGetter(AxonConnection::getAxonType),
                     CompoundTag.CODEC.fieldOf("data").forGetter(LocalAxonConnection::getData),
                     Codec.INT.xmap(i -> ConnectionType.TYPES[i], ConnectionType::ordinal).fieldOf("connectionType").forGetter(AxonConnection::getConnectionType)
@@ -35,32 +37,38 @@ public final class LocalAxonConnection extends AxonConnection {
 
     private final int sourceSlot;
     private final Vec3 sourceRenderOffset;
+    private final Vec3 sourceRenderDirection;
     private final BlockPos targetPos;
     private final int targetSlot;
     private final Vec3 targetRenderOffset;
+    private final Vec3 targetRenderDirection;
 
-    public LocalAxonConnection(@NotNull AxonItem item, int sourceSlot, Vec3 sourceRenderOffset, BlockPos targetPos,
-                               int targetSlot, Vec3 targetRenderOffset, AxonType axonType,
-                               @Nullable ConnectionType connectionType) {
+    public LocalAxonConnection(@NotNull AxonItem item, int sourceSlot, Vec3 sourceRenderOffset, Vec3 sourceRenderDirection,
+                               BlockPos targetPos, int targetSlot, Vec3 targetRenderOffset, Vec3 targetRenderDirection,
+                               AxonType axonType, @Nullable ConnectionType connectionType) {
         super(axonType, connectionType);
         this.item = item;
         this.sourceSlot = sourceSlot;
         this.sourceRenderOffset = sourceRenderOffset;
+        this.sourceRenderDirection = sourceRenderDirection;
         this.targetPos = targetPos;
         this.targetSlot = targetSlot;
         this.targetRenderOffset = targetRenderOffset;
+        this.targetRenderDirection = targetRenderDirection;
     }
 
-    private LocalAxonConnection(@NotNull AxonItem item, int sourceSlot, Vec3 sourceRenderOffset, BlockPos targetPos,
-                                int targetSlot, Vec3 targetRenderOffset, AxonType axonType,
-                                CompoundTag tag, @Nullable ConnectionType connectionType) {
+    private LocalAxonConnection(@NotNull AxonItem item, int sourceSlot, Vec3 sourceRenderOffset, Vec3 sourceRenderDirection,
+                                BlockPos targetPos, int targetSlot, Vec3 targetRenderOffset, Vec3 targetRenderDirection,
+                                AxonType axonType, CompoundTag tag, @Nullable ConnectionType connectionType) {
         super(axonType, tag, connectionType);
         this.item = item;
         this.sourceSlot = sourceSlot;
         this.sourceRenderOffset = sourceRenderOffset;
+        this.sourceRenderDirection = sourceRenderDirection;
         this.targetPos = targetPos;
         this.targetSlot = targetSlot;
         this.targetRenderOffset = targetRenderOffset;
+        this.targetRenderDirection = targetRenderDirection;
     }
 
     public @NotNull AxonItem getItem() {
@@ -75,12 +83,20 @@ public final class LocalAxonConnection extends AxonConnection {
         return sourceRenderOffset;
     }
 
+    public Vec3 getSourceRenderDirection() {
+        return sourceRenderDirection;
+    }
+
     public int getTargetSlot() {
         return targetSlot;
     }
 
     public Vec3 getTargetRenderOffset() {
         return targetRenderOffset;
+    }
+
+    public Vec3 getTargetRenderDirection() {
+        return targetRenderDirection;
     }
 
     public BlockPos getTargetPos() {
