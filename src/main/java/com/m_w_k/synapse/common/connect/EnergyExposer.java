@@ -1,19 +1,26 @@
 package com.m_w_k.synapse.common.connect;
 
 import com.m_w_k.synapse.api.block.IFacedAxonBlockEntity;
+import com.m_w_k.synapse.api.block.ruleset.EnergyTransferRuleset;
+import com.m_w_k.synapse.api.block.ruleset.FluidTransferRuleset;
 import com.m_w_k.synapse.api.block.ruleset.TransferRuleset;
 import com.m_w_k.synapse.api.connect.AxonTree;
 import com.m_w_k.synapse.api.connect.AxonType;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.ByteTag;
+import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
+import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.energy.IEnergyStorage;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
+import java.util.function.UnaryOperator;
 
 public class EnergyExposer extends AbstractExposer<IEnergyStorage, EnergyExposer, Void> implements IEnergyStorage {
+
+    protected EnergyTransferRuleset ruleset = new EnergyTransferRuleset(Dist.DEDICATED_SERVER);
 
     public EnergyExposer(@NotNull IFacedAxonBlockEntity owner) {
         super(owner);
@@ -31,15 +38,22 @@ public class EnergyExposer extends AbstractExposer<IEnergyStorage, EnergyExposer
 
     @Override
     protected @NotNull Tag save() {
-        return ByteTag.valueOf((byte) 0);
+        return EnergyTransferRuleset.CODEC.encodeStart(NbtOps.INSTANCE, this.ruleset).get()
+                .map(UnaryOperator.identity(), e -> ByteTag.valueOf((byte) 0));
     }
 
     @Override
-    protected void load(@NotNull Tag nbt) {}
+    protected void load(@NotNull Tag nbt) {
+        EnergyTransferRuleset.CODEC.parse(NbtOps.INSTANCE, nbt).get()
+                .ifLeft(ruleset -> {
+                    this.ruleset = ruleset;
+                    ruleset.setChangeListener(this::setDirty);
+                });
+    }
 
     @Override
     public TransferRuleset.@Nullable QueryableRuleset<Void> getRuleset() {
-        return null;
+        return ruleset;
     }
 
     @Override

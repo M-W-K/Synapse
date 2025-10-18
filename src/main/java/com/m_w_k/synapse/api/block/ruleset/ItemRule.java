@@ -9,7 +9,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
 
-public class ItemRule implements ItemRuleAccess {
+public class ItemRule extends BasicRule implements ItemRuleAccess {
 
     public static final Codec<ItemRule> CODEC = RecordCodecBuilder.create(instance ->
             instance.group(
@@ -22,25 +22,19 @@ public class ItemRule implements ItemRuleAccess {
                     Codec.BOOL.fieldOf("matchNBT").forGetter(ItemRule::isMatchNBT)
             ).apply(instance, ItemRule::new));
 
-    @NotNull
-    protected AxonAddress address = new AxonAddress();
-    protected boolean matchesIncoming;
-    protected boolean matchesOutgoing;
-
     public final ItemStack[] matchStacks;
     protected boolean whitelist = true;
     protected boolean matchNBT;
 
     public ItemRule() {
+        super();
         matchStacks = new ItemStack[9];
         Arrays.fill(matchStacks, ItemStack.EMPTY);
     }
 
     public ItemRule(@NotNull AxonAddress address, boolean matchesIncoming, boolean matchesOutgoing,
                     ItemStack[] matchStacks, boolean whitelist, boolean matchNBT) {
-        this.setAddress(address);
-        this.setMatchesIncoming(matchesIncoming);
-        this.setMatchesOutgoing(matchesOutgoing);
+        super(address, matchesIncoming, matchesOutgoing);
         this.matchStacks = matchStacks;
         this.setWhitelist(whitelist);
         this.setMatchNBT(matchNBT);
@@ -53,36 +47,6 @@ public class ItemRule implements ItemRuleAccess {
             return isWhitelist();
         }
         return !isWhitelist();
-    }
-
-    @Override
-    public @NotNull AxonAddress getAddress() {
-        return address;
-    }
-
-    @Override
-    public void setAddress(@NotNull AxonAddress address) {
-        this.address = address;
-    }
-
-    @Override
-    public boolean isMatchesIncoming() {
-        return matchesIncoming;
-    }
-
-    @Override
-    public void setMatchesIncoming(boolean matchesIncoming) {
-        this.matchesIncoming = matchesIncoming;
-    }
-
-    @Override
-    public boolean isMatchesOutgoing() {
-        return matchesOutgoing;
-    }
-
-    @Override
-    public void setMatchesOutgoing(boolean matchesOutgoing) {
-        this.matchesOutgoing = matchesOutgoing;
     }
 
     @Override

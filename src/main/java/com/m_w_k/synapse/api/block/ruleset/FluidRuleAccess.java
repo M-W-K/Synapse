@@ -5,19 +5,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.fluids.FluidStack;
 import org.jetbrains.annotations.NotNull;
 
-public interface FluidRuleAccess {
-
-    @NotNull AxonAddress getAddress();
-
-    void setAddress(@NotNull AxonAddress address);
-
-    boolean isMatchesIncoming();
-
-    void setMatchesIncoming(boolean matchesIncoming);
-
-    boolean isMatchesOutgoing();
-
-    void setMatchesOutgoing(boolean matchesOutgoing);
+public interface FluidRuleAccess extends RuleAccess {
 
     FluidStack getMatchStack(int index);
 

@@ -62,7 +62,8 @@ public class RelayBlockEntity extends AxonBlockEntity {
 
     @Override
     public @NotNull String getNameBySlot(int slot) {
-        return Integer.toString(slot);
+        var pair = AxonDeviceDefinitions.RELAYS_INV.get(slot);
+        return pair.value().name() + "_" + pair.keyInt();
     }
 
     @Override
