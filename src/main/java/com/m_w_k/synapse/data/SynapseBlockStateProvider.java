@@ -1,6 +1,7 @@
 package com.m_w_k.synapse.data;
 
 import com.m_w_k.synapse.SynapseMod;
+import com.m_w_k.synapse.common.block.EndpointBlock;
 import com.m_w_k.synapse.registry.SynapseBlockRegistry;
 import net.minecraft.data.PackOutput;
 import net.minecraft.world.level.block.Block;
@@ -19,6 +20,15 @@ public class SynapseBlockStateProvider extends BlockStateProvider {
         simple(SynapseBlockRegistry.DISTRIBUTOR_BLOCK_1.get(), "block/distributor/tier_1");
         simple(SynapseBlockRegistry.DISTRIBUTOR_BLOCK_2.get(), "block/distributor/tier_2");
         simple(SynapseBlockRegistry.DISTRIBUTOR_BLOCK_3.get(), "block/distributor/tier_3");
+        ModelFile endpoint = models().getExistingFile(modLoc("block/endpoint_base"));
+        getMultipartBuilder(SynapseBlockRegistry.ENDPOINT_BASIC.get())
+                .part().modelFile(endpoint).addModel().condition(EndpointBlock.NORTH, true).end()
+                .part().modelFile(endpoint).rotationY(90).addModel().condition(EndpointBlock.EAST, true).end()
+                .part().modelFile(endpoint).rotationY(180).addModel().condition(EndpointBlock.SOUTH, true).end()
+                .part().modelFile(endpoint).rotationY(270).addModel().condition(EndpointBlock.WEST, true).end()
+                .part().modelFile(endpoint).rotationX(90).addModel().condition(EndpointBlock.DOWN, true).end()
+                .part().modelFile(endpoint).rotationX(-90).addModel().condition(EndpointBlock.UP, true).end();
+        simpleBlockItem(SynapseBlockRegistry.ENDPOINT_BASIC.get(), endpoint);
     }
 
     private void simple(Block block, String file) {

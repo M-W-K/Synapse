@@ -88,10 +88,10 @@ public abstract class AxonBlock extends BaseEntityBlock {
             if (us.upstream() != null || !usAxon.allowsUpstream(usSlot, them) ||
                     !themAxon.allowsDownstream(themSlot, us)) return InteractionResult.FAIL;
             LocalAxonConnection connection = new LocalAxonConnection(iAxon, usSlot,
-                    randOffset(usAxon.renderOffsetForSlot(usSlot, themAxon), 5),
+                    randOffset(usAxon.renderOffsetForSlot(usSlot, themAxon), 10),
                     usAxon.renderDirectionForSlot(usSlot, themAxon),
                     connect, themSlot,
-                    themAxon.renderOffsetForSlot(themSlot, usAxon),
+                    randOffset(themAxon.renderOffsetForSlot(themSlot, usAxon), 10),
                     themAxon.renderDirectionForSlot(themSlot, usAxon),
                     type, direction);
             if (iAxon.consumeToPlace(connection, stack, player, false)) {
@@ -108,10 +108,10 @@ public abstract class AxonBlock extends BaseEntityBlock {
             if (them.upstream() != null || !themAxon.allowsUpstream(themSlot, us) ||
                     !usAxon.allowsDownstream(usSlot, them)) return InteractionResult.FAIL;
             LocalAxonConnection connection = new LocalAxonConnection(iAxon, themSlot,
-                    randOffset(themAxon.renderOffsetForSlot(themSlot, usAxon), 5),
+                    randOffset(themAxon.renderOffsetForSlot(themSlot, usAxon), 10),
                     themAxon.renderDirectionForSlot(themSlot, usAxon),
                     pos, usSlot,
-                    usAxon.renderOffsetForSlot(usSlot, themAxon),
+                    randOffset(usAxon.renderOffsetForSlot(usSlot, themAxon), 10),
                     usAxon.renderDirectionForSlot(usSlot, themAxon),
                     type, direction.flip());
             if (iAxon.consumeToPlace(connection, stack, player, false)) {
