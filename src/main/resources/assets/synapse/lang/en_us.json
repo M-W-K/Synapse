@@ -2,6 +2,7 @@
   "itemGroup.synapse": "Synapse",
 
   "synapse.menu.title.basic_connector": "Connector",
+  "synapse.menu.title.relay": "Relay",
   "synapse.menu.title.endpoint": "Endpoint",
   "synapse.menu.search": "Search",
   "synapse.menu.address_config": "Device ID",

@@ -2,6 +2,7 @@ package com.m_w_k.synapse;
 
 import com.m_w_k.synapse.client.gui.BasicConnectorScreen;
 import com.m_w_k.synapse.client.gui.EndpointScreen;
+import com.m_w_k.synapse.client.gui.RelayScreen;
 import com.m_w_k.synapse.client.renderer.TestAxonRenderer;
 import com.m_w_k.synapse.common.menu.EndpointMenu;
 import com.m_w_k.synapse.data.SynapseLootTableGen;
@@ -63,6 +64,7 @@ public final class SynapseMod {
                 () -> {
                     MenuScreens.register(SynapseMenuRegistry.BASIC_CONNECTOR.get(), BasicConnectorScreen::new);
                     MenuScreens.register(SynapseMenuRegistry.ENDPOINT.get(), EndpointScreen::new);
+                    MenuScreens.register(SynapseMenuRegistry.RELAY.get(), RelayScreen::new);
                 }
         );
     }
