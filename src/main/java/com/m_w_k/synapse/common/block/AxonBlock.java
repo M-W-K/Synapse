@@ -19,12 +19,14 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.SimpleMenuProvider;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BaseEntityBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.network.NetworkHooks;
 import org.jetbrains.annotations.NotNull;
 
@@ -43,6 +45,7 @@ public abstract class AxonBlock extends BaseEntityBlock {
         if (!(b instanceof AxonBlockEntity usAxon)) return InteractionResult.PASS;
 
         if (!(stack.getItem() instanceof AxonItem iAxon)) {
+            if (noMenuItem(stack)) return InteractionResult.PASS;
             if (hand == InteractionHand.OFF_HAND || !hasInteractMenu()) return InteractionResult.PASS;
             if (player instanceof ServerPlayer s) {
                 openInteractMenu(s, level, state, pos, usAxon);
@@ -84,8 +87,13 @@ public abstract class AxonBlock extends BaseEntityBlock {
         if (direction.upstream()) {
             if (us.upstream() != null || !usAxon.allowsUpstream(usSlot, them) ||
                     !themAxon.allowsDownstream(themSlot, us)) return InteractionResult.FAIL;
-            LocalAxonConnection connection = new LocalAxonConnection(iAxon, usSlot, usAxon.renderOffsetForSlot(usSlot),
-                    connect, themSlot, themAxon.renderOffsetForSlot(themSlot), type, direction);
+            LocalAxonConnection connection = new LocalAxonConnection(iAxon, usSlot,
+                    randOffset(usAxon.renderOffsetForSlot(usSlot, themAxon), 5),
+                    usAxon.renderDirectionForSlot(usSlot, themAxon),
+                    connect, themSlot,
+                    themAxon.renderOffsetForSlot(themSlot, usAxon),
+                    themAxon.renderDirectionForSlot(themSlot, usAxon),
+                    type, direction);
             if (iAxon.consumeToPlace(connection, stack, player, false)) {
                 var tree = AxonTree.load(level, type, type.getCapability());
                 if (tree.isEmpty() || tree.get().connect(us.treeID(), null, them.treeID(), null) == null) {
@@ -99,8 +107,13 @@ public abstract class AxonBlock extends BaseEntityBlock {
         } else if (direction.downstream()) {
             if (them.upstream() != null || !themAxon.allowsUpstream(themSlot, us) ||
                     !usAxon.allowsDownstream(usSlot, them)) return InteractionResult.FAIL;
-            LocalAxonConnection connection = new LocalAxonConnection(iAxon, themSlot, themAxon.renderOffsetForSlot(themSlot),
-                    pos, usSlot, usAxon.renderOffsetForSlot(usSlot), type, direction.flip());
+            LocalAxonConnection connection = new LocalAxonConnection(iAxon, themSlot,
+                    randOffset(themAxon.renderOffsetForSlot(themSlot, usAxon), 5),
+                    themAxon.renderDirectionForSlot(themSlot, usAxon),
+                    pos, usSlot,
+                    usAxon.renderOffsetForSlot(usSlot, themAxon),
+                    usAxon.renderDirectionForSlot(usSlot, themAxon),
+                    type, direction.flip());
             if (iAxon.consumeToPlace(connection, stack, player, false)) {
                 var tree = AxonTree.load(level, type, type.getCapability());
                 if (tree.isEmpty() || tree.get().connect(us.treeID(), null, them.treeID(), null) == null) {
@@ -113,6 +126,14 @@ public abstract class AxonBlock extends BaseEntityBlock {
             }
         }
         return InteractionResult.PASS;
+    }
+
+    protected boolean noMenuItem(ItemStack stack) {
+        return false;
+    }
+
+    private Vec3 randOffset(Vec3 vec, int inv) {
+        return vec.add((Math.random() - 0.5) / inv, (Math.random() - 0.5) / inv, (Math.random() - 0.5) / inv);
     }
 
     protected boolean hasInteractMenu() {

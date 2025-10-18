@@ -24,7 +24,7 @@ import java.util.Objects;
 
 @OnlyIn(Dist.CLIENT)
 public abstract class AbstractConnectorScreen<T extends BasicConnectorMenu> extends AbstractContainerScreen<T> {
-    static final ResourceLocation TEX_LOCATION = SynapseUtil.resLoc("textures/gui/container/basic_connector.png");
+    static final TexLocation TEX_LOCATION = TexLocation.standard(SynapseUtil.resLoc("textures/gui/container/basic_connector.png"));
 
     protected DeviceListWidget deviceList;
     protected @Nullable DeviceListWidget.DeviceEntry selected;
@@ -37,6 +37,8 @@ public abstract class AbstractConnectorScreen<T extends BasicConnectorMenu> exte
     protected byte lastSync;
 
     protected int lastDevice = -1;
+    protected ActionButton copyAddress;
+    protected ActionButton removeConnection;
     protected String selectedAddress = "";
     protected EditBox addressConfig;
     protected String lastDeviceID;
@@ -80,8 +82,10 @@ public abstract class AbstractConnectorScreen<T extends BasicConnectorMenu> exte
 
     protected void renderSelectedDeviceScreen(@NotNull GuiGraphics graphics, float partial, int mouseX, int mouseY) {
         if (selected != null) {
-            graphics.drawString(getFontRenderer(), selectedAddress, adjX(85), adjY(12), 0xFFFFFF, false);
-            if (getMenu().getSetResult() != null && !getMenu().getSetResult().success()) {
+            copyAddress.render(graphics, mouseX, mouseY, partial);
+            removeConnection.render(graphics, mouseX, mouseY, partial);
+            graphics.drawString(getFontRenderer(), selectedAddress, adjX(110), adjY(12), 0xFFFFFF, false);
+            if (getMenu().getSetResult() != null && getMenu().getSetResult().fail()) {
                 graphics.drawString(getFontRenderer(), ChatFormatting.RED + I18n.get(getMenu().getSetResult().failTranslation()),
                         adjX(85 + 40), adjY(24), 0xFFFFFF, false);
             }
@@ -109,6 +113,19 @@ public abstract class AbstractConnectorScreen<T extends BasicConnectorMenu> exte
         addressConfig.setVisible(false);
         deviceList = new DeviceListWidget(this, adjX(7), 64, adjY(8), adjY(115));
         addRenderableWidget(deviceList);
+
+        copyAddress = new ActionButton(TEX_LOCATION, adjX(85), adjY(9), 11,
+                Component.translatable("synapse.menu.button.copy"), () -> true,
+                () -> getMinecraftInstance().keyboardHandler.setClipboard(getMenu().getSelectedAddress().toString()),
+                TexDefinition.hover(143, 219, 154, 219), TexDefinition.simple(143, 230));
+        addWidget(copyAddress);
+        removeConnection = new ActionButton(TEX_LOCATION, adjX(97), adjY(9), 11,
+                Component.translatable("synapse.menu.button.sever"),
+                () -> getMenu().getSelectedAddress() != null && getMenu().getSelectedAddress().containsAbove(getMenu().getSelectedLevel()),
+                () -> getMenu().sendRemoveConnection(),
+                TexDefinition.noHoverInactive(143, 219, 132, 219, 154, 219),
+                TexDefinition.simple(154, 230));
+        addWidget(removeConnection);
     }
 
     @Override
@@ -186,7 +203,7 @@ public abstract class AbstractConnectorScreen<T extends BasicConnectorMenu> exte
 
     @Override
     protected void renderBg(@NotNull GuiGraphics graphics, float partial, int mouseX, int mouseY) {
-        graphics.blit(TEX_LOCATION, adjX(0), adjY(0), 0, 0, this.imageWidth, this.imageHeight);
+        graphics.blit(TEX_LOCATION.loc(), adjX(0), adjY(0), 0, 0, this.imageWidth, this.imageHeight);
         renderSelectedDeviceScreen(graphics, partial, mouseX, mouseY);
     }
 
@@ -197,7 +214,7 @@ public abstract class AbstractConnectorScreen<T extends BasicConnectorMenu> exte
         return font;
     }
 
-    public Minecraft getMinecraftInstance() {
+    public @NotNull Minecraft getMinecraftInstance() {
         return minecraft;
     }
 }

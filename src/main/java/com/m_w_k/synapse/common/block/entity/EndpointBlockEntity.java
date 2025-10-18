@@ -6,6 +6,7 @@ import com.m_w_k.synapse.api.block.ruleset.TransferRuleset;
 import com.m_w_k.synapse.api.connect.AxonType;
 import com.m_w_k.synapse.api.connect.ConnectorLevel;
 import com.m_w_k.synapse.common.block.EndpointBlock;
+import com.m_w_k.synapse.common.connect.AbstractExposer;
 import com.m_w_k.synapse.common.connect.IEndpointCapability;
 import com.m_w_k.synapse.common.connect.LocalAxonConnection;
 import com.m_w_k.synapse.common.connect.LocalConnectorDevice;
@@ -75,9 +76,15 @@ public class EndpointBlockEntity extends AxonBlockEntity implements IFacedAxonBl
     }
 
     @Override
-    public @NotNull Vec3 renderOffsetForSlot(int slot) {
+    public @NotNull Vec3 renderOffsetForSlot(int slot, AxonBlockEntity other) {
         Direction dir = AxonDeviceDefinitions.ENDPOINTS_INV.get(slot).right();
         return new Vec3(dir.getStepX() / 2d, dir.getStepY() / 2d, dir.getStepZ() / 2d);
+    }
+
+    @Override
+    public @NotNull Vec3 renderDirectionForSlot(int slot, AxonBlockEntity other) {
+        Direction dir = AxonDeviceDefinitions.ENDPOINTS_INV.get(slot).right().getOpposite();
+        return new Vec3(dir.getStepX(), dir.getStepY(), dir.getStepZ());
     }
 
     public boolean activeOnSide(@Nullable Capability<?> cap, Direction side) {
@@ -134,7 +141,7 @@ public class EndpointBlockEntity extends AxonBlockEntity implements IFacedAxonBl
             device.ensureRegistered(getLevel()); // wipe capability data
             if (be != null) {
                 // update capability data if present
-                be.getCapability(cap, side.getOpposite()).ifPresent(t -> device.ensureRegistered(getLevel(), cap, t));
+                be.getCapability(cap, side.getOpposite()).filter(t -> !(t instanceof AbstractExposer<?,?,?>)).ifPresent(t -> device.ensureRegistered(getLevel(), cap, t));
             }
         }
     }

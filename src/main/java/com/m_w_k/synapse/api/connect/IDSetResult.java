@@ -1,10 +1,14 @@
 package com.m_w_k.synapse.api.connect;
 
 public enum IDSetResult {
-    SUCCESS, SUCCESS_UNCHANGED, FAIL_CHILD_CONFLICT, FAIL_SPECIAL_CODE, FAIL;
+    SUCCESS, SUCCESS_UNCHANGED, FAIL_CHILD_CONFLICT, FAIL_SPECIAL_CODE, FAIL, NO_SET;
 
     public boolean success() {
         return this == SUCCESS || this == SUCCESS_UNCHANGED;
+    }
+
+    public boolean fail() {
+        return this == FAIL || this == FAIL_CHILD_CONFLICT || this == FAIL_SPECIAL_CODE;
     }
 
     public String failTranslation() {

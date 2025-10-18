@@ -1,17 +1,19 @@
-package com.m_w_k.synapse.client.gui;
+package com.m_w_k.synapse.client.gui.ruleset;
 
 import com.google.common.collect.ImmutableList;
 import com.m_w_k.synapse.SynapseUtil;
 import com.m_w_k.synapse.api.block.ruleset.*;
 import com.m_w_k.synapse.api.block.ruleset.FluidTransferRuleset;
 import com.m_w_k.synapse.api.connect.AxonAddress;
+import com.m_w_k.synapse.client.gui.AbstractConnectorScreen;
+import com.m_w_k.synapse.client.gui.ActionButton;
+import com.m_w_k.synapse.client.gui.TexDefinition;
+import com.m_w_k.synapse.client.gui.TexLocation;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.components.AbstractButton;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.EditBox;
-import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.components.events.AbstractContainerEventHandler;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
@@ -30,12 +32,9 @@ import org.jetbrains.annotations.NotNull;
 import org.joml.Matrix4f;
 
 import java.util.List;
-import java.util.function.BooleanSupplier;
 
 public class FluidRulesetWidget extends AbstractContainerEventHandler implements RulesetWidget {
-    static final ResourceLocation TEX_LOCATION = SynapseUtil.resLoc("textures/gui/container/ruleset.png");
-    static final int TEX_WIDTH = 128;
-    static final int TEX_HEIGHT = 128;
+    static final TexLocation TEX_LOCATION = new TexLocation(SynapseUtil.resLoc("textures/gui/container/ruleset.png"), 128, 128);
 
     protected final FluidTransferRuleset parent;
     protected final AbstractConnectorScreen<?> screen;
@@ -76,21 +75,22 @@ public class FluidRulesetWidget extends AbstractContainerEventHandler implements
                 builder.add(filterSlots[3 * i + j]);
             }
         }
-        builder.add(left = new ActionButton(x, y, 11, Component.translatable("synapse.menu.button.ruleset.left"),
+        ActionButton.ButtonFactory factory = new ActionButton.ButtonFactory(TEX_LOCATION);
+        builder.add(left = factory.button(x, y, 11, Component.translatable("synapse.menu.button.ruleset.left"),
                 () -> currentRule > 0, () -> {
             currentRule = Math.max(0, currentRule - 1);
             onRuleChanged();
         },
                 TexDefinition.noHoverInactive(11, 44, 0, 44, 22, 44),
                 TexDefinition.simple(0, 55)));
-        builder.add(right = new ActionButton(x + 15, y, 11, Component.translatable("synapse.menu.button.ruleset.right"),
+        builder.add(right = factory.button(x + 15, y, 11, Component.translatable("synapse.menu.button.ruleset.right"),
                 () -> currentRule < parent.ruleCount() - 1, () -> {
             currentRule = Math.min(parent.ruleCount() - 1, currentRule + 1);
             onRuleChanged();
         },
                 TexDefinition.noHoverInactive(11, 44, 0, 44, 22, 44),
                 TexDefinition.simple(11, 55)));
-        builder.add(swapLeft = new ActionButton(x + 65 + 1, y, 11, Component.translatable("synapse.menu.button.ruleset.swap_left"),
+        builder.add(swapLeft = factory.button(x + 65 + 1, y, 11, Component.translatable("synapse.menu.button.ruleset.swap_left"),
                 () -> currentRule > 0, () -> {
             if (currentRule == 0) return;
             parent.applyAction(currentRule, RuleAction.SHIFT_LEFT);
@@ -99,7 +99,7 @@ public class FluidRulesetWidget extends AbstractContainerEventHandler implements
         },
                 TexDefinition.noHoverInactive(11, 44, 0, 44, 22, 44),
                 TexDefinition.simple(0, 66)));
-        builder.add(swapRight = new ActionButton(x + 80 + 1, y, 11, Component.translatable("synapse.menu.button.ruleset.swap_right"),
+        builder.add(swapRight = factory.button(x + 80 + 1, y, 11, Component.translatable("synapse.menu.button.ruleset.swap_right"),
                 () -> currentRule < parent.ruleCount() - 1, () -> {
             if (currentRule >= parent.ruleCount() - 1) return;
             parent.applyAction(currentRule, RuleAction.SHIFT_RIGHT);
@@ -108,7 +108,7 @@ public class FluidRulesetWidget extends AbstractContainerEventHandler implements
         },
                 TexDefinition.noHoverInactive(11, 44, 0, 44, 22, 44),
                 TexDefinition.simple(11, 66)));
-        builder.add(delete = new ActionButton(x + 95 + 1, y, 11, Component.translatable("synapse.menu.button.ruleset.delete"),
+        builder.add(delete = factory.button(x + 95 + 1, y, 11, Component.translatable("synapse.menu.button.ruleset.delete"),
                 () -> true /* replace with check to see if the rule is not the default rule */, () -> {
             parent.applyAction(currentRule, RuleAction.DELETE);
             if (currentRule == parent.ruleCount()) currentRule--;
@@ -116,7 +116,7 @@ public class FluidRulesetWidget extends AbstractContainerEventHandler implements
         },
                 TexDefinition.noHoverInactive(11, 44, 0, 44, 22, 44),
                 TexDefinition.simple(0, 77)));
-        builder.add(add = new ActionButton(x + 110 + 1, y, 11, Component.translatable("synapse.menu.button.ruleset.add"),
+        builder.add(add = factory.button(x + 110 + 1, y, 11, Component.translatable("synapse.menu.button.ruleset.add"),
                 () -> parent.ruleCount() < 50, () -> {
             if (parent.ruleCount() >= 50) return;
             currentRule += 1;
@@ -128,19 +128,19 @@ public class FluidRulesetWidget extends AbstractContainerEventHandler implements
 
         builder.add(addressBox = new EditBox(screen.getFontRenderer(), x, y + 15, 120, 14, Component.translatable("synapse.menu.ruleset.address_config")));
 
-        builder.add(nbtMatch = new ActionButton(x, y + 35, 22, Component.translatable("synapse.menu.button.ruleset.nbt"),
+        builder.add(nbtMatch = factory.button(x, y + 35, 22, Component.translatable("synapse.menu.button.ruleset.nbt"),
                 () -> currentRule().isMatchNBT(), () -> currentRule().setMatchNBT(!currentRule().isMatchNBT()),
                 new TexDefinition(0, 0, 22, 0, 0, 22, 22, 22),
                 TexDefinition.active(44, 0, 66, 0)));
-        builder.add(whitelist = new ActionButton(x, y + 60, 22, Component.translatable("synapse.menu.button.ruleset.whitelist"),
+        builder.add(whitelist = factory.button(x, y + 60, 22, Component.translatable("synapse.menu.button.ruleset.whitelist"),
                 () -> currentRule().isWhitelist(), () -> currentRule().setWhitelist(!currentRule().isWhitelist()),
                 TexDefinition.hover(0, 0, 0, 22),
                 TexDefinition.active(44, 22, 66, 22)));
-        builder.add(filterIncoming = new ActionButton(x + 25, y + 35, 22, Component.translatable("synapse.menu.button.ruleset.incoming"),
+        builder.add(filterIncoming = factory.button(x + 25, y + 35, 22, Component.translatable("synapse.menu.button.ruleset.incoming"),
                 () -> currentRule().isMatchesIncoming(), () -> currentRule().setMatchesIncoming(!currentRule().isMatchesIncoming()),
                 new TexDefinition(0, 0, 22, 0, 0, 22, 22, 22),
                 TexDefinition.active(44, 44, 66, 44)));
-        builder.add(filterOutgoing = new ActionButton(x + 25, y + 60, 22, Component.translatable("synapse.menu.button.ruleset.outgoing"),
+        builder.add(filterOutgoing = factory.button(x + 25, y + 60, 22, Component.translatable("synapse.menu.button.ruleset.outgoing"),
                 () -> currentRule().isMatchesOutgoing(), () -> currentRule().setMatchesOutgoing(!currentRule().isMatchesOutgoing()),
                 new TexDefinition(0, 0, 22, 0, 0, 22, 22, 22),
                 TexDefinition.active(44, 66, 66, 66)));
@@ -164,6 +164,7 @@ public class FluidRulesetWidget extends AbstractContainerEventHandler implements
 
     @Override
     public void containerTick() {
+        addressBox.tick();
         if (!lastAddress.equals(addressBox.getValue())) {
             lastAddress = addressBox.getValue();
             AxonAddress.parse(lastAddress).ifLeft(a -> currentRule().setAddress(a));
@@ -204,7 +205,7 @@ public class FluidRulesetWidget extends AbstractContainerEventHandler implements
 
         @Override
         protected void renderWidget(@NotNull GuiGraphics graphics, int mouseX, int mouseY, float partial) {
-            graphics.blit(TEX_LOCATION, getX(), getY(), 0, 88, 0, 18, 18, TEX_WIDTH, TEX_HEIGHT);
+            graphics.blit(TEX_LOCATION.loc(), getX(), getY(), 0, 88, 0, 18, 18, TEX_LOCATION.xSize(), TEX_LOCATION.ySize());
             FluidStack stack = currentRule().getMatchStack(index);
             if (!stack.isEmpty()) {
                 var extensions = IClientFluidTypeExtensions.of(stack.getFluid());
@@ -255,99 +256,5 @@ public class FluidRulesetWidget extends AbstractContainerEventHandler implements
 
         @Override
         protected void updateWidgetNarration(NarrationElementOutput p_259858_) {}
-    }
-
-    protected static class ActionButton extends AbstractButton {
-
-        private final BooleanSupplier isActive;
-        private final Runnable onPress;
-        private final TexDefinition[] definitions;
-
-        public ActionButton(int x, int y, int size, Component p_93369_,
-                            BooleanSupplier isActive, Runnable onPress,
-                            TexDefinition... definitions) {
-            this(x, y, size, size, p_93369_, isActive, onPress, definitions);
-        }
-
-        public ActionButton(int x, int y, int width, int height, Component p_93369_,
-                            BooleanSupplier isActive, Runnable onPress,
-                            TexDefinition... definitions) {
-            super(x, y, width, height, p_93369_);
-            this.isActive = isActive;
-            this.onPress = onPress;
-            this.definitions = definitions;
-            setTooltip(Tooltip.create(p_93369_));
-        }
-
-        @Override
-        protected void renderWidget(@NotNull GuiGraphics graphics, int mouseX, int mouseY, float partial) {
-            boolean isActive = this.isActive.getAsBoolean();
-            boolean isHovered = this.isHovered();
-            for (TexDefinition definition : definitions) {
-                graphics.blit(TEX_LOCATION, getX(), getY(), 0,
-                        definition.x(isActive, isHovered), definition.y(isActive, isHovered),
-                        width, height, TEX_WIDTH, TEX_HEIGHT);
-            }
-        }
-
-        @Override
-        public void onPress() {
-            onPress.run();
-        }
-
-        @Override
-        protected void updateWidgetNarration(NarrationElementOutput p_259858_) {}
-    }
-
-    protected record TexDefinition(int xActive, int yActive, int xInactive, int yInactive,
-                                   int xActiveHovered, int yActiveHovered, int xInactiveHovered, int yInactiveHovered) {
-
-        public static TexDefinition simple(int x, int y) {
-            return new TexDefinition(x, y, x, y, x, y, x, y);
-        }
-
-        public static TexDefinition active(int xActive, int yActive, int xInactive, int yInactive) {
-            return new TexDefinition(xActive, yActive, xInactive, yInactive, xActive, yActive, xInactive, yInactive);
-        }
-
-        public static TexDefinition hover(int x, int y, int xHover, int yHover) {
-            return new TexDefinition(x, y, x, y, xHover, yHover, xHover, yHover);
-        }
-
-        public static TexDefinition noHoverInactive(int xActive, int yActive, int xInactive, int yInactive, int xHover, int yHover) {
-            return new TexDefinition(xActive, yActive, xInactive, yInactive, xHover, yHover, xInactive, yInactive);
-        }
-
-        public int x(boolean active, boolean hovered) {
-            if (active) {
-                if (hovered) {
-                    return xActiveHovered;
-                } else {
-                    return xActive;
-                }
-            } else {
-                if (hovered) {
-                    return xInactiveHovered;
-                } else {
-                    return xInactive;
-                }
-            }
-        }
-
-        public int y(boolean active, boolean hovered) {
-            if (active) {
-                if (hovered) {
-                    return yActiveHovered;
-                } else {
-                    return yActive;
-                }
-            } else {
-                if (hovered) {
-                    return yInactiveHovered;
-                } else {
-                    return yInactive;
-                }
-            }
-        }
     }
 }
