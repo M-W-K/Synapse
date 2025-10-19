@@ -26,8 +26,8 @@ public final class SynapseBlockRegistry {
     public static final RegistryObject<DistributorBlock> DISTRIBUTOR_BLOCK_3 = BLOCKS.register("distributor_block_3",
             () -> new DistributorBlock(BlockBehaviour.Properties.of(), ConnectorLevel.DISTRIBUTOR_3));
 
-    public static final RegistryObject<DASBlock> DISTRIBUTOR_ALIAS_SYSTEM_SERVER = BLOCKS.register("das_server",
-            () -> new DASBlock(BlockBehaviour.Properties.of()));
+//    public static final RegistryObject<DASBlock> DISTRIBUTOR_ALIAS_SYSTEM_SERVER = BLOCKS.register("das_server",
+//            () -> new DASBlock(BlockBehaviour.Properties.of()));
 
     public static final RegistryObject<EndpointBlock> ENDPOINT_BASIC = BLOCKS.register("endpoint_basic",
             () -> new EndpointBlock(BlockBehaviour.Properties.of()));
@@ -40,7 +40,7 @@ public final class SynapseBlockRegistry {
         register(DISTRIBUTOR_BLOCK_2, new Item.Properties());
         register(DISTRIBUTOR_BLOCK_3, new Item.Properties());
 
-        register(DISTRIBUTOR_ALIAS_SYSTEM_SERVER, new Item.Properties());
+//        register(DISTRIBUTOR_ALIAS_SYSTEM_SERVER, new Item.Properties());
 
         register(ENDPOINT_BASIC, new Item.Properties());
 
