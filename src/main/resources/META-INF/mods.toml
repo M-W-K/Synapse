@@ -18,7 +18,7 @@ displayName="${mod_name}"
 # A file name (in the root of the mod JAR) containing a logo for display
 logoFile="synapse.png"
 # A text field displayed in the mod UI
-#credits="" #optional
+credits="Iristhepianist for starting the project; Dom and Puff_official for textures."
 
 authors="${mod_authors}"
 

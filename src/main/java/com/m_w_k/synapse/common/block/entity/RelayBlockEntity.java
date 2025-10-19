@@ -122,7 +122,10 @@ public class RelayBlockEntity extends AxonBlockEntity {
 
     @Override
     public boolean allowsDownstream(int slot, LocalConnectorDevice downstream) {
-        return super.allowsDownstream(slot, downstream) && getBySlot(slot).upstream() != null;
+        if (getLevel() == null) return false;
+        LocalConnectorDevice device = getBySlot(slot).ensureRegistered(getLevel());
+        return super.allowsDownstream(slot, downstream) && device.upstream() != null
+                && (device.cache() == null || !device.cache().downstream().hasNext());
     }
 
     @Override

@@ -1,5 +1,4 @@
-// 1.20.1	2025-10-11T12:41:03.48326	Loot Tables
-8a672177017809f1ca141b8e5981656b543ccff3 data/synapse/loot_tables/blocks/das_server.json
+// 1.20.1	2025-10-19T17:09:24.629896	Loot Tables
 d475eca23de80ce206c0deff6ba25ccf24a7b2e0 data/synapse/loot_tables/blocks/distributor_block_1.json
 2c2534d0cc687617375cc7881607af3ceebe0a9f data/synapse/loot_tables/blocks/distributor_block_2.json
 86fd5d5121082d6d66f32311382d5b997a73327c data/synapse/loot_tables/blocks/distributor_block_3.json

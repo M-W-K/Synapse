@@ -56,7 +56,7 @@ public final class SynapseLootTableGen implements DataProvider.Factory<LootTable
             this.dropSelf(SynapseBlockRegistry.DISTRIBUTOR_BLOCK_1.get());
             this.dropSelf(SynapseBlockRegistry.DISTRIBUTOR_BLOCK_2.get());
             this.dropSelf(SynapseBlockRegistry.DISTRIBUTOR_BLOCK_3.get());
-            this.dropSelf(SynapseBlockRegistry.DISTRIBUTOR_ALIAS_SYSTEM_SERVER.get());
+//            this.dropSelf(SynapseBlockRegistry.DISTRIBUTOR_ALIAS_SYSTEM_SERVER.get());
 
             this.add(SynapseBlockRegistry.ENDPOINT_BASIC.get(), (block) -> LootTable.lootTable().withPool(
                     LootPool.lootPool().setRolls(ConstantValue.exactly(1.0F))
