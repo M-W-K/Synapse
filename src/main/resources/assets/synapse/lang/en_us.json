@@ -2,12 +2,15 @@
   "itemGroup.synapse": "Synapse",
 
   "synapse.menu.title.basic_connector": "Connector",
+  "synapse.menu.title.relay": "Relay",
   "synapse.menu.title.endpoint": "Endpoint",
   "synapse.menu.search": "Search",
   "synapse.menu.address_config": "Device ID",
   "synapse.menu.id.fail": "Unknown Failure",
   "synapse.menu.id.fail_code": "Invalid ID",
   "synapse.menu.id.fail_conflict": "ID is taken",
+  "synapse.menu.button.copy": "Copy Address",
+  "synapse.menu.button.sever": "Remove Upstream Connection",
 
   "synapse.menu.ruleset": "Ruleset",
   "synapse.menu.button.ruleset.left": "Previous Rule",
@@ -21,5 +24,23 @@
   "synapse.menu.button.ruleset.incoming": "Filters Incoming",
   "synapse.menu.button.ruleset.outgoing": "Filters Outgoing",
   "synapse.menu.ruleset.address_config": "Rule Address",
-  "synapse.menu.button.ruleset.item": "Filter Item"
+  "synapse.menu.button.ruleset.item": "Filter Item",
+
+  "item.synapse.biosteel_ingot": "Biosteel Ingot",
+  "item.synapse.duned_gold_ingot": "Duned Gold Ingot",
+  "item.synapse.transfer_powder": "Transference Powder",
+  "item.synapse.neural_thread": "Neural Thread",
+  "item.synapse.wetware_chip": "Primitive Wetware Chip",
+  "item.synapse.piezoelectric_crystal": "Piezoelectric Crystal",
+  "item.synapse.magma_crystal": "Magma Crystal",
+  "item.synapse.ender_crystal": "Ender Crystal",
+  "item.synapse.axon.item": "Item Axon",
+  "item.synapse.axon.fluid": "Fluid Axon",
+  "item.synapse.axon.energy": "Energy Axon",
+
+  "block.synapse.distributor_block_1": "Mk1 Distributor",
+  "block.synapse.distributor_block_2": "Mk2 Distributor",
+  "block.synapse.distributor_block_3": "Mk3 Distributor",
+  "block.synapse.endpoint_basic": "Network Endpoint",
+  "block.synapse.relay": "Distributor Relay"
 }

@@ -1,6 +1,6 @@
 package com.m_w_k.synapse.network;
 
-import com.m_w_k.synapse.SynapseMod;
+import com.m_w_k.synapse.SynapseUtil;
 import com.m_w_k.synapse.api.connect.IDSetResult;
 import com.m_w_k.synapse.common.menu.BasicConnectorMenu;
 import com.m_w_k.synapse.common.menu.EndpointMenu;
@@ -15,7 +15,7 @@ import java.util.function.Supplier;
 
 public final class SynapsePacketHandler {
     public static final String VERSION = "1";
-    public static final SimpleChannel INSTANCE = NetworkRegistry.newSimpleChannel(SynapseMod.resLoc("main"),
+    public static final SimpleChannel INSTANCE = NetworkRegistry.newSimpleChannel(SynapseUtil.resLoc("main"),
             () -> VERSION, VERSION::equals, VERSION::equals);
 
     private static int ids;
@@ -38,6 +38,9 @@ public final class SynapsePacketHandler {
         INSTANCE.registerMessage(ids++, EndpointRulesetSyncPacket.class,
                 EndpointRulesetSyncPacket::encode, EndpointRulesetSyncPacket::new,
                 SynapsePacketHandler::handle);
+        INSTANCE.registerMessage(ids++, ServerboundRemoveConnectionPacket.class,
+                ServerboundRemoveConnectionPacket::encode, ServerboundRemoveConnectionPacket::new,
+                SynapsePacketHandler::handle);
     }
 
     private static void handle(ServerboundSetSelectedConnectorPacket packet, Supplier<NetworkEvent.Context> ctx) {
@@ -45,7 +48,7 @@ public final class SynapsePacketHandler {
             ServerPlayer sender = ctx.get().getSender();
             if (sender == null) return;
             if (sender.containerMenu instanceof BasicConnectorMenu menu) {
-                menu.sendToClient(sender, packet.getSlot(), IDSetResult.SUCCESS);
+                menu.sendToClient(sender, packet.getSlot(), IDSetResult.NO_SET);
             }
         });
         ctx.get().setPacketHandled(true);
@@ -89,6 +92,17 @@ public final class SynapsePacketHandler {
                         menu.getRulesetServerside(packet.getDevice()).getType() == packet.getType()) {
                     packet.syncAction().ifPresent(a -> a.accept(menu.getRulesetServerside(packet.getDevice())));
                 }
+            }
+        });
+        ctx.get().setPacketHandled(true);
+    }
+
+    private static void handle(ServerboundRemoveConnectionPacket packet, Supplier<NetworkEvent.Context> ctx) {
+        ctx.get().enqueueWork(() -> {
+            ServerPlayer sender = ctx.get().getSender();
+            if (sender == null) return;
+            if (sender.containerMenu instanceof BasicConnectorMenu menu) {
+                menu.receiveRemoveConnection(sender, packet.slot);
             }
         });
         ctx.get().setPacketHandled(true);

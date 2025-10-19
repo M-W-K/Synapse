@@ -1,5 +1,6 @@
 package com.m_w_k.synapse.common.block;
 
+import com.m_w_k.synapse.SynapseUtil;
 import com.m_w_k.synapse.api.block.AxonDeviceDefinitions;
 import com.m_w_k.synapse.api.connect.AxonTree;
 import com.m_w_k.synapse.api.connect.AxonType;
@@ -18,15 +19,16 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.SimpleMenuProvider;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BaseEntityBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.network.NetworkHooks;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 public abstract class AxonBlock extends BaseEntityBlock {
     public AxonBlock(Properties p_49795_) {
@@ -43,6 +45,7 @@ public abstract class AxonBlock extends BaseEntityBlock {
         if (!(b instanceof AxonBlockEntity usAxon)) return InteractionResult.PASS;
 
         if (!(stack.getItem() instanceof AxonItem iAxon)) {
+            if (noMenuItem(stack)) return InteractionResult.PASS;
             if (hand == InteractionHand.OFF_HAND || !hasInteractMenu()) return InteractionResult.PASS;
             if (player instanceof ServerPlayer s) {
                 openInteractMenu(s, level, state, pos, usAxon);
@@ -64,6 +67,10 @@ public abstract class AxonBlock extends BaseEntityBlock {
 
         AxonType type = iAxon.getType();
         int themSlot = iAxon.getConnectSlot(stack);
+        if (themSlot > themAxon.getSlots()) {
+            iAxon.clearConnectData(stack);
+            return InteractionResult.FAIL;
+        }
         LocalConnectorDevice us = usAxon.getBySlot(usSlot);
         if (us.type() != type) {
             iAxon.clearConnectData(stack);
@@ -74,13 +81,19 @@ public abstract class AxonBlock extends BaseEntityBlock {
             iAxon.clearConnectData(stack);
             return InteractionResult.FAIL;
         }
-        ConnectionType direction = us.level().typeOf(them.level());
+        ConnectionType direction = SynapseUtil.actualTypeOf(us, them);
         us.ensureRegistered(level);
         them.ensureRegistered(level);
         if (direction.upstream()) {
-            if (us.upstream() != null) return InteractionResult.FAIL;
-            LocalAxonConnection connection = new LocalAxonConnection(iAxon, usSlot, usAxon.renderOffsetForSlot(usSlot),
-                    connect, themSlot, themAxon.renderOffsetForSlot(themSlot), type, direction);
+            if (us.upstream() != null || !usAxon.allowsUpstream(usSlot, them) ||
+                    !themAxon.allowsDownstream(themSlot, us)) return InteractionResult.FAIL;
+            LocalAxonConnection connection = new LocalAxonConnection(iAxon, usSlot,
+                    randOffset(usAxon.renderOffsetForSlot(usSlot, themAxon), 40),
+                    usAxon.renderDirectionForSlot(usSlot, themAxon),
+                    connect, themSlot,
+                    randOffset(themAxon.renderOffsetForSlot(themSlot, usAxon), 40),
+                    themAxon.renderDirectionForSlot(themSlot, usAxon),
+                    type, direction);
             if (iAxon.consumeToPlace(connection, stack, player, false)) {
                 var tree = AxonTree.load(level, type, type.getCapability());
                 if (tree.isEmpty() || tree.get().connect(us.treeID(), null, them.treeID(), null) == null) {
@@ -92,9 +105,15 @@ public abstract class AxonBlock extends BaseEntityBlock {
                 return InteractionResult.sidedSuccess(level.isClientSide);
             }
         } else if (direction.downstream()) {
-            if (them.upstream() != null) return InteractionResult.FAIL;
-            LocalAxonConnection connection = new LocalAxonConnection(iAxon, themSlot, themAxon.renderOffsetForSlot(themSlot),
-                    pos, usSlot, usAxon.renderOffsetForSlot(usSlot), type, direction.flip());
+            if (them.upstream() != null || !themAxon.allowsUpstream(themSlot, us) ||
+                    !usAxon.allowsDownstream(usSlot, them)) return InteractionResult.FAIL;
+            LocalAxonConnection connection = new LocalAxonConnection(iAxon, themSlot,
+                    randOffset(themAxon.renderOffsetForSlot(themSlot, usAxon), 40),
+                    themAxon.renderDirectionForSlot(themSlot, usAxon),
+                    pos, usSlot,
+                    randOffset(usAxon.renderOffsetForSlot(usSlot, themAxon), 40),
+                    usAxon.renderDirectionForSlot(usSlot, themAxon),
+                    type, direction.flip());
             if (iAxon.consumeToPlace(connection, stack, player, false)) {
                 var tree = AxonTree.load(level, type, type.getCapability());
                 if (tree.isEmpty() || tree.get().connect(us.treeID(), null, them.treeID(), null) == null) {
@@ -107,6 +126,14 @@ public abstract class AxonBlock extends BaseEntityBlock {
             }
         }
         return InteractionResult.PASS;
+    }
+
+    protected boolean noMenuItem(ItemStack stack) {
+        return false;
+    }
+
+    private Vec3 randOffset(Vec3 vec, int inv) {
+        return vec.add((Math.random() - 0.5) / inv, (Math.random() - 0.5) / inv, (Math.random() - 0.5) / inv);
     }
 
     protected boolean hasInteractMenu() {

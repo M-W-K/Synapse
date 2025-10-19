@@ -35,20 +35,24 @@ public final class AxonAddress extends Object2ShortRBTreeMap<ConnectorLevel> {
         return new AxonAddress(this);
     }
 
-    public void copyAbove(@NotNull AxonAddress source, @NotNull ConnectorLevel level) {
+    public boolean containsAbove(@NotNull ConnectorLevel level) {
+        return keySet().stream().anyMatch(l -> l.getPrio() > level.getPrio());
+    }
+
+    public void copyAtAndAbove(@NotNull AxonAddress source, @NotNull ConnectorLevel level) {
         for (var entry : source.object2ShortEntrySet()) {
-            if (entry.getKey().getPrio() > level.getPrio()) {
+            if (entry.getKey().getPrio() >= level.getPrio()) {
                 this.put(entry.getKey(), entry.getShortValue());
             }
         }
     }
 
-    public void clearAbove(@NotNull ConnectorLevel level) {
-        keySet().removeIf(l -> l.getPrio() > level.getPrio());
+    public void clearAtAndAbove(@NotNull ConnectorLevel level) {
+        keySet().removeIf(l -> l.getPrio() >= level.getPrio());
     }
 
     /**
-     * Creates a wildcard address for matching with other addresses.
+     * Creates a wildcard address for matching with other addresses. Not compatible with serialization.
      * @param universal whether the wildcard should match empty address sections as well.
      * @return an address that by default matches with any other address, and can have specificity added.
      */
@@ -140,11 +144,11 @@ public final class AxonAddress extends Object2ShortRBTreeMap<ConnectorLevel> {
             }
             split = split[0].split("\\.", -1);
             ConnectorLevel[] tiers = ConnectorLevel.values();
-            if (split.length > tiers.length - 2) {
+            if (split.length > tiers.length - ConnectorLevel.NON_ADDRESS_COUNT) {
                 return Either.right(ParseFailure.TOO_LONG);
             }
             for (int i = 0; i < split.length; i++) {
-                buildingAddress.put(tiers[i + 2], fromHex(split[split.length - i - 1]));
+                buildingAddress.put(tiers[i + ConnectorLevel.NON_ADDRESS_COUNT], fromHex(split[split.length - i - 1]));
             }
             return Either.left(buildingAddress);
         } catch (NumberFormatException e) {

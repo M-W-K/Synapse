@@ -6,10 +6,7 @@ import com.m_w_k.synapse.api.connect.IDSetResult;
 import com.m_w_k.synapse.common.block.AxonBlock;
 import com.m_w_k.synapse.api.block.IAxonBlockEntity;
 import com.m_w_k.synapse.common.connect.LocalConnectorDevice;
-import com.m_w_k.synapse.network.ClientboundBasicDeviceDataPacket;
-import com.m_w_k.synapse.network.ServerboundSetConnectorIDPacket;
-import com.m_w_k.synapse.network.ServerboundSetSelectedConnectorPacket;
-import com.m_w_k.synapse.network.SynapsePacketHandler;
+import com.m_w_k.synapse.network.*;
 import com.m_w_k.synapse.registry.SynapseMenuRegistry;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
@@ -179,7 +176,7 @@ public class BasicConnectorMenu extends AbstractContainerMenu {
         BitSet active = evaluateActiveness(be);
         ClientboundBasicDeviceDataPacket packet = active.get(device) ?
                 new ClientboundBasicDeviceDataPacket(active, device, be.getBySlot(device).ensureRegistered(be.getLevel()), result)
-                : new ClientboundBasicDeviceDataPacket(active, device, null, ConnectorLevel.RELAY, result);
+                : new ClientboundBasicDeviceDataPacket(active, device, null, ConnectorLevel.CORRUPTED, result);
         SynapsePacketHandler.INSTANCE.send(PacketDistributor.PLAYER.with(() -> player), packet);
     }
 
@@ -267,5 +264,17 @@ public class BasicConnectorMenu extends AbstractContainerMenu {
     @OnlyIn(Dist.CLIENT)
     public void sendSelectedID(short selectedID) {
         SynapsePacketHandler.INSTANCE.sendToServer(new ServerboundSetConnectorIDPacket(getSelectedDevice(), selectedID));
+    }
+
+    @OnlyIn(Dist.CLIENT)
+    public void sendRemoveConnection() {
+        SynapsePacketHandler.INSTANCE.sendToServer(new ServerboundRemoveConnectionPacket(getSelectedDevice()));
+    }
+
+    public void receiveRemoveConnection(ServerPlayer player, int slot) {
+        if (be == null || be.isRemoved()) return;
+        if (be.removeUpstreamFrom(slot)) {
+            sendToClient(player, slot, IDSetResult.NO_SET);
+        }
     }
 }
