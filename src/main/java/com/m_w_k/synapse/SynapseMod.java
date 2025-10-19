@@ -3,7 +3,7 @@ package com.m_w_k.synapse;
 import com.m_w_k.synapse.client.gui.BasicConnectorScreen;
 import com.m_w_k.synapse.client.gui.EndpointScreen;
 import com.m_w_k.synapse.client.gui.RelayScreen;
-import com.m_w_k.synapse.client.renderer.TestAxonRenderer;
+import com.m_w_k.synapse.client.renderer.AxonRenderer;
 import com.m_w_k.synapse.data.*;
 import com.m_w_k.synapse.network.SynapsePacketHandler;
 import com.m_w_k.synapse.registry.*;
@@ -43,10 +43,10 @@ public final class SynapseMod {
     }
 
     private void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {
-        event.registerBlockEntityRenderer(SynapseBlockEntityRegistry.DISTRIBUTOR_BLOCK.get(), TestAxonRenderer::new);
-        event.registerBlockEntityRenderer(SynapseBlockEntityRegistry.DAS_BLOCK.get(), TestAxonRenderer::new);
-        event.registerBlockEntityRenderer(SynapseBlockEntityRegistry.ENDPOINT_BLOCK.get(), TestAxonRenderer::new);
-        event.registerBlockEntityRenderer(SynapseBlockEntityRegistry.RELAY_BLOCK.get(), TestAxonRenderer::new);
+        event.registerBlockEntityRenderer(SynapseBlockEntityRegistry.DISTRIBUTOR_BLOCK.get(), AxonRenderer::new);
+        event.registerBlockEntityRenderer(SynapseBlockEntityRegistry.DAS_BLOCK.get(), AxonRenderer::new);
+        event.registerBlockEntityRenderer(SynapseBlockEntityRegistry.ENDPOINT_BLOCK.get(), AxonRenderer::new);
+        event.registerBlockEntityRenderer(SynapseBlockEntityRegistry.RELAY_BLOCK.get(), AxonRenderer::new);
     }
 
     private void gatherData(GatherDataEvent event) {
