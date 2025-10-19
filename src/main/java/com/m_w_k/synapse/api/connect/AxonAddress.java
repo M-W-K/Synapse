@@ -52,7 +52,7 @@ public final class AxonAddress extends Object2ShortRBTreeMap<ConnectorLevel> {
     }
 
     /**
-     * Creates a wildcard address for matching with other addresses.
+     * Creates a wildcard address for matching with other addresses. Not compatible with serialization.
      * @param universal whether the wildcard should match empty address sections as well.
      * @return an address that by default matches with any other address, and can have specificity added.
      */

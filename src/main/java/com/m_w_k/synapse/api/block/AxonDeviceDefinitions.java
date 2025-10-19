@@ -1,5 +1,6 @@
 package com.m_w_k.synapse.api.block;
 
+import com.m_w_k.synapse.api.block.ruleset.EnergyTransferRuleset;
 import com.m_w_k.synapse.api.block.ruleset.FluidTransferRuleset;
 import com.m_w_k.synapse.api.block.ruleset.ItemTransferRuleset;
 import com.m_w_k.synapse.api.block.ruleset.TransferRuleset;
@@ -57,6 +58,7 @@ public final class AxonDeviceDefinitions {
         }
         ENDPOINT_RULES.put(AxonType.ITEM, new ItemTransferRuleset(Dist.DEDICATED_SERVER));
         ENDPOINT_RULES.put(AxonType.FLUID, new FluidTransferRuleset(Dist.DEDICATED_SERVER));
+        ENDPOINT_RULES.put(AxonType.ENERGY, new EnergyTransferRuleset(Dist.DEDICATED_SERVER));
         ENDPOINT_CAPABILITIES.put(AxonType.ITEM, ItemExposer::new);
         ENDPOINT_CAPABILITIES.put(AxonType.FLUID, FluidExposer::new);
         ENDPOINT_CAPABILITIES.put(AxonType.ENERGY, EnergyExposer::new);

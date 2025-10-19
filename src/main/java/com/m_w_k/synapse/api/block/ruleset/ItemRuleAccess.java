@@ -4,19 +4,7 @@ import com.m_w_k.synapse.api.connect.AxonAddress;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
-public interface ItemRuleAccess {
-
-    @NotNull AxonAddress getAddress();
-
-    void setAddress(@NotNull AxonAddress address);
-
-    boolean isMatchesIncoming();
-
-    void setMatchesIncoming(boolean matchesIncoming);
-
-    boolean isMatchesOutgoing();
-
-    void setMatchesOutgoing(boolean matchesOutgoing);
+public interface ItemRuleAccess extends RuleAccess {
 
     ItemStack getMatchStack(int index);
 
