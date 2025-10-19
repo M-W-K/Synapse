@@ -41,5 +41,6 @@
   "block.synapse.distributor_block_1": "Mk1 Distributor",
   "block.synapse.distributor_block_2": "Mk2 Distributor",
   "block.synapse.distributor_block_3": "Mk3 Distributor",
-  "block.synapse.endpoint_basic": "Network Endpoint"
+  "block.synapse.endpoint_basic": "Network Endpoint",
+  "block.synapse.relay": "Distributor Relay"
 }

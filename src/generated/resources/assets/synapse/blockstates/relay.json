@@ -1,0 +1,260 @@
+{
+  "multipart": [
+    {
+      "apply": {
+        "model": "synapse:block/relay_1",
+        "x": 180,
+        "y": 270
+      },
+      "when": {
+        "facing": "down",
+        "relays": "1|2|3|4"
+      }
+    },
+    {
+      "apply": {
+        "model": "synapse:block/relay_2",
+        "x": 180,
+        "y": 270
+      },
+      "when": {
+        "facing": "down",
+        "relays": "2|3|4"
+      }
+    },
+    {
+      "apply": {
+        "model": "synapse:block/relay_3",
+        "x": 180,
+        "y": 270
+      },
+      "when": {
+        "facing": "down",
+        "relays": "3|4"
+      }
+    },
+    {
+      "apply": {
+        "model": "synapse:block/relay_4",
+        "x": 180,
+        "y": 270
+      },
+      "when": {
+        "facing": "down",
+        "relays": "4"
+      }
+    },
+    {
+      "apply": {
+        "model": "synapse:block/relay_1",
+        "y": 270
+      },
+      "when": {
+        "facing": "up",
+        "relays": "1|2|3|4"
+      }
+    },
+    {
+      "apply": {
+        "model": "synapse:block/relay_2",
+        "y": 270
+      },
+      "when": {
+        "facing": "up",
+        "relays": "2|3|4"
+      }
+    },
+    {
+      "apply": {
+        "model": "synapse:block/relay_3",
+        "y": 270
+      },
+      "when": {
+        "facing": "up",
+        "relays": "3|4"
+      }
+    },
+    {
+      "apply": {
+        "model": "synapse:block/relay_4",
+        "y": 270
+      },
+      "when": {
+        "facing": "up",
+        "relays": "4"
+      }
+    },
+    {
+      "apply": {
+        "model": "synapse:block/relay_1",
+        "x": -90,
+        "y": 180
+      },
+      "when": {
+        "facing": "north",
+        "relays": "1|2|3|4"
+      }
+    },
+    {
+      "apply": {
+        "model": "synapse:block/relay_2",
+        "x": -90,
+        "y": 180
+      },
+      "when": {
+        "facing": "north",
+        "relays": "2|3|4"
+      }
+    },
+    {
+      "apply": {
+        "model": "synapse:block/relay_3",
+        "x": -90,
+        "y": 180
+      },
+      "when": {
+        "facing": "north",
+        "relays": "3|4"
+      }
+    },
+    {
+      "apply": {
+        "model": "synapse:block/relay_4",
+        "x": -90,
+        "y": 180
+      },
+      "when": {
+        "facing": "north",
+        "relays": "4"
+      }
+    },
+    {
+      "apply": {
+        "model": "synapse:block/relay_1",
+        "x": -90
+      },
+      "when": {
+        "facing": "south",
+        "relays": "1|2|3|4"
+      }
+    },
+    {
+      "apply": {
+        "model": "synapse:block/relay_2",
+        "x": -90
+      },
+      "when": {
+        "facing": "south",
+        "relays": "2|3|4"
+      }
+    },
+    {
+      "apply": {
+        "model": "synapse:block/relay_3",
+        "x": -90
+      },
+      "when": {
+        "facing": "south",
+        "relays": "3|4"
+      }
+    },
+    {
+      "apply": {
+        "model": "synapse:block/relay_4",
+        "x": -90
+      },
+      "when": {
+        "facing": "south",
+        "relays": "4"
+      }
+    },
+    {
+      "apply": {
+        "model": "synapse:block/relay_1",
+        "x": -90,
+        "y": 90
+      },
+      "when": {
+        "facing": "west",
+        "relays": "1|2|3|4"
+      }
+    },
+    {
+      "apply": {
+        "model": "synapse:block/relay_2",
+        "x": -90,
+        "y": 90
+      },
+      "when": {
+        "facing": "west",
+        "relays": "2|3|4"
+      }
+    },
+    {
+      "apply": {
+        "model": "synapse:block/relay_3",
+        "x": -90,
+        "y": 90
+      },
+      "when": {
+        "facing": "west",
+        "relays": "3|4"
+      }
+    },
+    {
+      "apply": {
+        "model": "synapse:block/relay_4",
+        "x": -90,
+        "y": 90
+      },
+      "when": {
+        "facing": "west",
+        "relays": "4"
+      }
+    },
+    {
+      "apply": {
+        "model": "synapse:block/relay_1",
+        "x": -90,
+        "y": 270
+      },
+      "when": {
+        "facing": "east",
+        "relays": "1|2|3|4"
+      }
+    },
+    {
+      "apply": {
+        "model": "synapse:block/relay_2",
+        "x": -90,
+        "y": 270
+      },
+      "when": {
+        "facing": "east",
+        "relays": "2|3|4"
+      }
+    },
+    {
+      "apply": {
+        "model": "synapse:block/relay_3",
+        "x": -90,
+        "y": 270
+      },
+      "when": {
+        "facing": "east",
+        "relays": "3|4"
+      }
+    },
+    {
+      "apply": {
+        "model": "synapse:block/relay_4",
+        "x": -90,
+        "y": 270
+      },
+      "when": {
+        "facing": "east",
+        "relays": "4"
+      }
+    }
+  ]
+}
