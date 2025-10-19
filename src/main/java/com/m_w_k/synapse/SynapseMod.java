@@ -3,17 +3,14 @@ package com.m_w_k.synapse;
 import com.m_w_k.synapse.client.gui.BasicConnectorScreen;
 import com.m_w_k.synapse.client.gui.EndpointScreen;
 import com.m_w_k.synapse.client.gui.RelayScreen;
-import com.m_w_k.synapse.client.renderer.TestAxonRenderer;
-import com.m_w_k.synapse.common.menu.EndpointMenu;
-import com.m_w_k.synapse.data.SynapseLootTableGen;
+import com.m_w_k.synapse.client.renderer.AxonRenderer;
+import com.m_w_k.synapse.data.*;
 import com.m_w_k.synapse.network.SynapsePacketHandler;
 import com.m_w_k.synapse.registry.*;
 import com.mojang.logging.LogUtils;
 import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.data.DataGenerator;
-import net.minecraft.data.PackOutput;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.inventory.MenuType;
+import net.minecraft.data.DataProvider;
 import net.minecraftforge.client.event.EntityRenderersEvent;
 import net.minecraftforge.common.data.ExistingFileHelper;
 import net.minecraftforge.data.event.GatherDataEvent;
@@ -46,17 +43,23 @@ public final class SynapseMod {
     }
 
     private void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {
-        event.registerBlockEntityRenderer(SynapseBlockEntityRegistry.DISTRIBUTOR_BLOCK.get(), TestAxonRenderer::new);
-        event.registerBlockEntityRenderer(SynapseBlockEntityRegistry.DAS_BLOCK.get(), TestAxonRenderer::new);
-        event.registerBlockEntityRenderer(SynapseBlockEntityRegistry.ENDPOINT_BLOCK.get(), TestAxonRenderer::new);
-        event.registerBlockEntityRenderer(SynapseBlockEntityRegistry.RELAY_BLOCK.get(), TestAxonRenderer::new);
+        event.registerBlockEntityRenderer(SynapseBlockEntityRegistry.DISTRIBUTOR_BLOCK.get(), AxonRenderer::new);
+        event.registerBlockEntityRenderer(SynapseBlockEntityRegistry.DAS_BLOCK.get(), AxonRenderer::new);
+        event.registerBlockEntityRenderer(SynapseBlockEntityRegistry.ENDPOINT_BLOCK.get(), AxonRenderer::new);
+        event.registerBlockEntityRenderer(SynapseBlockEntityRegistry.RELAY_BLOCK.get(), AxonRenderer::new);
     }
 
     private void gatherData(GatherDataEvent event) {
         DataGenerator gen = event.getGenerator();
-        PackOutput packOutput = gen.getPackOutput();
         ExistingFileHelper helper = event.getExistingFileHelper();
-        gen.addProvider(event.includeServer(), SynapseLootTableGen.INSTANCE);
+        gen.addProvider(event.includeServer(), new SynapseLootTableGen());
+        gen.addProvider(event.includeServer(), clarify(SynapseRecipeProvider::new));
+        gen.addProvider(event.includeServer(), new SynapseAdvancementGen(event.getLookupProvider(), helper));
+        gen.addProvider(event.includeClient(), clarify(out -> new SynapseBlockStateProvider(out, helper)));
+    }
+
+    private <T extends DataProvider> DataProvider.Factory<T> clarify(DataProvider.Factory<T> f) {
+        return f;
     }
 
     private void clientSetup(FMLClientSetupEvent event) {
@@ -67,9 +70,5 @@ public final class SynapseMod {
                     MenuScreens.register(SynapseMenuRegistry.RELAY.get(), RelayScreen::new);
                 }
         );
-    }
-
-    public static ResourceLocation resLoc(String path) {
-        return new ResourceLocation(MODID, path);
     }
 }

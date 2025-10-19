@@ -1,6 +1,6 @@
 package com.m_w_k.synapse.api.connect;
 
-import com.m_w_k.synapse.SynapseMod;
+import com.m_w_k.synapse.SynapseUtil;
 import com.mojang.serialization.Codec;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.nbt.CompoundTag;
@@ -31,7 +31,7 @@ public abstract class DeviceDataKey<T> {
             });
 
     public static final DeviceDataKey<ConnectorLevel> RELAYING =
-            new DeviceDataKey<>(SynapseMod.resLoc("relay")) {
+            new DeviceDataKey<>(SynapseUtil.resLoc("relay")) {
                 @Override
                 public @NotNull CompoundTag save(@NotNull ConnectorLevel level) {
                     CompoundTag tag = new CompoundTag();

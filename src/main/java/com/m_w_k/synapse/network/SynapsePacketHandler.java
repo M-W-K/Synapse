@@ -1,6 +1,6 @@
 package com.m_w_k.synapse.network;
 
-import com.m_w_k.synapse.SynapseMod;
+import com.m_w_k.synapse.SynapseUtil;
 import com.m_w_k.synapse.api.connect.IDSetResult;
 import com.m_w_k.synapse.common.menu.BasicConnectorMenu;
 import com.m_w_k.synapse.common.menu.EndpointMenu;
@@ -15,7 +15,7 @@ import java.util.function.Supplier;
 
 public final class SynapsePacketHandler {
     public static final String VERSION = "1";
-    public static final SimpleChannel INSTANCE = NetworkRegistry.newSimpleChannel(SynapseMod.resLoc("main"),
+    public static final SimpleChannel INSTANCE = NetworkRegistry.newSimpleChannel(SynapseUtil.resLoc("main"),
             () -> VERSION, VERSION::equals, VERSION::equals);
 
     private static int ids;

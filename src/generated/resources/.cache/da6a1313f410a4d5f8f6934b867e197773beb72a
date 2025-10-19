@@ -1,0 +1,11 @@
+// 1.20.1	2025-10-19T14:30:42.932016	Block States: synapse
+ad030af592e503c4ddf7312d4349a9fcf4613d27 assets/synapse/blockstates/distributor_block_1.json
+1aac20c1927296da1daa2c84d3f9af18fa6607d4 assets/synapse/blockstates/distributor_block_2.json
+eb778cec37bb7ac8888f9243536c59a483c7fb94 assets/synapse/blockstates/distributor_block_3.json
+2c77009db2dce0d46d5c868472fdf05ff0208983 assets/synapse/blockstates/endpoint_basic.json
+095cffcac500223aa891470f9522ba48526c8996 assets/synapse/blockstates/relay.json
+2d905cad39a4eb507eed34d43c7cd179b76eb52b assets/synapse/models/item/distributor_block_1.json
+1ec82f0bd1ceacddeef9fc033e0a434e9dec8e11 assets/synapse/models/item/distributor_block_2.json
+8e85e60bb465f275944632718899f8785b45e42e assets/synapse/models/item/distributor_block_3.json
+b7a1eccc2bd55df48309795e54ff7eb987341296 assets/synapse/models/item/endpoint_basic.json
+67285754da538426010f92b9ea0765fe8d46ec5f assets/synapse/models/item/relay.json

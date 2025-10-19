@@ -2,6 +2,7 @@ package com.m_w_k.synapse.client.gui.ruleset;
 
 import com.google.common.collect.ImmutableList;
 import com.m_w_k.synapse.SynapseMod;
+import com.m_w_k.synapse.SynapseUtil;
 import com.m_w_k.synapse.api.block.ruleset.*;
 import com.m_w_k.synapse.api.connect.AxonAddress;
 import com.m_w_k.synapse.client.gui.AbstractConnectorScreen;
@@ -20,7 +21,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 
 public class EnergyRulesetWidget extends AbstractContainerEventHandler implements RulesetWidget {
-    static final TexLocation TEX_LOCATION = new TexLocation(SynapseMod.resLoc("textures/gui/container/ruleset.png"), 128, 128);
+    static final TexLocation TEX_LOCATION = new TexLocation(SynapseUtil.resLoc("textures/gui/container/ruleset.png"), 128, 128);
 
     protected final EnergyTransferRuleset parent;
     protected final AbstractConnectorScreen<?> screen;

@@ -1,6 +1,5 @@
 package com.m_w_k.synapse.client.renderer;
 
-import com.m_w_k.synapse.SynapseMod;
 import com.m_w_k.synapse.common.block.entity.AxonBlockEntity;
 import com.m_w_k.synapse.common.connect.LocalAxonConnection;
 import com.mojang.blaze3d.vertex.*;
@@ -12,7 +11,6 @@ import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.BlockPos;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.level.BlockAndTintGetter;
@@ -23,12 +21,11 @@ import org.jetbrains.annotations.NotNull;
 
 // TODO replace BER with custom baked model and baked rendering data using IForgeBlockEntity#getModelData()
 @OnlyIn(Dist.CLIENT)
-public class TestAxonRenderer implements BlockEntityRenderer<AxonBlockEntity> {
+public class AxonRenderer implements BlockEntityRenderer<AxonBlockEntity> {
 
-    private static final ResourceLocation testTex = new ResourceLocation(SynapseMod.MODID, "block/test_texture");
     private static final Vec3 UP = new Vec3(0, 1, 0);
 
-    public TestAxonRenderer(BlockEntityRendererProvider.Context context) {}
+    public AxonRenderer(BlockEntityRendererProvider.Context context) {}
 
     @Override
     public void render(@NotNull AxonBlockEntity be, float partialTicks, @NotNull PoseStack pose, @NotNull MultiBufferSource bufferSource, int light, int overlay) {
@@ -53,10 +50,10 @@ public class TestAxonRenderer implements BlockEntityRenderer<AxonBlockEntity> {
         Vec3 sourceOffset = testSource.add(connected.getSourceRenderDirection());
         Vec3 testTarget = connected.getTargetPos().getCenter().add(connected.getTargetRenderOffset());
         Vec3 targetOffset = testTarget.add(connected.getTargetRenderDirection());
-        int points = 1 + (int) (splineLength(testSource, sourceOffset, testTarget, targetOffset) * 2);
-        Vec3[] ropePoints = new Vec3[points + 1];
-        for (int j = 0; j <= points; j++) {
-            double t = (double) j / points;
+        int points = 2 + (int) (splineLength(testSource, sourceOffset, testTarget, targetOffset) * 2);
+        Vec3[] ropePoints = new Vec3[points];
+        for (int j = 0; j < points; j++) {
+            double t = (double) j / (points - 1);
             // three stage lerp with most lerps along a special curve
             Vec3 step1_1 = testSource.lerp(sourceOffset, t);
             Vec3 step1_2 = curveInterpolate(sourceOffset, targetOffset, t);
@@ -65,9 +62,9 @@ public class TestAxonRenderer implements BlockEntityRenderer<AxonBlockEntity> {
             Vec3 step2_2 = curveInterpolate(step1_2, step1_3, t);
             ropePoints[j] = curveInterpolate(step2_1, step2_2, t);
         }
-        TextureAtlasSprite sprite = Minecraft.getInstance().getModelManager().getAtlas(InventoryMenu.BLOCK_ATLAS).getSprite(testTex);
+        TextureAtlasSprite sprite = Minecraft.getInstance().getModelManager().getAtlas(InventoryMenu.BLOCK_ATLAS).getSprite(connected.getAxonType().getTex().loc());
 
-        for (int j = 0; j < points; j++) {
+        for (int j = 0; j < points - 1; j++) {
             Vec3 start = ropePoints[j];
             Vec3 end = ropePoints[j + 1];
 
@@ -77,7 +74,7 @@ public class TestAxonRenderer implements BlockEntityRenderer<AxonBlockEntity> {
             Vec3 rope = end.subtract(start);
             Vec3 ropePrev = j > 0 ? start.subtract(ropePoints[j - 1]).add(rope) : rope;
             Vec3 ropeNext = j < points - 2 ? ropePoints[j + 2].subtract(end).add(rope) : rope;
-            box(buffer, pose, start, end, ropeNext, ropePrev, sprite, j, sectionLight, overlay);
+            box(buffer, pose, start, end, ropeNext, ropePrev, sprite, connected.getAxonType().getTex(), rope.length(), sectionLight, overlay);
         }
     }
 
@@ -144,7 +141,7 @@ public class TestAxonRenderer implements BlockEntityRenderer<AxonBlockEntity> {
         return dxz * (Math.log((sqrt4 + 2 * dy) / Math.sqrt(dxz))) / (4 * dy) + sqrt4 / 2;
     }
 
-    private static void box(VertexConsumer b, PoseStack mat, Vec3 start, Vec3 end, Vec3 ropeNext, Vec3 ropePrev, TextureAtlasSprite sprite, int position, int light, int overlay) {
+    private static void box(VertexConsumer b, PoseStack mat, Vec3 start, Vec3 end, Vec3 ropeNext, Vec3 ropePrev, TextureAtlasSprite sprite, AxonTexDescription tex, double length, int light, int overlay) {
         Vec3 rope = end.subtract(start);
         Vec3 width = UP.cross(rope);
         Vec3 widthStart = UP.cross(ropePrev);
@@ -170,16 +167,18 @@ public class TestAxonRenderer implements BlockEntityRenderer<AxonBlockEntity> {
         } else {
             heightEnd = ropeNext.cross(widthEnd);
         }
-        width = width.normalize().scale(0.15625);
-        widthStart = widthStart.normalize().scale(0.15625);
-        widthEnd = widthEnd.normalize().scale(0.15625);
-        height = height.normalize().scale(0.15625);
-        heightStart = heightStart.normalize().scale(0.15625);
-        heightEnd = heightEnd.normalize().scale(0.15625);
-        float minU = sprite.getU0();
-        float maxU = sprite.getU1();
-        float minV = sprite.getV(((16 * position) % 128) / 8f);
-        float maxV = sprite.getV(((16 * position) % 128 + 16) / 8f);
+        double size = (tex.uMax() - tex.uMin())/32d;
+        width = width.normalize().scale(size);
+        widthStart = widthStart.normalize().scale(size);
+        widthEnd = widthEnd.normalize().scale(size);
+        height = height.normalize().scale(size);
+        heightStart = heightStart.normalize().scale(size);
+        heightEnd = heightEnd.normalize().scale(size);
+        float minU = sprite.getU(tex.uMin());
+        float maxU = sprite.getU(tex.uMax());
+        double pixelLength = Math.min(length * tex.lengthToVFactor(), tex.vMax() - tex.vMin());
+        float minV = sprite.getV(tex.vMin());
+        float maxV = sprite.getV(tex.vMin() + pixelLength);
         // top
         vertex(b, mat, start.add(widthStart).add(heightStart), maxU, minV, height, light, overlay);
         vertex(b, mat, start.subtract(widthStart).add(heightStart), minU, minV, height, light, overlay);

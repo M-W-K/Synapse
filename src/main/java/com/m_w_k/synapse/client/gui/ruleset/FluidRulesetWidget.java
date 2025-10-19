@@ -1,7 +1,7 @@
 package com.m_w_k.synapse.client.gui.ruleset;
 
 import com.google.common.collect.ImmutableList;
-import com.m_w_k.synapse.SynapseMod;
+import com.m_w_k.synapse.SynapseUtil;
 import com.m_w_k.synapse.api.block.ruleset.*;
 import com.m_w_k.synapse.api.block.ruleset.FluidTransferRuleset;
 import com.m_w_k.synapse.api.connect.AxonAddress;
@@ -34,7 +34,7 @@ import org.joml.Matrix4f;
 import java.util.List;
 
 public class FluidRulesetWidget extends AbstractContainerEventHandler implements RulesetWidget {
-    static final TexLocation TEX_LOCATION = new TexLocation(SynapseMod.resLoc("textures/gui/container/ruleset.png"), 128, 128);
+    static final TexLocation TEX_LOCATION = new TexLocation(SynapseUtil.resLoc("textures/gui/container/ruleset.png"), 128, 128);
 
     protected final FluidTransferRuleset parent;
     protected final AbstractConnectorScreen<?> screen;

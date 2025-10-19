@@ -1,8 +1,7 @@
 package com.m_w_k.synapse.client.gui;
 
-import com.m_w_k.synapse.SynapseMod;
+import com.m_w_k.synapse.SynapseUtil;
 import com.m_w_k.synapse.api.connect.AxonAddress;
-import com.m_w_k.synapse.api.connect.IDSetResult;
 import com.m_w_k.synapse.common.menu.BasicConnectorMenu;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -25,7 +24,7 @@ import java.util.Objects;
 
 @OnlyIn(Dist.CLIENT)
 public abstract class AbstractConnectorScreen<T extends BasicConnectorMenu> extends AbstractContainerScreen<T> {
-    static final TexLocation TEX_LOCATION = TexLocation.standard(SynapseMod.resLoc("textures/gui/container/basic_connector.png"));
+    static final TexLocation TEX_LOCATION = TexLocation.standard(SynapseUtil.resLoc("textures/gui/container/basic_connector.png"));
 
     protected DeviceListWidget deviceList;
     protected @Nullable DeviceListWidget.DeviceEntry selected;
