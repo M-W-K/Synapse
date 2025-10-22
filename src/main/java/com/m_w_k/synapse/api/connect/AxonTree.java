@@ -251,6 +251,7 @@ public class AxonTree<T> extends SavedData {
             UUID id = UUIDUtil.uuidFromIntArray(Arrays.copyOfRange(uuids, 4 * i, 4 * i + 4));
             members.put(id, ConnectorDevice.from(this, data.getCompound(i)));
         }
+        members.forEach((uuid, device) -> device.downstream.keySet().removeIf(u -> !members.containsKey(u)));
     }
 
     @Override
