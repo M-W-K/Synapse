@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    {
+      "item": "synapse:duned_gold_ingot"
+    }
+  ],
+  "result": {
+    "count": 9,
+    "item": "synapse:duned_gold_nugget"
+  }
+}

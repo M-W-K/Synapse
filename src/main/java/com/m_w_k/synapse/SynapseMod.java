@@ -56,6 +56,7 @@ public final class SynapseMod {
         gen.addProvider(event.includeServer(), clarify(SynapseRecipeProvider::new));
         gen.addProvider(event.includeServer(), new SynapseAdvancementGen(event.getLookupProvider(), helper));
         gen.addProvider(event.includeClient(), clarify(out -> new SynapseBlockStateProvider(out, helper)));
+        gen.addProvider(event.includeClient(), clarify(out -> new SynapseItemModelProvider(out, helper)));
     }
 
     private <T extends DataProvider> DataProvider.Factory<T> clarify(DataProvider.Factory<T> f) {

@@ -1,4 +1,12 @@
-// 1.20.1	2025-10-15T13:27:40.801721	Recipes
+// 1.20.1	2025-10-20T18:34:29.981659	Recipes
+9ca29a37d2c2bb67689b69d2ff04f53fa9ce6f8a data/minecraft/advancements/recipes/misc/biosteel_ingot_from_nuggets.json
+bf28b0ab4f88bf283bc648d81c82fbe835276f9f data/minecraft/advancements/recipes/misc/biosteel_nugget.json
+50b58a6784e0dd2107d243df5ef1cb80a1c93c3f data/minecraft/advancements/recipes/misc/duned_gold_ingot_from_nuggets.json
+1756f3670869a451a6f8650d84ebf8a2134bdf0f data/minecraft/advancements/recipes/misc/duned_gold_nugget.json
+0805503922845a1fa320f6b2dc32f541b3f7e509 data/minecraft/recipes/biosteel_ingot_from_nuggets.json
+efad90dc5e14f32de8d8a0ab2a04411f3cb03ea1 data/minecraft/recipes/biosteel_nugget.json
+7ae0a11d6f0bbc2a0957a95d5fc3c23656097aa0 data/minecraft/recipes/duned_gold_ingot_from_nuggets.json
+466470252495f815b66a98b18c0f78ca1e938547 data/minecraft/recipes/duned_gold_nugget.json
 d79d98184e7d1d240eed1449b8857d92cbe2f7c4 data/synapse/advancements/recipes/misc/axon.energy.json
 07ad865ea908a7c52281cf894dacfa66298e49a0 data/synapse/advancements/recipes/misc/axon.fluid.json
 e09c18f8f42b5e89ea451726fd043f4789f77027 data/synapse/advancements/recipes/misc/axon.item.json

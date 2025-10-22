@@ -4,7 +4,9 @@ import com.m_w_k.synapse.registry.SynapseBlockRegistry;
 import com.m_w_k.synapse.registry.SynapseItemRegistry;
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.recipes.*;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.level.ItemLike;
 import net.minecraftforge.common.Tags;
 import org.jetbrains.annotations.NotNull;
 
@@ -20,6 +22,7 @@ public final class SynapseRecipeProvider extends RecipeProvider {
     protected void buildRecipes(@NotNull Consumer<FinishedRecipe> writer) {
         materialRecipes(writer);
         functionalRecipes(writer);
+        decorationalRecipes(writer);
     }
 
     private void materialRecipes(@NotNull Consumer<FinishedRecipe> writer) {
@@ -157,5 +160,12 @@ public final class SynapseRecipeProvider extends RecipeProvider {
                 .define('t', SynapseItemRegistry.ENDER_CRYSTAL.get())
                 .unlockedBy("has_duned_gold", has(SynapseItemRegistry.DUNED_GOLD.get()))
                 .save(writer);
+    }
+
+    private void decorationalRecipes(@NotNull Consumer<FinishedRecipe> writer) {
+        nineBlockStorageRecipesWithCustomPacking(writer, RecipeCategory.MISC, SynapseItemRegistry.BIOSTEEL_NUGGET.get(),
+                RecipeCategory.MISC, SynapseItemRegistry.BIOSTEEL.get(), "biosteel_ingot_from_nuggets", "biosteel_ingot");
+        nineBlockStorageRecipesWithCustomPacking(writer, RecipeCategory.MISC, SynapseItemRegistry.DUNED_GOLD_NUGGET.get(),
+                RecipeCategory.MISC, SynapseItemRegistry.DUNED_GOLD.get(), "duned_gold_ingot_from_nuggets", "duned_gold_ingot");
     }
 }

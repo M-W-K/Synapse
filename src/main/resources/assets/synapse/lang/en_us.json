@@ -27,7 +27,9 @@
   "synapse.menu.button.ruleset.item": "Filter Item",
 
   "item.synapse.biosteel_ingot": "Biosteel Ingot",
+  "item.synapse.biosteel_nugget": "Biosteel Nugget",
   "item.synapse.duned_gold_ingot": "Duned Gold Ingot",
+  "item.synapse.duned_gold_nugget": "Duned Gold Nugget",
   "item.synapse.transfer_powder": "Transference Powder",
   "item.synapse.neural_thread": "Neural Thread",
   "item.synapse.wetware_chip": "Primitive Wetware Chip",

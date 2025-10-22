@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "group": "biosteel_ingot",
+  "key": {
+    "#": {
+      "item": "synapse:biosteel_nugget"
+    }
+  },
+  "pattern": [
+    "###",
+    "###",
+    "###"
+  ],
+  "result": {
+    "item": "synapse:biosteel_ingot"
+  },
+  "show_notification": true
+}

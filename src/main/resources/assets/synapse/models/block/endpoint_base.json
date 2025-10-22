@@ -14,7 +14,7 @@
 			"to": [13.25, 13.25, 1.11],
 			"rotation": {"angle": 0, "axis": "y", "origin": [3, 3, 0.2]},
 			"faces": {
-				"north": {"uv": [0, 0, 16, 16], "texture": "#1", "cullface": "north"}
+				"north": {"uv": [0, 0, 11, 11], "texture": "#1", "cullface": "north"}
 			}
 		},
 		{
