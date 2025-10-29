@@ -3,10 +3,15 @@ package com.m_w_k.synapse;
 import com.m_w_k.synapse.api.connect.ConnectionType;
 import com.m_w_k.synapse.api.connect.ConnectorLevel;
 import com.m_w_k.synapse.api.connect.DeviceDataKey;
+import com.m_w_k.synapse.common.block.entity.RelayBlockEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.function.Function;
+import java.util.function.ToDoubleBiFunction;
 
 public final class SynapseUtil {
 
@@ -36,6 +41,52 @@ public final class SynapseUtil {
             return a.getLevel().typeOf(b.getLevel());
         }
         return type;
+    }
+
+    public static <T> T getNearest(T target, T[] candidates, ToDoubleBiFunction<T, T> distance) {
+        int best = 0;
+        double dist = Double.POSITIVE_INFINITY;
+        for (int i = 0; i < candidates.length; i++) {
+            double d = distance.applyAsDouble(target, candidates[i]);
+            if (dist > d) {
+                best = i;
+                dist = d;
+            }
+        }
+        return candidates[best];
+    }
+
+    public static <T> T getNearest(Vec3 vec, T[] candidates, Function<T, Vec3> toVec) {
+        int best = 0;
+        double dist = Double.POSITIVE_INFINITY;
+        for (int i = 0; i < candidates.length; i++) {
+            double d = distanceEuler(vec, toVec.apply(candidates[i]));
+            if (dist > d) {
+                best = i;
+                dist = d;
+            }
+        }
+        return candidates[best];
+    }
+
+    public static int getNearest(Vec3 vec, Vec3[] candidates) {
+        int best = 0;
+        double dist = Double.POSITIVE_INFINITY;
+        for (int i = 0; i < candidates.length; i++) {
+            double d = distanceEuler(vec, candidates[i]);
+            if (dist > d) {
+                best = i;
+                dist = d;
+            }
+        }
+        return best;
+    }
+
+    public static double distanceEuler(Vec3 a, Vec3 b) {
+        double dx = a.x() - b.x();
+        double dy = a.y() - b.y();
+        double dz = a.z() - b.z();
+        return dx * dx + dy * dy + dz * dz;
     }
 
     public static ResourceLocation resLoc(String path) {

@@ -1,11 +1,10 @@
 package com.m_w_k.synapse.common.block;
 
+import com.m_w_k.synapse.SynapseUtil;
 import com.m_w_k.synapse.api.block.AxonDeviceDefinitions;
 import com.m_w_k.synapse.api.block.IAxonBlockEntity;
-import com.m_w_k.synapse.common.block.entity.AxonBlockEntity;
 import com.m_w_k.synapse.common.block.entity.RelayBlockEntity;
 import com.m_w_k.synapse.common.item.AxonItem;
-import com.m_w_k.synapse.common.menu.BasicConnectorMenu;
 import com.m_w_k.synapse.common.menu.RelayMenu;
 import it.unimi.dsi.fastutil.ints.IntObjectPair;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
@@ -43,7 +42,6 @@ import net.minecraftforge.network.NetworkHooks;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
-import java.util.BitSet;
 import java.util.Map;
 
 public class RelayBlock extends AxonBlock implements SimpleWaterloggedBlock {
@@ -103,28 +101,21 @@ public class RelayBlock extends AxonBlock implements SimpleWaterloggedBlock {
     }
 
     @Override
-    protected void openInteractMenu(@NotNull ServerPlayer player, @NotNull Level level, @NotNull BlockState state, @NotNull BlockPos pos, @NotNull IAxonBlockEntity be) {
+    protected void openInteractMenu(@NotNull ServerPlayer player, @NotNull Level level, @NotNull BlockState state, @NotNull BlockPos pos, @NotNull IAxonBlockEntity be, @NotNull BlockHitResult hit) {
         MenuProvider prov = new SimpleMenuProvider(
                 (containerId, playerInventory, p) -> RelayMenu.of(containerId, playerInventory, be),
                 Component.translatable("synapse.menu.title.relay"));
-        NetworkHooks.openScreen(player, prov, RelayMenu.writer(be));
+        Vec3 relative = hit.getLocation().subtract(pos.getCenter());
+        NetworkHooks.openScreen(player, prov, RelayMenu.writer(be, String.valueOf(
+                SynapseUtil.getNearest(relative, RelayBlockEntity.centers(state.getValue(MOUNT_DIRECTION))))));
     }
 
     @Override
     protected int determineHitSlot(@NotNull BlockState state, @NotNull Level level, @NotNull BlockPos pos, @NotNull Player player, @NotNull InteractionHand hand, @NotNull BlockHitResult hit) {
         if (player.getItemInHand(hand).getItem() instanceof AxonItem iAxon) {
             Vec3 relative = hit.getLocation().subtract(pos.getCenter());
-            Vec3[] candidates = RelayBlockEntity.centers(state.getValue(MOUNT_DIRECTION));
-            int best = 0;
-            double dot = 0;
-            for (int i = 0; i < candidates.length; i++) {
-                double dott = Math.abs(candidates[i].dot(relative));
-                if (dott > dot) {
-                    best = i;
-                    dot = dott;
-                }
-            }
-            return AxonDeviceDefinitions.relay(iAxon.getType(), best);
+            return AxonDeviceDefinitions.relay(iAxon.getType(),
+                    SynapseUtil.getNearest(relative, RelayBlockEntity.centers(state.getValue(MOUNT_DIRECTION))));
         }
         return 0;
     }

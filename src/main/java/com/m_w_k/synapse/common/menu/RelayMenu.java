@@ -19,7 +19,10 @@ import java.nio.charset.Charset;
 import java.util.function.Consumer;
 import java.util.function.IntFunction;
 
-public class RelayMenu extends BasicConnectorMenu {
+public class RelayMenu extends InitFilterMenu {
+
+    @OnlyIn(Dist.CLIENT)
+    protected String startingFilter;
 
     public RelayMenu(int containerID, Inventory playerInv, ContainerLevelAccess access, IntFunction<String> deviceNames, int deviceCount) {
         super(SynapseMenuRegistry.RELAY.get(), containerID, playerInv, access, deviceNames, deviceCount);
@@ -40,10 +43,7 @@ public class RelayMenu extends BasicConnectorMenu {
         }
         RelayMenu ret = new RelayMenu(containerID, playerInv, ContainerLevelAccess.NULL, i -> names[i], slots);
         ret.setActiveDevices(buf.readBitSet());
+        ret.readStartingFilter(buf);
         return ret;
-    }
-
-    public static Consumer<FriendlyByteBuf> writer(IAxonBlockEntity be) {
-        return BasicConnectorMenu.writer(be);
     }
 }

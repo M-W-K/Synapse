@@ -19,7 +19,6 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.SimpleMenuProvider;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BaseEntityBlock;
@@ -48,7 +47,7 @@ public abstract class AxonBlock extends BaseEntityBlock {
             if (noMenuItem(stack)) return InteractionResult.PASS;
             if (hand == InteractionHand.OFF_HAND || !hasInteractMenu()) return InteractionResult.PASS;
             if (player instanceof ServerPlayer s) {
-                openInteractMenu(s, level, state, pos, usAxon);
+                openInteractMenu(s, level, state, pos, usAxon, hit);
             }
             return InteractionResult.sidedSuccess(level.isClientSide);
         }
@@ -140,7 +139,7 @@ public abstract class AxonBlock extends BaseEntityBlock {
         return true;
     }
 
-    protected void openInteractMenu(@NotNull ServerPlayer player, @NotNull Level level, @NotNull BlockState state, @NotNull BlockPos pos, @NotNull IAxonBlockEntity be) {
+    protected void openInteractMenu(@NotNull ServerPlayer player, @NotNull Level level, @NotNull BlockState state, @NotNull BlockPos pos, @NotNull IAxonBlockEntity be, @NotNull BlockHitResult hit) {
         MenuProvider prov = new SimpleMenuProvider(
                 (containerId, playerInventory, p) -> BasicConnectorMenu.of(containerId, playerInventory, be),
                 Component.translatable("synapse.menu.title.basic_connector"));

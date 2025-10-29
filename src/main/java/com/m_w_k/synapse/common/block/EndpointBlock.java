@@ -1,18 +1,13 @@
 package com.m_w_k.synapse.common.block;
 
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Maps;
 import com.m_w_k.synapse.SynapseUtil;
 import com.m_w_k.synapse.api.block.AxonDeviceDefinitions;
 import com.m_w_k.synapse.api.block.IAxonBlockEntity;
 import com.m_w_k.synapse.common.block.entity.EndpointBlockEntity;
 import com.m_w_k.synapse.common.item.AxonItem;
-import com.m_w_k.synapse.common.menu.BasicConnectorMenu;
 import com.m_w_k.synapse.common.menu.EndpointMenu;
 import com.m_w_k.synapse.registry.SynapseBlockEntityRegistry;
-import it.unimi.dsi.fastutil.Pair;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
-import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
@@ -42,7 +37,6 @@ import net.minecraft.world.level.pathfinder.PathComputationType;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
-import net.minecraft.world.phys.shapes.CubeVoxelShape;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraftforge.network.NetworkHooks;
@@ -51,7 +45,6 @@ import org.jetbrains.annotations.NotNull;
 import javax.annotation.Nullable;
 import java.util.BitSet;
 import java.util.EnumMap;
-import java.util.EnumSet;
 import java.util.Map;
 
 public class EndpointBlock extends AxonBlock implements SimpleWaterloggedBlock {
@@ -90,11 +83,12 @@ public class EndpointBlock extends AxonBlock implements SimpleWaterloggedBlock {
     }
 
     @Override
-    protected void openInteractMenu(@NotNull ServerPlayer player, @NotNull Level level, @NotNull BlockState state, @NotNull BlockPos pos, @NotNull IAxonBlockEntity be) {
+    protected void openInteractMenu(@NotNull ServerPlayer player, @NotNull Level level, @NotNull BlockState state, @NotNull BlockPos pos, @NotNull IAxonBlockEntity be, @NotNull BlockHitResult hit) {
         MenuProvider prov = new SimpleMenuProvider(
                 (containerId, playerInventory, p) -> EndpointMenu.of(containerId, playerInventory, be),
                 Component.translatable("synapse.menu.title.endpoint"));
-        NetworkHooks.openScreen(player, prov, EndpointMenu.writer(be));
+        Vec3 rel = hit.getLocation().subtract(hit.getBlockPos().getCenter());
+        NetworkHooks.openScreen(player, prov, EndpointMenu.writer(be, Direction.getNearest(rel.x, rel.y, rel.z).name()));
     }
 
     @Override

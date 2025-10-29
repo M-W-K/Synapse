@@ -10,6 +10,12 @@ public class RelayScreen extends AbstractConnectorScreen<RelayMenu> {
     }
 
     @Override
+    protected void init() {
+        super.init();
+        deviceSearch.setValue(getMenu().getStartingFilter());
+    }
+
+    @Override
     protected void updateSelectedDeviceScreen() {
         super.updateSelectedDeviceScreen();
         addressConfig.setVisible(false);
