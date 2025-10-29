@@ -8,6 +8,7 @@ import com.m_w_k.synapse.common.item.AxonItem;
 import com.m_w_k.synapse.common.menu.RelayMenu;
 import it.unimi.dsi.fastutil.ints.IntObjectPair;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
@@ -18,6 +19,7 @@ import net.minecraft.world.SimpleMenuProvider;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
@@ -42,6 +44,7 @@ import net.minecraftforge.network.NetworkHooks;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
+import java.util.List;
 import java.util.Map;
 
 public class RelayBlock extends AxonBlock implements SimpleWaterloggedBlock {
@@ -182,5 +185,12 @@ public class RelayBlock extends AxonBlock implements SimpleWaterloggedBlock {
     @Override
     protected boolean noMenuItem(ItemStack stack) {
         return stack.getItem() instanceof BlockItem b && b.getBlock() == this;
+    }
+
+    @Override
+    public void appendHoverText(ItemStack p_49816_, @org.jetbrains.annotations.Nullable BlockGetter p_49817_, List<Component> p_49818_, TooltipFlag p_49819_) {
+        p_49818_.add(Component.translatable("block.synapse.relay_desc_1").withStyle(ChatFormatting.GRAY));
+        p_49818_.add(Component.translatable("block.synapse.relay_desc_2").withStyle(ChatFormatting.GRAY));
+        p_49818_.add(Component.translatable("block.synapse.relay_desc_3").withStyle(ChatFormatting.GRAY));
     }
 }

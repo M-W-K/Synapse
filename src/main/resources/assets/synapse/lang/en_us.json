@@ -39,10 +39,17 @@
   "item.synapse.axon.item": "Item Axon",
   "item.synapse.axon.fluid": "Fluid Axon",
   "item.synapse.axon.energy": "Energy Axon",
+  "item.synapse.axon.connecting": "Connecting to %s %s %s at device %s",
 
   "block.synapse.distributor_block_1": "Mk1 Distributor",
   "block.synapse.distributor_block_2": "Mk2 Distributor",
   "block.synapse.distributor_block_3": "Mk3 Distributor",
+  "block.synapse.distributor_desc_1": "Connects to unlimited Endpoints and Distributors of lower MK number",
+  "block.synapse.distributor_desc_2": "Connects to 1 Distributor of higher MK number",
   "block.synapse.endpoint_basic": "Network Endpoint",
-  "block.synapse.relay": "Distributor Relay"
+  "block.synapse.endpoint_desc": "Connects to 1 Distributor",
+  "block.synapse.relay": "Distributor Relay",
+  "block.synapse.relay_desc_1": "Connects to 1 Distributor, and 'relays' that connection to 1 Endpoint or lower MK number Distributor",
+  "block.synapse.relay_desc_2": "If its connection to a Distributor is removed, it can only be reconnected to a distributor of equal or higher MK number",
+  "block.synapse.relay_desc_3": "Up to 4 per block"
 }
