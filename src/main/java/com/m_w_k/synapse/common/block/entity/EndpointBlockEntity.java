@@ -78,7 +78,7 @@ public class EndpointBlockEntity extends AxonBlockEntity implements IFacedAxonBl
     @Override
     public @NotNull Vec3 renderOffsetForSlot(int slot, AxonBlockEntity other) {
         Direction dir = AxonDeviceDefinitions.ENDPOINTS_INV.get(slot).right();
-        return new Vec3(dir.getStepX() * 2/5d, dir.getStepY() * 2/5d, dir.getStepZ() * 2/5d);
+        return new Vec3(dir.getStepX() * 3/10d, dir.getStepY() * 3/10d, dir.getStepZ() * 3/10d);
     }
 
     @Override
