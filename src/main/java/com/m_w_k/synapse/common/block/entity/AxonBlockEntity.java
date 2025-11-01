@@ -37,6 +37,8 @@ public abstract class AxonBlockEntity extends BlockEntity implements IAxonBlockE
     protected static final Codec<List<LocalConnectorDevice>> DEVICE_CODEC = Codec.list(LocalConnectorDevice.CODEC);
     protected final @NotNull List<LocalConnectorDevice> devices = new ObjectArrayList<>();
 
+    protected int connectionRemovingSlot = -1;
+
     public AxonBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
         super(type, pos, state);
     }
@@ -51,11 +53,13 @@ public abstract class AxonBlockEntity extends BlockEntity implements IAxonBlockE
         return devices.get(slot);
     }
 
-    public @NotNull Vec3 renderOffsetForSlot(int slot, AxonBlockEntity other) {
+    @Override
+    public @NotNull Vec3 renderOffsetForSlot(int slot, IAxonBlockEntity other) {
         return Vec3.ZERO;
     }
 
-    public @NotNull Vec3 renderDirectionForSlot(int slot, AxonBlockEntity other) {
+    @Override
+    public @NotNull Vec3 renderDirectionForSlot(int slot, IAxonBlockEntity other) {
         BlockPos offset = other.getBlockPos().subtract(this.getBlockPos());
         Direction.Axis axis = null;
         int val = 0;
@@ -75,6 +79,7 @@ public abstract class AxonBlockEntity extends BlockEntity implements IAxonBlockE
         return new Vec3(axis == Direction.Axis.X ? val : 0, axis == Direction.Axis.Y ? val : 0, axis == Direction.Axis.Z ? val : 0);
     }
 
+    @Override
     public @Nullable LocalAxonConnection setUpstream(@NotNull LocalAxonConnection connection, boolean dropOld) {
         LocalAxonConnection prev = getBySlot(connection.getSourceSlot()).setUpstream(connection);
         if (getLevel() != null) {
@@ -89,19 +94,6 @@ public abstract class AxonBlockEntity extends BlockEntity implements IAxonBlockE
             }
         }
         clientSyncDataChanged();
-        return prev;
-    }
-
-    public @Nullable LocalAxonConnection removeUpstream(int slot, boolean drop) {
-        LocalAxonConnection prev = getBySlot(slot).setUpstream(null);
-        if (prev != null && getLevel() != null) {
-            BlockEntity be = getLevel().getBlockEntity(prev.getTargetPos());
-            if (be instanceof IAxonBlockEntity a) a.removeDownstream(getBlockPos());
-            if (drop) {
-                Block.popResource(getLevel(), getBlockPos(), prev.getItem().getItemWhenRemoved(prev));
-            }
-            clientSyncDataChanged();
-        }
         return prev;
     }
 
@@ -125,6 +117,81 @@ public abstract class AxonBlockEntity extends BlockEntity implements IAxonBlockE
             setChanged();
         }
         return changed;
+    }
+
+    @Override
+    public boolean removeUpstreamFrom(int slot) {
+        if (getLevel() == null) return false;
+        LocalConnectorDevice device = getBySlot(slot);
+        LocalAxonConnection connection = device.upstream();
+        if (connection == null) return false;
+        BlockEntity be = getLevel().getBlockEntity(connection.getTargetPos());
+        Block.popResource(getLevel(), getBlockPos(), connection.getItem().getItemWhenRemoved(connection));
+        clientSyncDataChanged();
+        device.setUpstream(null);
+        if ((be instanceof IAxonBlockEntity a) && !be.isRemoved()) {
+            AxonTree.load(getLevel(), connection.getAxonType(), connection.getAxonType().getCapability())
+                    .ifPresent(tree -> tree.removeConnection(device.treeID(), null, a.getBySlot(connection.getTargetSlot()).treeID(), null));
+            boolean noOthers = true;
+            for (LocalConnectorDevice d : devices) {
+                if (d.upstream() != null && d.upstream().getTargetPos().equals(connection.getTargetPos())) {
+                    noOthers = false;
+                    break;
+                }
+            }
+            if (noOthers) a.removeDownstream(this.getBlockPos());
+        }
+        return true;
+    }
+
+    @Override
+    public void removeDownstreamFrom(int slot) {
+        if (getLevel() == null) return;
+        connectionRemovingSlot = slot;
+        for (BlockPos pos : getDownstream()) {
+            BlockEntity be = getLevel().getBlockEntity(pos);
+            if (be instanceof IAxonBlockEntity abe) {
+                abe.onUpstreamRemoved();
+                LocalConnectorDevice device = getBySlot(slot);
+                AxonTree.load(getLevel(), device.type(), device.type().getCapability())
+                        .ifPresent(tree -> {
+                            AxonTree<?>.ConnectorDevice treeDevice = tree.get(device.treeID());
+                            if (treeDevice == null) return;
+                            treeDevice.forEachDownstream(downstream -> {
+                                tree.removeConnection(device.treeID(), null, downstream, null);
+                            });
+                        });
+            }
+        }
+        connectionRemovingSlot = -1;
+    }
+
+    @Override
+    public void retireSlot(int slot) {
+        if (!(getLevel() instanceof ServerLevel)) return;
+        connectionRemovingSlot = slot;
+        for (BlockPos pos : getDownstream()) {
+            BlockEntity be = getLevel().getBlockEntity(pos);
+            if (be instanceof IAxonBlockEntity abe) {
+                abe.onUpstreamRemoved();
+            }
+        }
+        connectionRemovingSlot = -1;
+        var d1 = devices.get(slot);
+        AxonTree.load(getLevel(), d1.type(), d1.type().getCapability())
+                .ifPresent(t -> t.retire(d1.treeID()));
+        LocalAxonConnection connection = d1.setUpstream(null);
+        if (connection == null) return;
+        BlockEntity be = getLevel().getBlockEntity(connection.getTargetPos());
+        if (be instanceof IAxonBlockEntity a) {
+            a.removeDownstream(getBlockPos());
+        }
+        Block.popResource(getLevel(), getBlockPos(), connection.getItem().getItemWhenRemoved(connection));
+    }
+
+    @Override
+    public boolean slotIsActive(int slot) {
+        return slot != connectionRemovingSlot;
     }
 
     @Override
@@ -199,37 +266,12 @@ public abstract class AxonBlockEntity extends BlockEntity implements IAxonBlockE
             LocalAxonConnection connection = d.upstream();
             if (connection == null) return;
             BlockEntity be = getLevel().getBlockEntity(connection.getTargetPos());
-            if (!(be instanceof AxonBlockEntity) || be.isRemoved()) {
+            if (!(be instanceof IAxonBlockEntity abe) || be.isRemoved() || !abe.slotIsActive(connection.getTargetSlot())) {
                 Block.popResource(getLevel(), connection.getTargetPos(), connection.getItem().getItemWhenRemoved(connection));
                 clientSyncDataChanged();
                 d.setUpstream(null);
             }
         });
-    }
-
-    @Override
-    public boolean removeUpstreamFrom(int slot) {
-        if (getLevel() == null) return false;
-        LocalConnectorDevice device = getBySlot(slot);
-        LocalAxonConnection connection = device.upstream();
-        if (connection == null) return false;
-        BlockEntity be = getLevel().getBlockEntity(connection.getTargetPos());
-        Block.popResource(getLevel(), getBlockPos(), connection.getItem().getItemWhenRemoved(connection));
-        clientSyncDataChanged();
-        device.setUpstream(null);
-        if ((be instanceof IAxonBlockEntity a) && !be.isRemoved()) {
-            AxonTree.load(getLevel(), connection.getAxonType(), connection.getAxonType().getCapability())
-                    .ifPresent(tree -> tree.removeConnection(device.treeID(), null, a.getBySlot(connection.getTargetSlot()).treeID(), null));
-            boolean noOthers = true;
-            for (LocalConnectorDevice d : devices) {
-                if (d.upstream() != null && d.upstream().getTargetPos().equals(connection.getTargetPos())) {
-                    noOthers = false;
-                    break;
-                }
-            }
-            if (noOthers) a.removeDownstream(this.getBlockPos());
-        }
-        return true;
     }
 
     @Override

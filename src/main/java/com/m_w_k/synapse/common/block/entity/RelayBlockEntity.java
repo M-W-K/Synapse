@@ -70,7 +70,7 @@ public class RelayBlockEntity extends AxonBlockEntity {
     }
 
     @Override
-    public @NotNull Vec3 renderOffsetForSlot(int slot, AxonBlockEntity other) {
+    public @NotNull Vec3 renderOffsetForSlot(int slot, IAxonBlockEntity other) {
         Direction dir = getBlockState().getValue(RelayBlock.MOUNT_DIRECTION);
 
         return centers(dir)[AxonDeviceDefinitions.RELAYS_INV.get(slot).firstInt()];
@@ -88,7 +88,7 @@ public class RelayBlockEntity extends AxonBlockEntity {
     }
 
     @Override
-    public @NotNull Vec3 renderDirectionForSlot(int slot, AxonBlockEntity other) {
+    public @NotNull Vec3 renderDirectionForSlot(int slot, IAxonBlockEntity other) {
         Vec3i norm = getBlockState().getValue(RelayBlock.MOUNT_DIRECTION).getNormal();
         return new Vec3(norm.getX(), norm.getY(), norm.getZ());
     }
@@ -136,6 +136,6 @@ public class RelayBlockEntity extends AxonBlockEntity {
 
     @Override
     public boolean slotIsActive(int slot) {
-        return getBlockState().getValue(RelayBlock.RELAYS) > AxonDeviceDefinitions.RELAYS_INV.get(slot).firstInt();
+        return super.slotIsActive(slot) && getBlockState().getValue(RelayBlock.RELAYS) > AxonDeviceDefinitions.RELAYS_INV.get(slot).firstInt();
     }
 }

@@ -1,6 +1,7 @@
 package com.m_w_k.synapse.common.block;
 
 import com.m_w_k.synapse.SynapseUtil;
+import com.m_w_k.synapse.api.KnifeAction;
 import com.m_w_k.synapse.api.block.AxonDeviceDefinitions;
 import com.m_w_k.synapse.api.connect.AxonTree;
 import com.m_w_k.synapse.api.connect.AxonType;
@@ -10,7 +11,13 @@ import com.m_w_k.synapse.api.block.IAxonBlockEntity;
 import com.m_w_k.synapse.common.connect.LocalAxonConnection;
 import com.m_w_k.synapse.common.connect.LocalConnectorDevice;
 import com.m_w_k.synapse.common.item.AxonItem;
+import com.m_w_k.synapse.common.item.KnifeItem;
 import com.m_w_k.synapse.common.menu.BasicConnectorMenu;
+import com.m_w_k.synapse.config.SynapseConfigs;
+import com.mojang.math.Constants;
+import it.unimi.dsi.fastutil.ints.IntArrayList;
+import it.unimi.dsi.fastutil.ints.IntList;
+import it.unimi.dsi.fastutil.ints.IntSet;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
@@ -29,6 +36,8 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.network.NetworkHooks;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.BitSet;
+
 public abstract class AxonBlock extends BaseEntityBlock {
     public AxonBlock(Properties p_49795_) {
         super(p_49795_);
@@ -41,9 +50,12 @@ public abstract class AxonBlock extends BaseEntityBlock {
         ItemStack stack = player.getItemInHand(hand);
 
         BlockEntity b = level.getBlockEntity(pos);
-        if (!(b instanceof AxonBlockEntity usAxon)) return InteractionResult.PASS;
+        if (!(b instanceof IAxonBlockEntity usAxon)) return InteractionResult.PASS;
 
         if (!(stack.getItem() instanceof AxonItem iAxon)) {
+            if (stack.getItem() instanceof KnifeItem knife) {
+                return handleKnife(state, level, pos, player, hand, hit, usAxon, knife, stack);
+            }
             if (noMenuItem(stack)) return InteractionResult.PASS;
             if (hand == InteractionHand.OFF_HAND || !hasInteractMenu()) return InteractionResult.PASS;
             if (player instanceof ServerPlayer s) {
@@ -61,8 +73,11 @@ public abstract class AxonBlock extends BaseEntityBlock {
             iAxon.setConnectSlot(stack, usSlot);
             return InteractionResult.sidedSuccess(level.isClientSide);
         }
+        if (connect.distSqr(pos) > SynapseConfigs.server().network.getSquareRangeLimit()) {
+            return InteractionResult.FAIL;
+        }
         BlockEntity a = level.getBlockEntity(connect);
-        if (!(a instanceof AxonBlockEntity themAxon)) return InteractionResult.PASS;
+        if (!(a instanceof IAxonBlockEntity themAxon)) return InteractionResult.PASS;
 
         AxonType type = iAxon.getType();
         int themSlot = iAxon.getConnectSlot(stack);
@@ -146,6 +161,43 @@ public abstract class AxonBlock extends BaseEntityBlock {
         NetworkHooks.openScreen(player, prov, BasicConnectorMenu.writer(be));
     }
 
+    protected InteractionResult handleKnife(@NotNull BlockState state, @NotNull Level level,
+                               @NotNull BlockPos pos, @NotNull Player player,
+                               @NotNull InteractionHand hand, @NotNull BlockHitResult hit,
+                               @NotNull IAxonBlockEntity usAxon, @NotNull KnifeItem knife,
+                                            @NotNull ItemStack knifeStack) {
+        if (knife.getAction() == KnifeAction.NONE) return InteractionResult.PASS;
+        BitSet slots = knifeAffectedSlots(state, level, pos, player, hand, hit, usAxon, knife, knifeStack);
+        if (slots.isEmpty()) return InteractionResult.FAIL;
+        if (slots.cardinality() == getSlotCount() && knife.getAction() == KnifeAction.REMOVE) {
+            dropResources(state, level, pos);
+            level.removeBlock(pos, false);
+        } else {
+            for (int i = 0; i < slots.length(); i++) {
+                if (slots.get(i)) {
+                    switch (knife.getAction()) {
+                        case SEVER -> {
+                            usAxon.removeUpstreamFrom(i);
+                            usAxon.removeDownstreamFrom(i);
+                        }
+                        case REMOVE -> usAxon.retireSlot(i);
+                    }
+                }
+            }
+        }
+        return InteractionResult.sidedSuccess(level.isClientSide);
+    }
+
+    protected BitSet knifeAffectedSlots(@NotNull BlockState state, @NotNull Level level,
+                                        @NotNull BlockPos pos, @NotNull Player player,
+                                        @NotNull InteractionHand hand, @NotNull BlockHitResult hit,
+                                        @NotNull IAxonBlockEntity usAxon, @NotNull KnifeItem knife,
+                                        @NotNull ItemStack knifeStack) {
+        BitSet set = new BitSet();
+        set.set(0, getSlotCount());
+        return set;
+    }
+
     protected int determineHitSlot(@NotNull BlockState state, @NotNull Level level,
                                    @NotNull BlockPos pos, @NotNull Player player,
                                    @NotNull InteractionHand hand, @NotNull BlockHitResult hit) {
@@ -153,5 +205,9 @@ public abstract class AxonBlock extends BaseEntityBlock {
             return AxonDeviceDefinitions.standard(iAxon.getType());
         }
         return 0;
+    }
+
+    protected int getSlotCount() {
+        return AxonDeviceDefinitions.STANDARD_INV.size();
     }
 }

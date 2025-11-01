@@ -14,5 +14,7 @@ public class SynapseItemModelProvider extends ItemModelProvider {
     @Override
     protected void registerModels() {
         SynapseItemRegistry.SIMPLE.forEach(o -> basicItem(o.get()));
+        basicItem(SynapseItemRegistry.BIOSTEEL_KNIFE.get());
+        basicItem(SynapseItemRegistry.DUNED_GOLD_KNIFE.get());
     }
 }

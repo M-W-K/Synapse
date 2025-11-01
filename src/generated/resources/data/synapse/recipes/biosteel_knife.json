@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "key": {
+    "i": {
+      "item": "synapse:biosteel_ingot"
+    },
+    "n": {
+      "item": "synapse:biosteel_nugget"
+    },
+    "s": {
+      "item": "minecraft:stick"
+    }
+  },
+  "pattern": [
+    "  n",
+    "ni ",
+    "sn "
+  ],
+  "result": {
+    "item": "synapse:biosteel_knife"
+  },
+  "show_notification": true
+}

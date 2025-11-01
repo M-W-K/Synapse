@@ -5,6 +5,7 @@ import com.m_w_k.synapse.registry.SynapseItemRegistry;
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.recipes.*;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.ItemLike;
 import net.minecraftforge.common.Tags;
@@ -82,6 +83,9 @@ public final class SynapseRecipeProvider extends RecipeProvider {
     }
 
     private void functionalRecipes(@NotNull Consumer<FinishedRecipe> writer) {
+        knife(writer, SynapseItemRegistry.BIOSTEEL_KNIFE.get(), SynapseItemRegistry.BIOSTEEL.get(), SynapseItemRegistry.BIOSTEEL_NUGGET.get());
+        knife(writer, SynapseItemRegistry.DUNED_GOLD_KNIFE.get(), SynapseItemRegistry.DUNED_GOLD.get(), SynapseItemRegistry.DUNED_GOLD_NUGGET.get());
+
         ShapedRecipeBuilder.shaped(RecipeCategory.MISC, SynapseItemRegistry.ENERGY_AXON.get(), 3)
                 .pattern("sis")
                 .pattern("iti")
@@ -167,5 +171,17 @@ public final class SynapseRecipeProvider extends RecipeProvider {
                 RecipeCategory.MISC, SynapseItemRegistry.BIOSTEEL.get(), "biosteel_ingot_from_nuggets", "biosteel_ingot");
         nineBlockStorageRecipesWithCustomPacking(writer, RecipeCategory.MISC, SynapseItemRegistry.DUNED_GOLD_NUGGET.get(),
                 RecipeCategory.MISC, SynapseItemRegistry.DUNED_GOLD.get(), "duned_gold_ingot_from_nuggets", "duned_gold_ingot");
+    }
+
+    private void knife(@NotNull Consumer<FinishedRecipe> writer, ItemLike knife, ItemLike ingot, ItemLike nugget) {
+        ShapedRecipeBuilder.shaped(RecipeCategory.COMBAT, knife)
+                .pattern("  n")
+                .pattern("ni ")
+                .pattern("sn ")
+                .define('s', Items.STICK)
+                .define('i', ingot)
+                .define('n', nugget)
+                .unlockedBy("has_ingot", has(ingot))
+                .save(writer);
     }
 }

@@ -4,6 +4,7 @@ import com.m_w_k.synapse.client.gui.BasicConnectorScreen;
 import com.m_w_k.synapse.client.gui.EndpointScreen;
 import com.m_w_k.synapse.client.gui.RelayScreen;
 import com.m_w_k.synapse.client.renderer.AxonRenderer;
+import com.m_w_k.synapse.config.SynapseConfigs;
 import com.m_w_k.synapse.data.*;
 import com.m_w_k.synapse.network.SynapsePacketHandler;
 import com.m_w_k.synapse.registry.*;
@@ -15,6 +16,7 @@ import net.minecraftforge.client.event.EntityRenderersEvent;
 import net.minecraftforge.common.data.ExistingFileHelper;
 import net.minecraftforge.data.event.GatherDataEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
@@ -28,6 +30,7 @@ public final class SynapseMod {
     public SynapseMod() {
         IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
         registries(modEventBus);
+        SynapseConfigs.register(ModLoadingContext.get());
         modEventBus.addListener(this::registerRenderers);
         modEventBus.addListener(this::gatherData);
         modEventBus.addListener(this::clientSetup);

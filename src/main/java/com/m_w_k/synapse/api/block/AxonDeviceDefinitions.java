@@ -62,6 +62,10 @@ public final class AxonDeviceDefinitions {
         ENDPOINT_CAPABILITIES.put(AxonType.ITEM, ItemExposer::new);
         ENDPOINT_CAPABILITIES.put(AxonType.FLUID, FluidExposer::new);
         ENDPOINT_CAPABILITIES.put(AxonType.ENERGY, EnergyExposer::new);
+
+        STANDARD.defaultReturnValue(-1);
+        ENDPOINTS.defaultReturnValue(-1);
+        RELAYS.defaultReturnValue(-1);
     }
 
     public static int standard(AxonType type) {

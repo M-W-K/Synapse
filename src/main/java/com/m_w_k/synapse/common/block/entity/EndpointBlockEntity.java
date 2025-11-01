@@ -1,6 +1,7 @@
 package com.m_w_k.synapse.common.block.entity;
 
 import com.m_w_k.synapse.api.block.AxonDeviceDefinitions;
+import com.m_w_k.synapse.api.block.IAxonBlockEntity;
 import com.m_w_k.synapse.api.block.IFacedAxonBlockEntity;
 import com.m_w_k.synapse.api.block.ruleset.TransferRuleset;
 import com.m_w_k.synapse.api.connect.AxonType;
@@ -72,17 +73,17 @@ public class EndpointBlockEntity extends AxonBlockEntity implements IFacedAxonBl
 
     @Override
     public boolean slotIsActive(int slot) {
-        return activeOnSide(null, AxonDeviceDefinitions.ENDPOINTS_INV.get(slot).right());
+        return super.slotIsActive(slot) && activeOnSide(null, AxonDeviceDefinitions.ENDPOINTS_INV.get(slot).right());
     }
 
     @Override
-    public @NotNull Vec3 renderOffsetForSlot(int slot, AxonBlockEntity other) {
+    public @NotNull Vec3 renderOffsetForSlot(int slot, IAxonBlockEntity other) {
         Direction dir = AxonDeviceDefinitions.ENDPOINTS_INV.get(slot).right();
         return new Vec3(dir.getStepX() * 3/10d, dir.getStepY() * 3/10d, dir.getStepZ() * 3/10d);
     }
 
     @Override
-    public @NotNull Vec3 renderDirectionForSlot(int slot, AxonBlockEntity other) {
+    public @NotNull Vec3 renderDirectionForSlot(int slot, IAxonBlockEntity other) {
         Direction dir = AxonDeviceDefinitions.ENDPOINTS_INV.get(slot).right().getOpposite();
         return new Vec3(dir.getStepX(), dir.getStepY(), dir.getStepZ());
     }

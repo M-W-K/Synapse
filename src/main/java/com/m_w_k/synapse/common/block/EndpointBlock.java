@@ -1,12 +1,17 @@
 package com.m_w_k.synapse.common.block;
 
 import com.m_w_k.synapse.SynapseUtil;
+import com.m_w_k.synapse.api.KnifeAction;
 import com.m_w_k.synapse.api.block.AxonDeviceDefinitions;
 import com.m_w_k.synapse.api.block.IAxonBlockEntity;
+import com.m_w_k.synapse.api.connect.AxonType;
 import com.m_w_k.synapse.common.block.entity.EndpointBlockEntity;
+import com.m_w_k.synapse.common.block.entity.RelayBlockEntity;
 import com.m_w_k.synapse.common.item.AxonItem;
+import com.m_w_k.synapse.common.item.KnifeItem;
 import com.m_w_k.synapse.common.menu.EndpointMenu;
 import com.m_w_k.synapse.registry.SynapseBlockEntityRegistry;
+import com.m_w_k.synapse.registry.SynapseBlockRegistry;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
@@ -14,6 +19,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.SimpleMenuProvider;
 import net.minecraft.world.entity.player.Player;
@@ -95,12 +101,48 @@ public class EndpointBlock extends AxonBlock implements SimpleWaterloggedBlock {
     }
 
     @Override
+    protected InteractionResult handleKnife(@NotNull BlockState state, @NotNull Level level, @NotNull BlockPos pos, @NotNull Player player, @NotNull InteractionHand hand, @NotNull BlockHitResult hit, @NotNull IAxonBlockEntity usAxon, @NotNull KnifeItem knife, @NotNull ItemStack knifeStack) {
+        InteractionResult res = super.handleKnife(state, level, pos, player, hand, hit, usAxon, knife, knifeStack);
+        if (res.consumesAction() && knife.getAction() == KnifeAction.REMOVE) {
+            if (state.getValue(ENDPOINTS) == 1) {
+                dropResources(state, level, pos);
+                level.removeBlock(pos, false);
+            } else {
+                Vec3 rel = hit.getLocation().subtract(pos.getCenter());
+                Direction dir = Direction.getNearest(rel.x, rel.y, rel.z);
+                if (state.getValue(PROPERTY_BY_DIRECTION.get(dir))) {
+                    level.setBlock(pos, state.setValue(PROPERTY_BY_DIRECTION.get(dir), false).setValue(ENDPOINTS, state.getValue(ENDPOINTS) - 1), Block.UPDATE_ALL);
+                    Block.popResource(level, pos, new ItemStack(SynapseBlockRegistry.ENDPOINT_BASIC.get()));
+                }
+            }
+        }
+        return res;
+    }
+
+    @Override
+    protected BitSet knifeAffectedSlots(@NotNull BlockState state, @NotNull Level level, @NotNull BlockPos pos, @NotNull Player player, @NotNull InteractionHand hand, @NotNull BlockHitResult hit, @NotNull IAxonBlockEntity usAxon, @NotNull KnifeItem knife, @NotNull ItemStack knifeStack) {
+        BitSet set = new BitSet();
+        Vec3 rel = hit.getLocation().subtract(pos.getCenter());
+        Direction dir = Direction.getNearest(rel.x, rel.y, rel.z);
+        for (AxonType type : AxonType.values()) {
+            int slot = AxonDeviceDefinitions.endpoint(type, dir);
+            if (slot > 0) set.set(slot);
+        }
+        return set;
+    }
+
+    @Override
     protected int determineHitSlot(@NotNull BlockState state, @NotNull Level level, @NotNull BlockPos pos, @NotNull Player player, @NotNull InteractionHand hand, @NotNull BlockHitResult hit) {
         if (player.getItemInHand(hand).getItem() instanceof AxonItem iAxon) {
             Vec3 rel = hit.getLocation().subtract(hit.getBlockPos().getCenter());
             return AxonDeviceDefinitions.endpoint(iAxon.getType(), Direction.getNearest(rel.x, rel.y, rel.z));
         }
         return hit.getDirection().ordinal();
+    }
+
+    @Override
+    protected int getSlotCount() {
+        return AxonDeviceDefinitions.ENDPOINTS_INV.size();
     }
 
     @Override

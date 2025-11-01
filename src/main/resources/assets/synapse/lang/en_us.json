@@ -40,6 +40,10 @@
   "item.synapse.axon.fluid": "Fluid Axon",
   "item.synapse.axon.energy": "Energy Axon",
   "item.synapse.axon.connecting": "Connecting to %s %s %s at device %s",
+  "item.synapse.biosteel_knife": "Biosteel Knife",
+  "item.synapse.duned_gold_knife": "Duned Gold Knife",
+  "item.synapse.severing_knife": "Severs all connections from clicked device",
+  "item.synapse.removing_knife": "Removes clicked device",
 
   "block.synapse.distributor_block_1": "Mk1 Distributor",
   "block.synapse.distributor_block_2": "Mk2 Distributor",
