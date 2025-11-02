@@ -1,9 +1,10 @@
 package com.m_w_k.synapse.client.gui.ruleset;
 
 import com.google.common.collect.ImmutableList;
-import com.m_w_k.synapse.SynapseMod;
 import com.m_w_k.synapse.SynapseUtil;
-import com.m_w_k.synapse.api.block.ruleset.*;
+import com.m_w_k.synapse.api.block.ruleset.EnergyTransferRuleset;
+import com.m_w_k.synapse.api.block.ruleset.RuleAccess;
+import com.m_w_k.synapse.api.block.ruleset.RuleAction;
 import com.m_w_k.synapse.api.connect.AxonAddress;
 import com.m_w_k.synapse.client.gui.AbstractConnectorScreen;
 import com.m_w_k.synapse.client.gui.ActionButton;

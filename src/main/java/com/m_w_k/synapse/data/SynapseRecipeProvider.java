@@ -4,8 +4,6 @@ import com.m_w_k.synapse.registry.SynapseBlockRegistry;
 import com.m_w_k.synapse.registry.SynapseItemRegistry;
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.recipes.*;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.ItemLike;
 import net.minecraftforge.common.Tags;

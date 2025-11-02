@@ -9,7 +9,6 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
 import java.nio.charset.Charset;
-import java.util.function.Consumer;
 import java.util.function.IntFunction;
 
 public class RelayMenu extends InitFilterMenu {

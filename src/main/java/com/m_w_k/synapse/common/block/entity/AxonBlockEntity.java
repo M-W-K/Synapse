@@ -2,8 +2,8 @@ package com.m_w_k.synapse.common.block.entity;
 
 import com.m_w_k.synapse.api.block.IAxonBlockEntity;
 import com.m_w_k.synapse.api.connect.AxonTree;
-import com.m_w_k.synapse.common.connect.LocalConnectorDevice;
 import com.m_w_k.synapse.common.connect.LocalAxonConnection;
+import com.m_w_k.synapse.common.connect.LocalConnectorDevice;
 import com.mojang.serialization.Codec;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
@@ -27,7 +27,9 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnmodifiableView;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.List;
+import java.util.Set;
 import java.util.function.UnaryOperator;
 
 public abstract class AxonBlockEntity extends BlockEntity implements IAxonBlockEntity {

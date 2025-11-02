@@ -1,6 +1,5 @@
 package com.m_w_k.synapse.api.block;
 
-import com.m_w_k.synapse.common.block.entity.AxonBlockEntity;
 import com.m_w_k.synapse.common.connect.LocalAxonConnection;
 import com.m_w_k.synapse.common.connect.LocalConnectorDevice;
 import net.minecraft.core.BlockPos;

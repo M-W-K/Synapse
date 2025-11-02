@@ -1,11 +1,11 @@
 package com.m_w_k.synapse.common.connect;
 
+import com.m_w_k.synapse.api.block.IFacedAxonBlockEntity;
 import com.m_w_k.synapse.api.block.ruleset.TransferRuleset;
 import com.m_w_k.synapse.api.connect.AxonAddress;
 import com.m_w_k.synapse.api.connect.AxonConnection;
 import com.m_w_k.synapse.api.connect.AxonTree;
 import com.m_w_k.synapse.api.connect.AxonType;
-import com.m_w_k.synapse.api.block.IFacedAxonBlockEntity;
 import com.mojang.datafixers.util.Either;
 import com.mojang.datafixers.util.Pair;
 import net.minecraft.core.Direction;

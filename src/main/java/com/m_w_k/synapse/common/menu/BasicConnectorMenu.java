@@ -1,10 +1,10 @@
 package com.m_w_k.synapse.common.menu;
 
+import com.m_w_k.synapse.api.block.IAxonBlockEntity;
 import com.m_w_k.synapse.api.connect.AxonAddress;
 import com.m_w_k.synapse.api.connect.ConnectorLevel;
 import com.m_w_k.synapse.api.connect.IDSetResult;
 import com.m_w_k.synapse.common.block.AxonBlock;
-import com.m_w_k.synapse.api.block.IAxonBlockEntity;
 import com.m_w_k.synapse.network.*;
 import com.m_w_k.synapse.registry.SynapseMenuRegistry;
 import net.minecraft.network.FriendlyByteBuf;

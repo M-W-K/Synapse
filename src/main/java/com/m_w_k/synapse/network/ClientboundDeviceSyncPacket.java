@@ -1,7 +1,5 @@
 package com.m_w_k.synapse.network;
 
-import com.m_w_k.synapse.api.connect.AxonAddress;
-import com.m_w_k.synapse.common.connect.LocalConnectorDevice;
 import net.minecraft.network.FriendlyByteBuf;
 
 import java.util.BitSet;
