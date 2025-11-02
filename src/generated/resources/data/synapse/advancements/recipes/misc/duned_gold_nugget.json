@@ -1,12 +1,12 @@
 {
   "parent": "minecraft:recipes/root",
   "criteria": {
-    "has_biosteel_nugget": {
+    "has_duned_gold_ingot": {
       "conditions": {
         "items": [
           {
             "items": [
-              "synapse:biosteel_nugget"
+              "synapse:duned_gold_ingot"
             ]
           }
         ]
@@ -15,20 +15,20 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "minecraft:biosteel_ingot_from_nuggets"
+        "recipe": "synapse:duned_gold_nugget"
       },
       "trigger": "minecraft:recipe_unlocked"
     }
   },
   "requirements": [
     [
-      "has_biosteel_nugget",
+      "has_duned_gold_ingot",
       "has_the_recipe"
     ]
   ],
   "rewards": {
     "recipes": [
-      "minecraft:biosteel_ingot_from_nuggets"
+      "synapse:duned_gold_nugget"
     ]
   },
   "sends_telemetry_event": false

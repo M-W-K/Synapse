@@ -167,10 +167,10 @@ public final class SynapseRecipeProvider extends RecipeProvider {
     }
 
     private void decorationalRecipes(@NotNull Consumer<FinishedRecipe> writer) {
-        nineBlockStorageRecipesWithCustomPacking(writer, RecipeCategory.MISC, SynapseItemRegistry.BIOSTEEL_NUGGET.get(),
-                RecipeCategory.MISC, SynapseItemRegistry.BIOSTEEL.get(), "biosteel_ingot_from_nuggets", "biosteel_ingot");
-        nineBlockStorageRecipesWithCustomPacking(writer, RecipeCategory.MISC, SynapseItemRegistry.DUNED_GOLD_NUGGET.get(),
-                RecipeCategory.MISC, SynapseItemRegistry.DUNED_GOLD.get(), "duned_gold_ingot_from_nuggets", "duned_gold_ingot");
+        nineBlockStorageRecipes(writer, RecipeCategory.MISC, SynapseItemRegistry.BIOSTEEL_NUGGET.get(),
+                RecipeCategory.MISC, SynapseItemRegistry.BIOSTEEL.get(), "synapse:biosteel_ingot_from_nuggets", "synapse:biosteel_ingot", "synapse:biosteel_nugget", null);
+        nineBlockStorageRecipes(writer, RecipeCategory.MISC, SynapseItemRegistry.DUNED_GOLD_NUGGET.get(),
+                RecipeCategory.MISC, SynapseItemRegistry.DUNED_GOLD.get(), "synapse:duned_gold_ingot_from_nuggets", "synapse:duned_gold_ingot", "synapse:duned_gold_nugget", null);
     }
 
     private void knife(@NotNull Consumer<FinishedRecipe> writer, ItemLike knife, ItemLike ingot, ItemLike nugget) {

@@ -1,0 +1,9 @@
+{
+  "values": [
+    "synapse:distributor_block_1",
+    "synapse:distributor_block_2",
+    "synapse:distributor_block_3",
+    "synapse:endpoint_basic",
+    "synapse:relay"
+  ]
+}

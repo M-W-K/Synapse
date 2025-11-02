@@ -1,7 +1,7 @@
 {
   "type": "minecraft:crafting_shaped",
   "category": "misc",
-  "group": "duned_gold_ingot",
+  "group": "synapse:duned_gold_ingot",
   "key": {
     "#": {
       "item": "synapse:duned_gold_nugget"
