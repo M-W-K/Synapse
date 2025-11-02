@@ -15,8 +15,6 @@ import net.minecraft.core.Vec3i;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
-import net.minecraft.world.phys.shapes.Shapes;
-import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -95,8 +93,8 @@ public class RelayBlockEntity extends AxonBlockEntity {
 
     @Override
     public @Nullable LocalAxonConnection setUpstream(@NotNull LocalAxonConnection connection, boolean dropOld) {
-        if (getLevel() != null) {
-            BlockEntity be = getLevel().getBlockEntity(connection.getTargetPos());
+        if (level() != null) {
+            BlockEntity be = level().getBlockEntity(connection.getTargetPos());
             if (be instanceof IAxonBlockEntity a) {
                 LocalConnectorDevice device = getBySlot(connection.getSourceSlot());
                 device.getData().put(DeviceDataKey.RELAYING, SynapseUtil.actualLevel(a.getBySlot(connection.getTargetSlot())));
@@ -122,8 +120,8 @@ public class RelayBlockEntity extends AxonBlockEntity {
 
     @Override
     public boolean allowsDownstream(int slot, LocalConnectorDevice downstream) {
-        if (getLevel() == null) return false;
-        LocalConnectorDevice device = getBySlot(slot).ensureRegistered(getLevel());
+        if (level() == null) return false;
+        LocalConnectorDevice device = getBySlot(slot).ensureRegistered(level());
         return super.allowsDownstream(slot, downstream) && device.upstream() != null
                 && (device.cache() == null || !device.cache().downstream().hasNext());
     }

@@ -66,10 +66,10 @@ public abstract class AbstractExposer<T, V extends AbstractExposer<T, V, G>, G> 
 
     protected @NotNull List<AxonTree.Connection<T>> getConnections() {
         if (associated.left().isEmpty()) return List.of();
-        if (!getOwner().isRemoved() && getOwner().getLevel() != null) {
-            long time = getOwner().getLevel().getGameTime();
+        if (!getOwner().removed() && getOwner().level() != null) {
+            long time = getOwner().level().getGameTime();
             if (time != cacheTick || cache == null) {
-                cache = AxonTree.load(getOwner().getLevel(), getType(), getCapability())
+                cache = AxonTree.load(getOwner().level(), getType(), getCapability())
                         .map(t -> {
                             Collection<AxonAddress> seek;
                             if (getRuleset() != null) {
@@ -91,17 +91,17 @@ public abstract class AbstractExposer<T, V extends AbstractExposer<T, V, G>, G> 
     }
 
     protected long getAllowed(long desired, AxonTree.Connection<T> connection) {
-        if (getOwner().getLevel() == null) return 0;
+        if (getOwner().level() == null) return 0;
         for (AxonConnection connect : connection.connection()) {
-            desired = connect.getCapacity(getOwner().getLevel(), desired, true);
+            desired = connect.getCapacity(getOwner().level(), desired, true);
         }
         return desired;
     }
 
     protected void consumeCapacity(long consumed, AxonTree.Connection<T> connection) {
-        if (getOwner().getLevel() == null) return;
+        if (getOwner().level() == null) return;
         for (AxonConnection connect : connection.connection()) {
-            connect.getCapacity(getOwner().getLevel(), consumed, false);
+            connect.getCapacity(getOwner().level(), consumed, false);
         }
     }
 
@@ -136,6 +136,6 @@ public abstract class AbstractExposer<T, V extends AbstractExposer<T, V, G>, G> 
     protected abstract void load(@NotNull Tag nbt);
 
     protected void setDirty() {
-        owner.setChanged();
+        owner.notifyChanged();
     }
 }

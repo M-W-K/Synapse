@@ -14,11 +14,11 @@ import javax.annotation.Nullable;
 
 public interface IAxonBlockEntity extends ICapabilityProvider, IForgeBlockEntity {
 
-    boolean isRemoved();
+    boolean removed();
 
-    @Nullable Level getLevel();
+    @Nullable Level level();
 
-    @NotNull BlockPos getBlockPos();
+    @NotNull BlockPos blockPos();
 
     int getSlots();
 
@@ -38,7 +38,7 @@ public interface IAxonBlockEntity extends ICapabilityProvider, IForgeBlockEntity
         return slotIsActive(slot);
     }
 
-    void setChanged();
+    void notifyChanged();
 
     @NotNull Vec3 renderOffsetForSlot(int slot, IAxonBlockEntity other);
 

@@ -137,12 +137,12 @@ public class EndpointBlockEntity extends AxonBlockEntity implements IFacedAxonBl
 
     protected <T> void updateDevice(AxonType type, Capability<T> cap, Direction side) {
         LocalConnectorDevice device = getByFace(side, type);
-        if (getLevel() != null) {
-            BlockEntity be = getLevel().getBlockEntity(getBlockPos().relative(side));
-            device.ensureRegistered(getLevel()); // wipe capability data
+        if (level() != null) {
+            BlockEntity be = level().getBlockEntity(blockPos().relative(side));
+            device.ensureRegistered(level()); // wipe capability data
             if (be != null) {
                 // update capability data if present
-                be.getCapability(cap, side.getOpposite()).filter(t -> !(t instanceof AbstractExposer<?,?,?>)).ifPresent(t -> device.ensureRegistered(getLevel(), cap, t));
+                be.getCapability(cap, side.getOpposite()).filter(t -> !(t instanceof AbstractExposer<?,?,?>)).ifPresent(t -> device.ensureRegistered(level(), cap, t));
             }
         }
     }

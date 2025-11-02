@@ -1,19 +1,12 @@
 package com.m_w_k.synapse.common.menu;
 
 import com.m_w_k.synapse.api.block.IAxonBlockEntity;
-import com.m_w_k.synapse.api.block.ruleset.TransferRuleset;
-import com.m_w_k.synapse.api.connect.IDSetResult;
-import com.m_w_k.synapse.common.block.entity.EndpointBlockEntity;
-import com.m_w_k.synapse.network.EndpointRulesetSyncPacket;
-import com.m_w_k.synapse.network.SynapsePacketHandler;
 import com.m_w_k.synapse.registry.SynapseMenuRegistry;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.ContainerLevelAccess;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.network.PacketDistributor;
 
 import java.nio.charset.Charset;
 import java.util.function.Consumer;
@@ -29,7 +22,7 @@ public class RelayMenu extends InitFilterMenu {
     }
 
     public static RelayMenu of(int containerID, Inventory playerInv, IAxonBlockEntity be) {
-        RelayMenu menu = new RelayMenu(containerID, playerInv, ContainerLevelAccess.create(be.getLevel(), be.getBlockPos()), be::getNameBySlot, be.getSlots());
+        RelayMenu menu = new RelayMenu(containerID, playerInv, ContainerLevelAccess.create(be.level(), be.blockPos()), be::getNameBySlot, be.getSlots());
         menu.be = be;
         return menu;
     }
