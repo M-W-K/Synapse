@@ -3,10 +3,7 @@ package com.m_w_k.synapse.api.block.ruleset;
 import com.m_w_k.synapse.api.connect.AxonAddress;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraftforge.fluids.FluidStack;
 import org.jetbrains.annotations.NotNull;
-
-import java.util.Arrays;
 
 public class BasicRule implements RuleAccess {
 

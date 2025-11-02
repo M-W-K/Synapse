@@ -1,11 +1,10 @@
 package com.m_w_k.synapse.common.menu;
 
+import com.m_w_k.synapse.api.block.IAxonBlockEntity;
 import com.m_w_k.synapse.api.connect.AxonAddress;
 import com.m_w_k.synapse.api.connect.ConnectorLevel;
 import com.m_w_k.synapse.api.connect.IDSetResult;
 import com.m_w_k.synapse.common.block.AxonBlock;
-import com.m_w_k.synapse.api.block.IAxonBlockEntity;
-import com.m_w_k.synapse.common.connect.LocalConnectorDevice;
 import com.m_w_k.synapse.network.*;
 import com.m_w_k.synapse.registry.SynapseMenuRegistry;
 import net.minecraft.network.FriendlyByteBuf;
@@ -20,7 +19,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.network.PacketDistributor;
-import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -84,7 +82,7 @@ public class BasicConnectorMenu extends AbstractContainerMenu {
     }
 
     public static BasicConnectorMenu of(int containerID, Inventory playerInv, IAxonBlockEntity be) {
-        BasicConnectorMenu menu = new BasicConnectorMenu(containerID, playerInv, ContainerLevelAccess.create(be.getLevel(), be.getBlockPos()), be::getNameBySlot, be.getSlots());
+        BasicConnectorMenu menu = new BasicConnectorMenu(containerID, playerInv, ContainerLevelAccess.create(be.level(), be.blockPos()), be::getNameBySlot, be.getSlots());
         menu.be = be;
         return menu;
     }
@@ -172,10 +170,10 @@ public class BasicConnectorMenu extends AbstractContainerMenu {
     }
 
     public void sendToClient(ServerPlayer player, int device, IDSetResult result) {
-        if (be == null || be.getLevel() == null) return;
+        if (be == null || be.level() == null) return;
         BitSet active = evaluateActiveness(be);
         ClientboundBasicDeviceDataPacket packet = active.get(device) ?
-                new ClientboundBasicDeviceDataPacket(active, device, be.getBySlot(device).ensureRegistered(be.getLevel()), result)
+                new ClientboundBasicDeviceDataPacket(active, device, be.getBySlot(device).ensureRegistered(be.level()), result)
                 : new ClientboundBasicDeviceDataPacket(active, device, null, ConnectorLevel.CORRUPTED, result);
         SynapsePacketHandler.INSTANCE.send(PacketDistributor.PLAYER.with(() -> player), packet);
     }
@@ -272,7 +270,7 @@ public class BasicConnectorMenu extends AbstractContainerMenu {
     }
 
     public void receiveRemoveConnection(ServerPlayer player, int slot) {
-        if (be == null || be.isRemoved()) return;
+        if (be == null || be.removed()) return;
         if (be.removeUpstreamFrom(slot)) {
             sendToClient(player, slot, IDSetResult.NO_SET);
         }

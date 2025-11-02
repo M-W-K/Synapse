@@ -12,6 +12,7 @@ import com.mojang.logging.LogUtils;
 import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.DataProvider;
+import net.minecraft.data.PackOutput;
 import net.minecraftforge.client.event.EntityRenderersEvent;
 import net.minecraftforge.common.data.ExistingFileHelper;
 import net.minecraftforge.data.event.GatherDataEvent;
@@ -55,11 +56,13 @@ public final class SynapseMod {
     private void gatherData(GatherDataEvent event) {
         DataGenerator gen = event.getGenerator();
         ExistingFileHelper helper = event.getExistingFileHelper();
+        PackOutput out = gen.getPackOutput();
         gen.addProvider(event.includeServer(), new SynapseLootTableGen());
+        gen.addProvider(event.includeServer(), new SynapseBlockTagsProvider(out, event.getLookupProvider(), helper));
         gen.addProvider(event.includeServer(), clarify(SynapseRecipeProvider::new));
         gen.addProvider(event.includeServer(), new SynapseAdvancementGen(event.getLookupProvider(), helper));
-        gen.addProvider(event.includeClient(), clarify(out -> new SynapseBlockStateProvider(out, helper)));
-        gen.addProvider(event.includeClient(), clarify(out -> new SynapseItemModelProvider(out, helper)));
+        gen.addProvider(event.includeClient(), new SynapseBlockStateProvider(out, helper));
+        gen.addProvider(event.includeClient(), new SynapseItemModelProvider(out, helper));
     }
 
     private <T extends DataProvider> DataProvider.Factory<T> clarify(DataProvider.Factory<T> f) {

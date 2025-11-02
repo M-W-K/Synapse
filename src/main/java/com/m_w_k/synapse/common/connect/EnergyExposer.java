@@ -2,7 +2,6 @@ package com.m_w_k.synapse.common.connect;
 
 import com.m_w_k.synapse.api.block.IFacedAxonBlockEntity;
 import com.m_w_k.synapse.api.block.ruleset.EnergyTransferRuleset;
-import com.m_w_k.synapse.api.block.ruleset.FluidTransferRuleset;
 import com.m_w_k.synapse.api.block.ruleset.TransferRuleset;
 import com.m_w_k.synapse.api.connect.AxonTree;
 import com.m_w_k.synapse.api.connect.AxonType;

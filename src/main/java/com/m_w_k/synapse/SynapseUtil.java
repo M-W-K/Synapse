@@ -3,7 +3,6 @@ package com.m_w_k.synapse;
 import com.m_w_k.synapse.api.connect.ConnectionType;
 import com.m_w_k.synapse.api.connect.ConnectorLevel;
 import com.m_w_k.synapse.api.connect.DeviceDataKey;
-import com.m_w_k.synapse.common.block.entity.RelayBlockEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;

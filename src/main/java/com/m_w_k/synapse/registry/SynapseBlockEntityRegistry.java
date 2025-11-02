@@ -10,7 +10,6 @@ import com.m_w_k.synapse.common.block.entity.DistributorBlockEntity;
 import com.m_w_k.synapse.common.block.entity.EndpointBlockEntity;
 import com.m_w_k.synapse.common.block.entity.RelayBlockEntity;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.registries.DeferredRegister;

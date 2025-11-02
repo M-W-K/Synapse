@@ -1,7 +1,8 @@
 package com.m_w_k.synapse.data;
 
 import com.m_w_k.synapse.SynapseUtil;
-import net.minecraft.advancements.*;
+import net.minecraft.advancements.Advancement;
+import net.minecraft.advancements.FrameType;
 import net.minecraft.advancements.critereon.InventoryChangeTrigger;
 import net.minecraft.advancements.critereon.ItemPredicate;
 import net.minecraft.core.HolderLookup;

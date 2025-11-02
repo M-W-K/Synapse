@@ -2,8 +2,8 @@ package com.m_w_k.synapse.common.block.entity;
 
 import com.m_w_k.synapse.api.block.IAxonBlockEntity;
 import com.m_w_k.synapse.api.connect.AxonTree;
-import com.m_w_k.synapse.common.connect.LocalConnectorDevice;
 import com.m_w_k.synapse.common.connect.LocalAxonConnection;
+import com.m_w_k.synapse.common.connect.LocalConnectorDevice;
 import com.mojang.serialization.Codec;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
@@ -15,6 +15,7 @@ import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -26,7 +27,9 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnmodifiableView;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.List;
+import java.util.Set;
 import java.util.function.UnaryOperator;
 
 public abstract class AxonBlockEntity extends BlockEntity implements IAxonBlockEntity {
@@ -60,7 +63,7 @@ public abstract class AxonBlockEntity extends BlockEntity implements IAxonBlockE
 
     @Override
     public @NotNull Vec3 renderDirectionForSlot(int slot, IAxonBlockEntity other) {
-        BlockPos offset = other.getBlockPos().subtract(this.getBlockPos());
+        BlockPos offset = other.blockPos().subtract(this.blockPos());
         Direction.Axis axis = null;
         int val = 0;
         for (Direction.Axis a : Direction.Axis.values()) {
@@ -82,14 +85,14 @@ public abstract class AxonBlockEntity extends BlockEntity implements IAxonBlockE
     @Override
     public @Nullable LocalAxonConnection setUpstream(@NotNull LocalAxonConnection connection, boolean dropOld) {
         LocalAxonConnection prev = getBySlot(connection.getSourceSlot()).setUpstream(connection);
-        if (getLevel() != null) {
-            BlockEntity be = getLevel().getBlockEntity(connection.getTargetPos());
-            if (be instanceof IAxonBlockEntity a) a.addDownstream(getBlockPos());
+        if (level() != null) {
+            BlockEntity be = level().getBlockEntity(connection.getTargetPos());
+            if (be instanceof IAxonBlockEntity a) a.addDownstream(blockPos());
             if (prev != null) {
-                be = getLevel().getBlockEntity(prev.getTargetPos());
-                if (be instanceof IAxonBlockEntity a) a.removeDownstream(getBlockPos());
+                be = level().getBlockEntity(prev.getTargetPos());
+                if (be instanceof IAxonBlockEntity a) a.removeDownstream(blockPos());
                 if (dropOld) {
-                    Block.popResource(getLevel(), getBlockPos(), prev.getItem().getItemWhenRemoved(prev));
+                    Block.popResource(level(), blockPos(), prev.getItem().getItemWhenRemoved(prev));
                 }
             }
         }
@@ -105,7 +108,7 @@ public abstract class AxonBlockEntity extends BlockEntity implements IAxonBlockE
     public boolean removeDownstream(@NotNull BlockPos pos) {
         boolean changed = downstream.remove(pos);
         if (changed) {
-            setChanged();
+            notifyChanged();
         }
         return changed;
     }
@@ -114,7 +117,7 @@ public abstract class AxonBlockEntity extends BlockEntity implements IAxonBlockE
     public boolean addDownstream(@NotNull BlockPos pos) {
         boolean changed = downstream.add(pos);
         if (changed) {
-            setChanged();
+            notifyChanged();
         }
         return changed;
     }
@@ -239,35 +242,35 @@ public abstract class AxonBlockEntity extends BlockEntity implements IAxonBlockE
     @Override
     public void setRemoved() {
         super.setRemoved();
-        if (!(getLevel() instanceof ServerLevel)) return;
+        if (!(level() instanceof ServerLevel)) return;
         for (BlockPos pos : getDownstream()) {
-            BlockEntity be = getLevel().getBlockEntity(pos);
+            BlockEntity be = level().getBlockEntity(pos);
             if (be instanceof IAxonBlockEntity abe) {
                 abe.onUpstreamRemoved();
             }
         }
         devices.forEach(d1 -> {
-            AxonTree.load(getLevel(), d1.type(), d1.type().getCapability())
+            AxonTree.load(level(), d1.type(), d1.type().getCapability())
                     .ifPresent(t -> t.retire(d1.treeID()));
             LocalAxonConnection connection = d1.upstream();
             if (connection == null) return;
-            BlockEntity be = getLevel().getBlockEntity(connection.getTargetPos());
+            BlockEntity be = level().getBlockEntity(connection.getTargetPos());
             if (be instanceof IAxonBlockEntity a) {
-                a.removeDownstream(getBlockPos());
+                a.removeDownstream(blockPos());
             }
-            Block.popResource(getLevel(), getBlockPos(), connection.getItem().getItemWhenRemoved(connection));
+            Block.popResource(level(), blockPos(), connection.getItem().getItemWhenRemoved(connection));
         });
     }
 
     @Override
     public void onUpstreamRemoved() {
-        if (getLevel() == null) return;
+        if (level() == null) return;
         devices.forEach(d -> {
             LocalAxonConnection connection = d.upstream();
             if (connection == null) return;
-            BlockEntity be = getLevel().getBlockEntity(connection.getTargetPos());
-            if (!(be instanceof IAxonBlockEntity abe) || be.isRemoved() || !abe.slotIsActive(connection.getTargetSlot())) {
-                Block.popResource(getLevel(), connection.getTargetPos(), connection.getItem().getItemWhenRemoved(connection));
+            BlockEntity be = level().getBlockEntity(connection.getTargetPos());
+            if (!(be instanceof IAxonBlockEntity abe) || abe.removed() || !abe.slotIsActive(connection.getTargetSlot())) {
+                Block.popResource(level(), connection.getTargetPos(), connection.getItem().getItemWhenRemoved(connection));
                 clientSyncDataChanged();
                 d.setUpstream(null);
             }
@@ -280,20 +283,41 @@ public abstract class AxonBlockEntity extends BlockEntity implements IAxonBlockE
     }
 
     protected void clientSyncDataChanged() {
-        if (getLevel() != null) {
-            setChanged();
-            getLevel().sendBlockUpdated(getBlockPos(), getBlockState(), getBlockState(), 2);
+        if (level() != null) {
+            notifyChanged();
+            level().sendBlockUpdated(blockPos(), getBlockState(), getBlockState(), 2);
         }
     }
 
     @Override
     public AABB getRenderBoundingBox() {
-        BoundingBox box = new BoundingBox(getBlockPos());
+        BoundingBox box = new BoundingBox(blockPos());
         devices.forEach(device -> {
             LocalAxonConnection connection = device.upstream();
             if (connection == null) return;
             box.encapsulate(device.upstream().getTargetPos());
         });
         return AABB.of(box).inflate(1);
+    }
+
+    // these redirects are required since the interface isn't obfuscated, but the BlockEntity class is.
+    @Override
+    public @Nullable Level level() {
+        return getLevel();
+    }
+
+    @Override
+    public boolean removed() {
+        return isRemoved();
+    }
+
+    @Override
+    public @NotNull BlockPos blockPos() {
+        return getBlockPos();
+    }
+
+    @Override
+    public void notifyChanged() {
+        setChanged();
     }
 }

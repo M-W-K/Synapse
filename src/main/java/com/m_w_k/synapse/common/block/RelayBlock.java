@@ -10,7 +10,6 @@ import com.m_w_k.synapse.common.item.AxonItem;
 import com.m_w_k.synapse.common.item.KnifeItem;
 import com.m_w_k.synapse.common.menu.RelayMenu;
 import com.m_w_k.synapse.registry.SynapseBlockRegistry;
-import com.m_w_k.synapse.registry.SynapseItemRegistry;
 import it.unimi.dsi.fastutil.ints.IntObjectPair;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.ChatFormatting;

@@ -2,7 +2,8 @@ package com.m_w_k.synapse.client.renderer;
 
 import com.m_w_k.synapse.common.block.entity.AxonBlockEntity;
 import com.m_w_k.synapse.common.connect.LocalAxonConnection;
-import com.mojang.blaze3d.vertex.*;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -29,16 +30,16 @@ public class AxonRenderer implements BlockEntityRenderer<AxonBlockEntity> {
 
     @Override
     public void render(@NotNull AxonBlockEntity be, float partialTicks, @NotNull PoseStack pose, @NotNull MultiBufferSource bufferSource, int light, int overlay) {
-        if (Minecraft.getInstance().getCameraEntity() == null || be.getLevel() == null) return;
+        if (Minecraft.getInstance().getCameraEntity() == null || be.level() == null) return;
         pose.pushPose();
-        BlockPos pos = be.getBlockPos();
-        Vec3 source = be.getBlockPos().getCenter();
+        BlockPos pos = be.blockPos();
+        Vec3 source = be.blockPos().getCenter();
         pose.translate(-pos.getX(), -pos.getY(), -pos.getZ());
         VertexConsumer buffer = bufferSource.getBuffer(RenderType.solid());
         for (int i = 0; i < be.getSlots(); i++) {
             LocalAxonConnection connected = be.getBySlot(i).upstream();
             if (connected == null) continue;
-            renderConnection(source, connected, pose, be.getLevel(), buffer, overlay);
+            renderConnection(source, connected, pose, be.level(), buffer, overlay);
         }
         pose.popPose();
     }

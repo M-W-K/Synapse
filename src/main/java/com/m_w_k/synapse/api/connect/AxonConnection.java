@@ -1,6 +1,5 @@
 package com.m_w_k.synapse.api.connect;
 
-import com.m_w_k.synapse.common.connect.LocalAxonConnection;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.nbt.CompoundTag;

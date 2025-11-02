@@ -29,7 +29,7 @@ public class EndpointMenu extends InitFilterMenu {
     }
 
     public static EndpointMenu of(int containerID, Inventory playerInv, IAxonBlockEntity be) {
-        EndpointMenu menu = new EndpointMenu(containerID, playerInv, ContainerLevelAccess.create(be.getLevel(), be.getBlockPos()), be::getNameBySlot, be.getSlots());
+        EndpointMenu menu = new EndpointMenu(containerID, playerInv, ContainerLevelAccess.create(be.level(), be.blockPos()), be::getNameBySlot, be.getSlots());
         menu.be = be;
         return menu;
     }
@@ -57,7 +57,7 @@ public class EndpointMenu extends InitFilterMenu {
     }
 
     public TransferRuleset getRulesetServerside(int device) {
-        if (be == null || be.getLevel() == null || !(be instanceof EndpointBlockEntity endpoint)) return null;
+        if (be == null || be.level() == null || !(be instanceof EndpointBlockEntity endpoint)) return null;
         if (be.slotIsActive(device)) {
             return endpoint.rulesetForSlot(device);
         }

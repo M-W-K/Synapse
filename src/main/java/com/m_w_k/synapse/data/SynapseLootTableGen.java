@@ -1,6 +1,5 @@
 package com.m_w_k.synapse.data;
 
-import com.m_w_k.synapse.SynapseMod;
 import com.m_w_k.synapse.common.block.EndpointBlock;
 import com.m_w_k.synapse.common.block.RelayBlock;
 import com.m_w_k.synapse.registry.SynapseBlockRegistry;
@@ -9,11 +8,8 @@ import net.minecraft.data.DataProvider;
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.loot.BlockLootSubProvider;
 import net.minecraft.data.loot.LootTableProvider;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.SeaPickleBlock;
 import net.minecraft.world.level.storage.loot.LootPool;
 import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.level.storage.loot.entries.LootItem;

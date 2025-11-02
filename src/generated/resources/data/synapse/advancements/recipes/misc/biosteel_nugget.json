@@ -15,7 +15,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "minecraft:biosteel_nugget"
+        "recipe": "synapse:biosteel_nugget"
       },
       "trigger": "minecraft:recipe_unlocked"
     }
@@ -28,7 +28,7 @@
   ],
   "rewards": {
     "recipes": [
-      "minecraft:biosteel_nugget"
+      "synapse:biosteel_nugget"
     ]
   },
   "sends_telemetry_event": false

@@ -1,6 +1,5 @@
 package com.m_w_k.synapse.api.block;
 
-import com.m_w_k.synapse.common.block.entity.AxonBlockEntity;
 import com.m_w_k.synapse.common.connect.LocalAxonConnection;
 import com.m_w_k.synapse.common.connect.LocalConnectorDevice;
 import net.minecraft.core.BlockPos;
@@ -14,11 +13,11 @@ import javax.annotation.Nullable;
 
 public interface IAxonBlockEntity extends ICapabilityProvider, IForgeBlockEntity {
 
-    boolean isRemoved();
+    boolean removed();
 
-    @Nullable Level getLevel();
+    @Nullable Level level();
 
-    @NotNull BlockPos getBlockPos();
+    @NotNull BlockPos blockPos();
 
     int getSlots();
 
@@ -38,7 +37,7 @@ public interface IAxonBlockEntity extends ICapabilityProvider, IForgeBlockEntity
         return slotIsActive(slot);
     }
 
-    void setChanged();
+    void notifyChanged();
 
     @NotNull Vec3 renderOffsetForSlot(int slot, IAxonBlockEntity other);
 

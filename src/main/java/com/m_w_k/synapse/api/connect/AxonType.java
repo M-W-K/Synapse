@@ -1,7 +1,6 @@
 package com.m_w_k.synapse.api.connect;
 
 import com.m_w_k.synapse.SynapseUtil;
-import com.m_w_k.synapse.client.gui.TexDefinition;
 import com.m_w_k.synapse.client.renderer.AxonTexDescription;
 import com.m_w_k.synapse.config.SynapseConfigs;
 import com.mojang.serialization.Codec;

@@ -1,11 +1,16 @@
 package com.m_w_k.synapse.api.connect;
 
 import com.m_w_k.synapse.SynapseUtil;
-import it.unimi.dsi.fastutil.objects.*;
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.shorts.ShortOpenHashSet;
 import it.unimi.dsi.fastutil.shorts.ShortSet;
 import net.minecraft.core.UUIDUtil;
-import net.minecraft.nbt.*;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.NbtOps;
+import net.minecraft.nbt.Tag;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraftforge.common.capabilities.Capability;

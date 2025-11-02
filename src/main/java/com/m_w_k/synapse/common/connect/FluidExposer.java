@@ -1,11 +1,10 @@
 package com.m_w_k.synapse.common.connect;
 
+import com.m_w_k.synapse.api.block.IFacedAxonBlockEntity;
 import com.m_w_k.synapse.api.block.ruleset.FluidTransferRuleset;
-import com.m_w_k.synapse.api.block.ruleset.ItemTransferRuleset;
 import com.m_w_k.synapse.api.block.ruleset.TransferRuleset;
 import com.m_w_k.synapse.api.connect.AxonTree;
 import com.m_w_k.synapse.api.connect.AxonType;
-import com.m_w_k.synapse.api.block.IFacedAxonBlockEntity;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.ByteTag;
 import net.minecraft.nbt.NbtOps;

@@ -6,7 +6,6 @@ import com.m_w_k.synapse.api.block.AxonDeviceDefinitions;
 import com.m_w_k.synapse.api.block.IAxonBlockEntity;
 import com.m_w_k.synapse.api.connect.AxonType;
 import com.m_w_k.synapse.common.block.entity.EndpointBlockEntity;
-import com.m_w_k.synapse.common.block.entity.RelayBlockEntity;
 import com.m_w_k.synapse.common.item.AxonItem;
 import com.m_w_k.synapse.common.item.KnifeItem;
 import com.m_w_k.synapse.common.menu.EndpointMenu;
