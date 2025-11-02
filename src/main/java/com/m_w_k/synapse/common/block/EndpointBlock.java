@@ -1,28 +1,31 @@
 package com.m_w_k.synapse.common.block;
 
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Maps;
 import com.m_w_k.synapse.SynapseUtil;
+import com.m_w_k.synapse.api.KnifeAction;
 import com.m_w_k.synapse.api.block.AxonDeviceDefinitions;
 import com.m_w_k.synapse.api.block.IAxonBlockEntity;
+import com.m_w_k.synapse.api.connect.AxonType;
 import com.m_w_k.synapse.common.block.entity.EndpointBlockEntity;
+import com.m_w_k.synapse.common.block.entity.RelayBlockEntity;
 import com.m_w_k.synapse.common.item.AxonItem;
-import com.m_w_k.synapse.common.menu.BasicConnectorMenu;
+import com.m_w_k.synapse.common.item.KnifeItem;
 import com.m_w_k.synapse.common.menu.EndpointMenu;
 import com.m_w_k.synapse.registry.SynapseBlockEntityRegistry;
-import it.unimi.dsi.fastutil.Pair;
+import com.m_w_k.synapse.registry.SynapseBlockRegistry;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
-import net.minecraft.Util;
+import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.SimpleMenuProvider;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
@@ -42,7 +45,6 @@ import net.minecraft.world.level.pathfinder.PathComputationType;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
-import net.minecraft.world.phys.shapes.CubeVoxelShape;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraftforge.network.NetworkHooks;
@@ -51,7 +53,7 @@ import org.jetbrains.annotations.NotNull;
 import javax.annotation.Nullable;
 import java.util.BitSet;
 import java.util.EnumMap;
-import java.util.EnumSet;
+import java.util.List;
 import java.util.Map;
 
 public class EndpointBlock extends AxonBlock implements SimpleWaterloggedBlock {
@@ -90,11 +92,43 @@ public class EndpointBlock extends AxonBlock implements SimpleWaterloggedBlock {
     }
 
     @Override
-    protected void openInteractMenu(@NotNull ServerPlayer player, @NotNull Level level, @NotNull BlockState state, @NotNull BlockPos pos, @NotNull IAxonBlockEntity be) {
+    protected void openInteractMenu(@NotNull ServerPlayer player, @NotNull Level level, @NotNull BlockState state, @NotNull BlockPos pos, @NotNull IAxonBlockEntity be, @NotNull BlockHitResult hit) {
         MenuProvider prov = new SimpleMenuProvider(
                 (containerId, playerInventory, p) -> EndpointMenu.of(containerId, playerInventory, be),
                 Component.translatable("synapse.menu.title.endpoint"));
-        NetworkHooks.openScreen(player, prov, EndpointMenu.writer(be));
+        Vec3 rel = hit.getLocation().subtract(hit.getBlockPos().getCenter());
+        NetworkHooks.openScreen(player, prov, EndpointMenu.writer(be, Direction.getNearest(rel.x, rel.y, rel.z).name()));
+    }
+
+    @Override
+    protected InteractionResult handleKnife(@NotNull BlockState state, @NotNull Level level, @NotNull BlockPos pos, @NotNull Player player, @NotNull InteractionHand hand, @NotNull BlockHitResult hit, @NotNull IAxonBlockEntity usAxon, @NotNull KnifeItem knife, @NotNull ItemStack knifeStack) {
+        InteractionResult res = super.handleKnife(state, level, pos, player, hand, hit, usAxon, knife, knifeStack);
+        if (res.consumesAction() && knife.getAction() == KnifeAction.REMOVE) {
+            if (state.getValue(ENDPOINTS) == 1) {
+                dropResources(state, level, pos);
+                level.removeBlock(pos, false);
+            } else {
+                Vec3 rel = hit.getLocation().subtract(pos.getCenter());
+                Direction dir = Direction.getNearest(rel.x, rel.y, rel.z);
+                if (state.getValue(PROPERTY_BY_DIRECTION.get(dir))) {
+                    level.setBlock(pos, state.setValue(PROPERTY_BY_DIRECTION.get(dir), false).setValue(ENDPOINTS, state.getValue(ENDPOINTS) - 1), Block.UPDATE_ALL);
+                    Block.popResource(level, pos, new ItemStack(SynapseBlockRegistry.ENDPOINT_BASIC.get()));
+                }
+            }
+        }
+        return res;
+    }
+
+    @Override
+    protected BitSet knifeAffectedSlots(@NotNull BlockState state, @NotNull Level level, @NotNull BlockPos pos, @NotNull Player player, @NotNull InteractionHand hand, @NotNull BlockHitResult hit, @NotNull IAxonBlockEntity usAxon, @NotNull KnifeItem knife, @NotNull ItemStack knifeStack) {
+        BitSet set = new BitSet();
+        Vec3 rel = hit.getLocation().subtract(pos.getCenter());
+        Direction dir = Direction.getNearest(rel.x, rel.y, rel.z);
+        for (AxonType type : AxonType.values()) {
+            int slot = AxonDeviceDefinitions.endpoint(type, dir);
+            if (slot > 0) set.set(slot);
+        }
+        return set;
     }
 
     @Override
@@ -104,6 +138,11 @@ public class EndpointBlock extends AxonBlock implements SimpleWaterloggedBlock {
             return AxonDeviceDefinitions.endpoint(iAxon.getType(), Direction.getNearest(rel.x, rel.y, rel.z));
         }
         return hit.getDirection().ordinal();
+    }
+
+    @Override
+    protected int getSlotCount() {
+        return AxonDeviceDefinitions.ENDPOINTS_INV.size();
     }
 
     @Override
@@ -202,5 +241,10 @@ public class EndpointBlock extends AxonBlock implements SimpleWaterloggedBlock {
             }
             return shape;
         });
+    }
+
+    @Override
+    public void appendHoverText(ItemStack p_49816_, @org.jetbrains.annotations.Nullable BlockGetter p_49817_, List<Component> p_49818_, TooltipFlag p_49819_) {
+        p_49818_.add(Component.translatable("block.synapse.endpoint_desc").withStyle(ChatFormatting.GRAY));
     }
 }

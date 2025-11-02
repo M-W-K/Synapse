@@ -1,8 +1,11 @@
 package com.m_w_k.synapse.registry;
 
 import com.m_w_k.synapse.SynapseMod;
+import com.m_w_k.synapse.api.KnifeAction;
 import com.m_w_k.synapse.api.connect.AxonType;
 import com.m_w_k.synapse.common.item.AxonItem;
+import com.m_w_k.synapse.common.item.KnifeItem;
+import com.m_w_k.synapse.common.item.SynapseTiers;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.item.Item;
@@ -24,6 +27,11 @@ public final class SynapseItemRegistry {
             () -> new AxonItem(new Item.Properties(), AxonType.ITEM));
     public static final RegistryObject<AxonItem> FLUID_AXON = ITEMS.register("axon.fluid",
             () -> new AxonItem(new Item.Properties(), AxonType.FLUID));
+
+    public static final RegistryObject<KnifeItem> BIOSTEEL_KNIFE = ITEMS.register("biosteel_knife",
+            () -> new KnifeItem(SynapseTiers.BIOSTEEL, 2, -1.8F, KnifeAction.SEVER, new Item.Properties()));
+    public static final RegistryObject<KnifeItem> DUNED_GOLD_KNIFE = ITEMS.register("duned_gold_knife",
+            () -> new KnifeItem(SynapseTiers.DUNED_GOLD, 2, -1.8F, KnifeAction.REMOVE, new Item.Properties()));
 
 
     public static final RegistryObject<Item> BIOSTEEL = simple("biosteel_ingot");

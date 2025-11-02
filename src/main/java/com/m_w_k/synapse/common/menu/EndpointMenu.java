@@ -19,7 +19,7 @@ import java.nio.charset.Charset;
 import java.util.function.Consumer;
 import java.util.function.IntFunction;
 
-public class EndpointMenu extends BasicConnectorMenu {
+public class EndpointMenu extends InitFilterMenu {
 
     @OnlyIn(Dist.CLIENT)
     protected TransferRuleset selectedRuleset;
@@ -43,19 +43,8 @@ public class EndpointMenu extends BasicConnectorMenu {
         }
         EndpointMenu ret = new EndpointMenu(containerID, playerInv, ContainerLevelAccess.NULL, i -> names[i], slots);
         ret.setActiveDevices(buf.readBitSet());
+        ret.readStartingFilter(buf);
         return ret;
-    }
-
-    public static Consumer<FriendlyByteBuf> writer(IAxonBlockEntity be) {
-        return buf -> {
-            buf.writeVarInt(be.getSlots());
-            for (int i = 0; i < be.getSlots(); i++) {
-                String name = be.getNameBySlot(i);
-                buf.writeVarInt(name.length());
-                buf.writeCharSequence(name, Charset.defaultCharset());
-            }
-            buf.writeBitSet(evaluateActiveness(be));
-        };
     }
 
     @Override

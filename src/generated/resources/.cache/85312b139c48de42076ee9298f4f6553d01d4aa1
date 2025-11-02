@@ -1,7 +1,9 @@
-// 1.20.1	2025-10-20T18:34:29.979199	Item Models: synapse
+// 1.20.1	2025-11-01T13:53:50.614604	Item Models: synapse
 49957518fd8e64a6bdc75c52c7d395b7e1937b3c assets/synapse/models/item/biosteel_ingot.json
+199e47a54d90e0c69df93b8028f8c013033af2a8 assets/synapse/models/item/biosteel_knife.json
 5dcd2dff03cb4a4d7e01b1eb9c2a885d818677ff assets/synapse/models/item/biosteel_nugget.json
 8e457f9cf191188561ab8be121ffd0c9768a4c0a assets/synapse/models/item/duned_gold_ingot.json
+278fb70c01eb38fc406e36cfb9c711a2a647af4d assets/synapse/models/item/duned_gold_knife.json
 41fe6791aae137b41c12d9c394fdcf0d5e06467d assets/synapse/models/item/duned_gold_nugget.json
 007f2d5f0d8cf8a95accb9deb5b63ee73f0f802a assets/synapse/models/item/ender_crystal.json
 671cb9f5181bd8681150ec706820e5c3465555b0 assets/synapse/models/item/magma_crystal.json

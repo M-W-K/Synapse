@@ -3,6 +3,7 @@ package com.m_w_k.synapse.api.connect;
 import com.m_w_k.synapse.SynapseUtil;
 import com.m_w_k.synapse.client.gui.TexDefinition;
 import com.m_w_k.synapse.client.renderer.AxonTexDescription;
+import com.m_w_k.synapse.config.SynapseConfigs;
 import com.mojang.serialization.Codec;
 import net.minecraft.util.StringRepresentable;
 import net.minecraftforge.common.IExtensibleEnum;
@@ -15,9 +16,9 @@ public enum AxonType implements StringRepresentable, IExtensibleEnum {
         long capacity = d.getLong("Capacity");
         long consumed = d.getLong("Consumed");
         if (t > 0) {
-            capacity += (int) (consumed * 0.1f);
+            capacity += (int) (consumed * energyResponse());
             consumed = 0;
-            capacity = (int) (capacity * Math.pow(0.95f, t));
+            capacity = (int) (capacity * Math.pow(1 - energyDecay(), t));
             if (!sim) d.putLong("Capacity", capacity);
         }
         if (!sim) d.putLong("Consumed", Math.min(r + consumed, capacity));
@@ -25,7 +26,7 @@ public enum AxonType implements StringRepresentable, IExtensibleEnum {
         return capacity - consumed;
     }, ForgeCapabilities.ENERGY, new AxonTexDescription(SynapseUtil.resLoc("block/axon_texture"), 3, 6, 0, 16)),
     ITEM((r, d, t, sim) -> {
-        int baseStackCap = 1;
+        int baseCap = baseItemCap();
         long capacity = d.getInt("Capacity");
         long consumed = d.getInt("Consumed");
         if (t > 0) {
@@ -34,11 +35,11 @@ public enum AxonType implements StringRepresentable, IExtensibleEnum {
             if (!sim) d.putInt("TimeSum", t % refreshInterval);
             t = t / refreshInterval;
             if (t > 0) {
-                capacity += Math.min(baseStackCap * 64, consumed);
+                capacity += Math.min(baseCap, consumed);
                 if (!sim) d.remove("Consumed");
                 consumed = 0;
                 if (t > 1) {
-                    capacity = Math.max(baseStackCap * 64, capacity - baseStackCap * 64L * (t - 1));
+                    capacity = Math.max(baseCap, capacity - baseCap * (t - 1L));
                 }
                 if (!sim) d.putLong("Capacity", capacity);
             }
@@ -47,7 +48,7 @@ public enum AxonType implements StringRepresentable, IExtensibleEnum {
         return capacity - consumed;
     }, ForgeCapabilities.ITEM_HANDLER, new AxonTexDescription(SynapseUtil.resLoc("block/axon_texture"), 6, 9, 0, 16)),
     FLUID((r, d, t, sim) -> {
-        long baseCap = 1000;
+        long baseCap = baseFluidCap();
         long capacity = d.getInt("Capacity");
         int consumed = d.getInt("Consumed");
         if (t > 0) {
@@ -100,5 +101,25 @@ public enum AxonType implements StringRepresentable, IExtensibleEnum {
     @Override
     public @NotNull String getSerializedName() {
         return name();
+    }
+
+    private static int refreshInterval() {
+        return SynapseConfigs.server().network.capacityRefreshInterval.get();
+    }
+
+    private static int baseItemCap() {
+        return SynapseConfigs.server().network.baseItemCapacity.get();
+    }
+
+    private static int baseFluidCap() {
+        return SynapseConfigs.server().network.baseFluidCapacity.get();
+    }
+
+    private static float energyResponse() {
+        return SynapseConfigs.server().network.energyCapacityResponseFactor.getF();
+    }
+
+    private static float energyDecay() {
+        return SynapseConfigs.server().network.energyCapacityDecayFactor.getF();
     }
 }

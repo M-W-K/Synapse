@@ -1,4 +1,4 @@
-// 1.20.1	2025-10-20T18:34:29.981659	Recipes
+// 1.20.1	2025-11-01T13:53:50.618128	Recipes
 9ca29a37d2c2bb67689b69d2ff04f53fa9ce6f8a data/minecraft/advancements/recipes/misc/biosteel_ingot_from_nuggets.json
 bf28b0ab4f88bf283bc648d81c82fbe835276f9f data/minecraft/advancements/recipes/misc/biosteel_nugget.json
 50b58a6784e0dd2107d243df5ef1cb80a1c93c3f data/minecraft/advancements/recipes/misc/duned_gold_ingot_from_nuggets.json
@@ -7,6 +7,8 @@ bf28b0ab4f88bf283bc648d81c82fbe835276f9f data/minecraft/advancements/recipes/mis
 efad90dc5e14f32de8d8a0ab2a04411f3cb03ea1 data/minecraft/recipes/biosteel_nugget.json
 7ae0a11d6f0bbc2a0957a95d5fc3c23656097aa0 data/minecraft/recipes/duned_gold_ingot_from_nuggets.json
 466470252495f815b66a98b18c0f78ca1e938547 data/minecraft/recipes/duned_gold_nugget.json
+66e5083cafac99357c2a71c49560067846a29c4c data/synapse/advancements/recipes/combat/biosteel_knife.json
+d256d5efbc88a22fcd1f332897a617f4cfa10d05 data/synapse/advancements/recipes/combat/duned_gold_knife.json
 d79d98184e7d1d240eed1449b8857d92cbe2f7c4 data/synapse/advancements/recipes/misc/axon.energy.json
 07ad865ea908a7c52281cf894dacfa66298e49a0 data/synapse/advancements/recipes/misc/axon.fluid.json
 e09c18f8f42b5e89ea451726fd043f4789f77027 data/synapse/advancements/recipes/misc/axon.item.json
@@ -27,10 +29,12 @@ e521d78f0f031f1dc78087a7e163f71aecf8671b data/synapse/advancements/recipes/misc/
 154a11010a32b064949ca8e2324dbd25997370b0 data/synapse/recipes/axon.fluid.json
 0b043f092fba097eec77d75d12172cf9f0e91a3f data/synapse/recipes/axon.item.json
 cee79a30b906e512e5c02ce65e3e832c6be55c80 data/synapse/recipes/biosteel_ingot.json
+0f200ec59cf861c9d37d5d71bd65be05d0977ec7 data/synapse/recipes/biosteel_knife.json
 38b0c62efa245b29b8efb8522612717e32355799 data/synapse/recipes/distributor_block_1.json
 fc13040793f29b09751b535e83113d0ee6b715d2 data/synapse/recipes/distributor_block_2.json
 6def40c54ec8b22f27a94089fac8b40e3928b0f9 data/synapse/recipes/distributor_block_3.json
 c3e2291b8bf47f504a3920b3dc49e0950a68e0fd data/synapse/recipes/duned_gold_ingot.json
+ace292fc19cdce1d9e18e5fb4f68902bbeee8f75 data/synapse/recipes/duned_gold_knife.json
 0c0ab8d6861feaaf383aa16fc0243815a5050949 data/synapse/recipes/ender_crystal.json
 2049b8b01cbff3b4c6a9749131feb96e34ec09d1 data/synapse/recipes/endpoint_basic.json
 04799e01d829295984aacb875e862051a896daab data/synapse/recipes/magma_crystal.json

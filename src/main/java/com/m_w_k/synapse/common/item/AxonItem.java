@@ -1,20 +1,27 @@
 package com.m_w_k.synapse.common.item;
 
+import com.m_w_k.synapse.api.block.IAxonBlockEntity;
 import com.m_w_k.synapse.api.connect.AxonType;
 import com.m_w_k.synapse.common.connect.LocalAxonConnection;
+import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.phys.HitResult;
 import net.minecraftforge.common.ForgeHooks;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.List;
 
 public class AxonItem extends Item {
     protected final @NotNull AxonType type;
@@ -132,5 +139,27 @@ public class AxonItem extends Item {
         if (stack.isEmpty()) return false;
         if (consume && !player.isCreative()) stack.shrink(1);
         return true;
+    }
+
+    @Override
+    public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> components, TooltipFlag flag) {
+        if (hasConnectData(stack)) {
+            BlockPos pos = getConnectPos(stack);
+            if (pos == null) return;
+            int slot = getConnectSlot(stack);
+            String slotName = String.valueOf(slot);
+            if (level != null) {
+                BlockEntity be = level.getExistingBlockEntity(pos);
+                if (be instanceof IAxonBlockEntity axon) {
+                    slotName = axon.getNameBySlot(slot);
+                }
+            }
+            components.add(Component.translatable("item.synapse.axon.connecting",
+                    Component.literal(String.valueOf(pos.getX())).withStyle(ChatFormatting.WHITE),
+                    Component.literal(String.valueOf(pos.getY())).withStyle(ChatFormatting.WHITE),
+                    Component.literal(String.valueOf(pos.getZ())).withStyle(ChatFormatting.WHITE),
+                    Component.literal(slotName).withStyle(ChatFormatting.WHITE))
+                    .withStyle(ChatFormatting.GRAY));
+        }
     }
 }

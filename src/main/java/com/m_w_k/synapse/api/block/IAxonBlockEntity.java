@@ -1,8 +1,11 @@
 package com.m_w_k.synapse.api.block;
 
+import com.m_w_k.synapse.common.block.entity.AxonBlockEntity;
+import com.m_w_k.synapse.common.connect.LocalAxonConnection;
 import com.m_w_k.synapse.common.connect.LocalConnectorDevice;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.minecraftforge.common.extensions.IForgeBlockEntity;
 import org.jetbrains.annotations.NotNull;
@@ -37,6 +40,12 @@ public interface IAxonBlockEntity extends ICapabilityProvider, IForgeBlockEntity
 
     void setChanged();
 
+    @NotNull Vec3 renderOffsetForSlot(int slot, IAxonBlockEntity other);
+
+    @NotNull Vec3 renderDirectionForSlot(int slot, IAxonBlockEntity other);
+
+    @Nullable LocalAxonConnection setUpstream(@NotNull LocalAxonConnection connection, boolean dropOld);
+
     boolean removeDownstream(@NotNull BlockPos pos);
 
     boolean addDownstream(@NotNull BlockPos pos);
@@ -44,4 +53,8 @@ public interface IAxonBlockEntity extends ICapabilityProvider, IForgeBlockEntity
     void onUpstreamRemoved();
 
     boolean removeUpstreamFrom(int slot);
+
+    void removeDownstreamFrom(int slot);
+
+    void retireSlot(int slot);
 }

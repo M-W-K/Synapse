@@ -420,6 +420,10 @@ public class AxonTree<T> extends SavedData {
             this.downstream.remove(downstream);
         }
 
+        public void forEachDownstream(Consumer<UUID> action) {
+            downstream.keySet().forEach(action);
+        }
+
         /**
          * @return an iterator through downstream connectors.
          */

@@ -42,6 +42,7 @@ public class EndpointScreen extends AbstractConnectorScreen<EndpointMenu> {
     @Override
     protected void init() {
         super.init();
+        deviceSearch.setValue(getMenu().getStartingFilter());
         lastRuleset = null;
         if (rulesetWidget != null) removeWidget(rulesetWidget);
         rulesetWidget = null;
