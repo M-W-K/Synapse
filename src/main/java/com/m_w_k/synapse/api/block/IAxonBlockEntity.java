@@ -3,13 +3,17 @@ package com.m_w_k.synapse.api.block;
 import com.m_w_k.synapse.common.connect.LocalAxonConnection;
 import com.m_w_k.synapse.common.connect.LocalConnectorDevice;
 import net.minecraft.core.BlockPos;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.minecraftforge.common.extensions.IForgeBlockEntity;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.UnmodifiableView;
 
-import javax.annotation.Nullable;
+import java.util.Map;
+import java.util.function.BiConsumer;
 
 public interface IAxonBlockEntity extends ICapabilityProvider, IForgeBlockEntity {
 
@@ -19,29 +23,31 @@ public interface IAxonBlockEntity extends ICapabilityProvider, IForgeBlockEntity
 
     @NotNull BlockPos blockPos();
 
-    int getSlots();
+    @NotNull @UnmodifiableView Map<ResourceLocation, LocalConnectorDevice> getSlots();
 
-    @NotNull LocalConnectorDevice getBySlot(int slot);
+    @NotNull LocalConnectorDevice getBySlot(ResourceLocation slot);
 
-    default boolean slotIsActive(int slot) {
+    boolean hasSlot(@Nullable ResourceLocation slot);
+
+    default boolean slotIsActive(ResourceLocation slot) {
         return true;
     }
 
-    @NotNull String getNameBySlot(int slot);
+    @NotNull String getNameBySlot(ResourceLocation slot);
 
-    default boolean allowsUpstream(int slot, LocalConnectorDevice upstream) {
+    default boolean allowsUpstream(ResourceLocation slot, LocalConnectorDevice upstream) {
         return slotIsActive(slot);
     }
 
-    default boolean allowsDownstream(int slot, LocalConnectorDevice downstream) {
+    default boolean allowsDownstream(ResourceLocation slot, LocalConnectorDevice downstream) {
         return slotIsActive(slot);
     }
 
     void notifyChanged();
 
-    @NotNull Vec3 renderOffsetForSlot(int slot, IAxonBlockEntity other);
+    @NotNull Vec3 renderOffsetForSlot(ResourceLocation slot, IAxonBlockEntity other);
 
-    @NotNull Vec3 renderDirectionForSlot(int slot, IAxonBlockEntity other);
+    @NotNull Vec3 renderDirectionForSlot(ResourceLocation slot, IAxonBlockEntity other);
 
     @Nullable LocalAxonConnection setUpstream(@NotNull LocalAxonConnection connection, boolean dropOld);
 
@@ -51,9 +57,9 @@ public interface IAxonBlockEntity extends ICapabilityProvider, IForgeBlockEntity
 
     void onUpstreamRemoved();
 
-    boolean removeUpstreamFrom(int slot);
+    boolean removeUpstreamFrom(ResourceLocation slot);
 
-    void removeDownstreamFrom(int slot);
+    void removeDownstreamFrom(ResourceLocation slot);
 
-    void retireSlot(int slot);
+    void retireSlot(ResourceLocation slot);
 }

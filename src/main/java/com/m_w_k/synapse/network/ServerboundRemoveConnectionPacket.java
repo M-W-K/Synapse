@@ -1,24 +1,25 @@
 package com.m_w_k.synapse.network;
 
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.ResourceLocation;
 
 public class ServerboundRemoveConnectionPacket {
 
-    protected final int slot;
+    protected final ResourceLocation slot;
 
-    public ServerboundRemoveConnectionPacket(int slot) {
+    public ServerboundRemoveConnectionPacket(ResourceLocation slot) {
         this.slot = slot;
     }
 
     public ServerboundRemoveConnectionPacket(FriendlyByteBuf buf) {
-        this.slot = buf.readVarInt();
+        this.slot = buf.readResourceLocation();
     }
 
     public void encode(FriendlyByteBuf buf) {
-        buf.writeVarInt(slot);
+        buf.writeResourceLocation(slot);
     }
 
-    public int getSlot() {
+    public ResourceLocation getSlot() {
         return slot;
     }
 }

@@ -2,6 +2,7 @@ package com.m_w_k.synapse.common.block.entity;
 
 import com.m_w_k.synapse.SynapseUtil;
 import com.m_w_k.synapse.api.block.AxonDeviceDefinitions;
+import com.m_w_k.synapse.api.block.OldAxonDeviceDefinitions;
 import com.m_w_k.synapse.api.block.IAxonBlockEntity;
 import com.m_w_k.synapse.api.connect.ConnectorLevel;
 import com.m_w_k.synapse.api.connect.DeviceDataKey;
@@ -12,6 +13,7 @@ import com.m_w_k.synapse.registry.SynapseBlockEntityRegistry;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
@@ -62,16 +64,16 @@ public class RelayBlockEntity extends AxonBlockEntity {
 
     public RelayBlockEntity(BlockPos pos, BlockState state) {
         super(SynapseBlockEntityRegistry.RELAY_BLOCK.get(), pos, state);
-        for (var pair : AxonDeviceDefinitions.RELAYS_INV) {
-            devices.add(new LocalConnectorDevice(pair.value(), ConnectorLevel.RELAY));
-        }
+        AxonDeviceDefinitions.RELAYS.forEach((pair, resloc) -> {
+            devices.put(resloc, new LocalConnectorDevice(pair.value(), ConnectorLevel.RELAY));
+        });
     }
 
     @Override
-    public @NotNull Vec3 renderOffsetForSlot(int slot, IAxonBlockEntity other) {
+    public @NotNull Vec3 renderOffsetForSlot(ResourceLocation slot, IAxonBlockEntity other) {
         Direction dir = getBlockState().getValue(RelayBlock.MOUNT_DIRECTION);
 
-        return centers(dir)[AxonDeviceDefinitions.RELAYS_INV.get(slot).firstInt()];
+        return centers(dir)[AxonDeviceDefinitions.relay(slot, true).firstInt()];
     }
 
     public static Vec3[] centers(Direction mount) {
@@ -86,15 +88,15 @@ public class RelayBlockEntity extends AxonBlockEntity {
     }
 
     @Override
-    public @NotNull Vec3 renderDirectionForSlot(int slot, IAxonBlockEntity other) {
+    public @NotNull Vec3 renderDirectionForSlot(ResourceLocation slot, IAxonBlockEntity other) {
         Vec3i norm = getBlockState().getValue(RelayBlock.MOUNT_DIRECTION).getNormal();
         return new Vec3(norm.getX(), norm.getY(), norm.getZ());
     }
 
     @Override
     public @Nullable LocalAxonConnection setUpstream(@NotNull LocalAxonConnection connection, boolean dropOld) {
-        if (level() != null) {
-            BlockEntity be = level().getBlockEntity(connection.getTargetPos());
+        if (getLevel() != null) {
+            BlockEntity be = getLevel().getBlockEntity(connection.getTargetPos());
             if (be instanceof IAxonBlockEntity a) {
                 LocalConnectorDevice device = getBySlot(connection.getSourceSlot());
                 device.getData().put(DeviceDataKey.RELAYING, SynapseUtil.actualLevel(a.getBySlot(connection.getTargetSlot())));
@@ -108,7 +110,7 @@ public class RelayBlockEntity extends AxonBlockEntity {
     }
 
     @Override
-    public boolean allowsUpstream(int slot, LocalConnectorDevice upstream) {
+    public boolean allowsUpstream(ResourceLocation slot, LocalConnectorDevice upstream) {
         if (!super.allowsUpstream(slot, upstream)) return false;
         LocalConnectorDevice us = getBySlot(slot);
         if (SynapseUtil.actualLevel(us) != ConnectorLevel.RELAY) {
@@ -119,21 +121,21 @@ public class RelayBlockEntity extends AxonBlockEntity {
     }
 
     @Override
-    public boolean allowsDownstream(int slot, LocalConnectorDevice downstream) {
-        if (level() == null) return false;
-        LocalConnectorDevice device = getBySlot(slot).ensureRegistered(level());
+    public boolean allowsDownstream(ResourceLocation slot, LocalConnectorDevice downstream) {
+        if (getLevel() == null) return false;
+        LocalConnectorDevice device = getBySlot(slot).ensureRegistered(getLevel());
         return super.allowsDownstream(slot, downstream) && device.upstream() != null
                 && (device.cache() == null || !device.cache().downstream().hasNext());
     }
 
     @Override
-    public @NotNull String getNameBySlot(int slot) {
-        var pair = AxonDeviceDefinitions.RELAYS_INV.get(slot);
+    public @NotNull String getNameBySlot(ResourceLocation slot) {
+        var pair = AxonDeviceDefinitions.relay(slot, true);
         return pair.value().name() + "_" + pair.keyInt();
     }
 
     @Override
-    public boolean slotIsActive(int slot) {
-        return super.slotIsActive(slot) && getBlockState().getValue(RelayBlock.RELAYS) > AxonDeviceDefinitions.RELAYS_INV.get(slot).firstInt();
+    public boolean slotIsActive(ResourceLocation slot) {
+        return super.slotIsActive(slot) && getBlockState().getValue(RelayBlock.RELAYS) > AxonDeviceDefinitions.relay(slot, true).firstInt();
     }
 }

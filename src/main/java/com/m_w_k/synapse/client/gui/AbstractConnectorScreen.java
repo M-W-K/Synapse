@@ -11,6 +11,7 @@ import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -27,15 +28,13 @@ public abstract class AbstractConnectorScreen<T extends BasicConnectorMenu> exte
 
     protected DeviceListWidget deviceList;
     protected @Nullable DeviceListWidget.DeviceEntry selected;
-    protected int deviceCount;
-    protected final @NotNull BitSet filteredDevices = new BitSet();
 
     protected EditBox deviceSearch;
     private String lastFilterText = "";
 
     protected byte lastSync;
 
-    protected int lastDevice = -1;
+    protected ResourceLocation lastDevice = null;
     protected ActionButton copyAddress;
     protected ActionButton removeConnection;
     protected String selectedAddress = "";
@@ -57,8 +56,9 @@ public abstract class AbstractConnectorScreen<T extends BasicConnectorMenu> exte
         updateSelectedDeviceScreen();
     }
 
-    public @NotNull BitSet getFilteredDevices() {
-        return filteredDevices;
+    public boolean displayDevice(ResourceLocation slot) {
+        var pair = getMenu().getDevices().get(slot);
+        return pair != null && pair.firstBoolean() && StringUtils.toLowerCase(pair.right()).contains(StringUtils.toLowerCase(lastFilterText));
     }
 
     protected void updateSelectedDeviceScreen() {
@@ -71,7 +71,7 @@ public abstract class AbstractConnectorScreen<T extends BasicConnectorMenu> exte
             }
             addressConfig.setVisible(true);
         } else {
-            lastDevice = -1;
+            lastDevice = null;
             selectedAddress = "";
             addressConfig.setValue("0");
             addressConfig.setVisible(false);
@@ -94,9 +94,6 @@ public abstract class AbstractConnectorScreen<T extends BasicConnectorMenu> exte
     @Override
     protected void init() {
         super.init();
-        deviceCount = getMenu().getDeviceCount();
-        filteredDevices.clear();
-        filteredDevices.or(getMenu().getActiveDevices());
 
         deviceSearch = new EditBox(getFontRenderer(), adjX(8), adjY(120), 68, 14, Component.translatable("synapse.menu.search"));
         deviceSearch.setMaxLength(50);
@@ -134,7 +131,7 @@ public abstract class AbstractConnectorScreen<T extends BasicConnectorMenu> exte
         deviceList.setSelected(selected);
         if (lastSync != getMenu().getSync()) {
             lastSync = getMenu().getSync();
-            if (selected != null && getMenu().getSelectedDevice() != selected.getSlot()) {
+            if (selected != null && !selected.getSlot().equals(getMenu().getSelectedDevice())) {
                 getMenu().sendSelectedDevice(selected.getSlot());
                 getMenu().setSelectedAddress(null);
             }
@@ -142,13 +139,6 @@ public abstract class AbstractConnectorScreen<T extends BasicConnectorMenu> exte
         }
         if (!deviceSearch.getValue().equals(lastFilterText)) {
             lastFilterText = deviceSearch.getValue();
-            this.filteredDevices.clear();
-            this.filteredDevices.or(getMenu().getActiveDevices());
-            for (int i = 0; i < deviceCount; i++) {
-                if (!filteredDevices.get(i)) continue;
-                this.filteredDevices.set(i, StringUtils.toLowerCase(getMenu().getDeviceNames().apply(i))
-                        .contains(StringUtils.toLowerCase(lastFilterText)));
-            }
             deviceList.refreshList();
             if (selected != null) {
                 if (deviceList.children().stream().noneMatch(e -> Objects.equals(e.getDeviceName(), selected.getDeviceName()))) {

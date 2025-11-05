@@ -5,6 +5,7 @@ import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.locale.Language;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
+import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.NotNull;
 
 public class DeviceListWidget extends ObjectSelectionList<DeviceListWidget.DeviceEntry> {
@@ -35,19 +36,19 @@ public class DeviceListWidget extends ObjectSelectionList<DeviceListWidget.Devic
 
     public void refreshList() {
         this.clearEntries();
-        for (int i = 0; i < parent.getFilteredDevices().length(); i++) {
-            if (parent.getFilteredDevices().get(i)) {
-                this.addEntry(new DeviceEntry(i, parent.getMenu().getDeviceNames().apply(i)));
+        parent.getMenu().getDevices().forEach((resloc, pair) -> {
+            if (parent.displayDevice(resloc)) {
+                this.addEntry(new DeviceEntry(resloc, pair.right()));
             }
-        }
+        });
     }
 
     public class DeviceEntry extends ObjectSelectionList.Entry<DeviceEntry> {
 
-        protected final int slot;
-        protected final String deviceName;
+        protected final @NotNull ResourceLocation slot;
+        protected final @NotNull String deviceName;
 
-        protected DeviceEntry(int slot, String deviceName) {
+        protected DeviceEntry(@NotNull ResourceLocation slot, @NotNull String deviceName) {
             this.slot = slot;
             this.deviceName = deviceName;
         }
@@ -70,7 +71,7 @@ public class DeviceListWidget extends ObjectSelectionList<DeviceListWidget.Devic
             return false;
         }
 
-        public int getSlot() {
+        public @NotNull ResourceLocation getSlot() {
             return slot;
         }
 

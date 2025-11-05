@@ -3,6 +3,7 @@ package com.m_w_k.synapse.common.block;
 import com.m_w_k.synapse.SynapseUtil;
 import com.m_w_k.synapse.api.KnifeAction;
 import com.m_w_k.synapse.api.block.AxonDeviceDefinitions;
+import com.m_w_k.synapse.api.block.OldAxonDeviceDefinitions;
 import com.m_w_k.synapse.api.block.IAxonBlockEntity;
 import com.m_w_k.synapse.api.connect.AxonTree;
 import com.m_w_k.synapse.api.connect.AxonType;
@@ -15,6 +16,7 @@ import com.m_w_k.synapse.common.menu.BasicConnectorMenu;
 import com.m_w_k.synapse.config.SynapseConfigs;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -30,8 +32,10 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.network.NetworkHooks;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.BitSet;
+import java.util.Set;
 
 public abstract class AxonBlock extends BaseEntityBlock {
     public AxonBlock(Properties p_49795_) {
@@ -61,8 +65,8 @@ public abstract class AxonBlock extends BaseEntityBlock {
 
         BlockPos connect = iAxon.getConnectPos(stack);
         if (pos.equals(connect)) return InteractionResult.FAIL;
-        int usSlot = determineHitSlot(state, level, pos, player, hand, hit);
-        if (!usAxon.slotIsActive(usSlot)) return InteractionResult.FAIL;
+        ResourceLocation usSlot = determineHitSlot(state, level, pos, player, hand, hit);
+        if (usSlot == null || !usAxon.slotIsActive(usSlot)) return InteractionResult.FAIL;
         if (connect == null) {
             iAxon.setConnectPos(stack, pos);
             iAxon.setConnectSlot(stack, usSlot);
@@ -75,8 +79,8 @@ public abstract class AxonBlock extends BaseEntityBlock {
         if (!(a instanceof IAxonBlockEntity themAxon)) return InteractionResult.PASS;
 
         AxonType type = iAxon.getType();
-        int themSlot = iAxon.getConnectSlot(stack);
-        if (themSlot > themAxon.getSlots()) {
+        ResourceLocation themSlot = iAxon.getConnectSlot(stack);
+        if (!themAxon.hasSlot(themSlot)) {
             iAxon.clearConnectData(stack);
             return InteractionResult.FAIL;
         }
@@ -162,47 +166,40 @@ public abstract class AxonBlock extends BaseEntityBlock {
                                @NotNull IAxonBlockEntity usAxon, @NotNull KnifeItem knife,
                                             @NotNull ItemStack knifeStack) {
         if (knife.getAction() == KnifeAction.NONE) return InteractionResult.PASS;
-        BitSet slots = knifeAffectedSlots(state, level, pos, player, hand, hit, usAxon, knife, knifeStack);
-        if (slots.isEmpty()) return InteractionResult.FAIL;
-        if (slots.cardinality() == getSlotCount() && knife.getAction() == KnifeAction.REMOVE) {
+        Set<ResourceLocation> slots = knifeAffectedSlots(state, level, pos, player, hand, hit, usAxon, knife, knifeStack);
+        if (slots == null) {
             dropResources(state, level, pos);
             level.removeBlock(pos, false);
         } else {
-            for (int i = 0; i < slots.length(); i++) {
-                if (slots.get(i)) {
-                    switch (knife.getAction()) {
-                        case SEVER -> {
-                            usAxon.removeUpstreamFrom(i);
-                            usAxon.removeDownstreamFrom(i);
-                        }
-                        case REMOVE -> usAxon.retireSlot(i);
+            if (slots.isEmpty()) return InteractionResult.FAIL;
+            for (ResourceLocation resloc : slots) {
+                switch (knife.getAction()) {
+                    case SEVER -> {
+                        usAxon.removeUpstreamFrom(resloc);
+                        usAxon.removeDownstreamFrom(resloc);
                     }
+                    case REMOVE -> usAxon.retireSlot(resloc);
                 }
             }
         }
         return InteractionResult.sidedSuccess(level.isClientSide);
     }
 
-    protected BitSet knifeAffectedSlots(@NotNull BlockState state, @NotNull Level level,
-                                        @NotNull BlockPos pos, @NotNull Player player,
-                                        @NotNull InteractionHand hand, @NotNull BlockHitResult hit,
-                                        @NotNull IAxonBlockEntity usAxon, @NotNull KnifeItem knife,
-                                        @NotNull ItemStack knifeStack) {
-        BitSet set = new BitSet();
-        set.set(0, getSlotCount());
-        return set;
+    // note -- only return null if the block should be removed by this knife action, otherwise return an empty set.
+    protected @Nullable Set<ResourceLocation> knifeAffectedSlots(@NotNull BlockState state, @NotNull Level level,
+                                                       @NotNull BlockPos pos, @NotNull Player player,
+                                                       @NotNull InteractionHand hand, @NotNull BlockHitResult hit,
+                                                       @NotNull IAxonBlockEntity usAxon, @NotNull KnifeItem knife,
+                                                       @NotNull ItemStack knifeStack) {
+        return AxonDeviceDefinitions.STANDARD.values();
     }
 
-    protected int determineHitSlot(@NotNull BlockState state, @NotNull Level level,
-                                   @NotNull BlockPos pos, @NotNull Player player,
-                                   @NotNull InteractionHand hand, @NotNull BlockHitResult hit) {
+    protected @Nullable ResourceLocation determineHitSlot(@NotNull BlockState state, @NotNull Level level,
+                                                          @NotNull BlockPos pos, @NotNull Player player,
+                                                          @NotNull InteractionHand hand, @NotNull BlockHitResult hit) {
         if (player.getItemInHand(hand).getItem() instanceof AxonItem iAxon) {
-            return AxonDeviceDefinitions.standard(iAxon.getType());
+            return AxonDeviceDefinitions.standard(iAxon.getType(), false);
         }
-        return 0;
-    }
-
-    protected int getSlotCount() {
-        return AxonDeviceDefinitions.STANDARD_INV.size();
+        return null;
     }
 }

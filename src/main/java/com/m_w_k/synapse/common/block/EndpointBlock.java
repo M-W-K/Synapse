@@ -3,6 +3,7 @@ package com.m_w_k.synapse.common.block;
 import com.m_w_k.synapse.SynapseUtil;
 import com.m_w_k.synapse.api.KnifeAction;
 import com.m_w_k.synapse.api.block.AxonDeviceDefinitions;
+import com.m_w_k.synapse.api.block.OldAxonDeviceDefinitions;
 import com.m_w_k.synapse.api.block.IAxonBlockEntity;
 import com.m_w_k.synapse.api.connect.AxonType;
 import com.m_w_k.synapse.common.block.entity.EndpointBlockEntity;
@@ -12,10 +13,12 @@ import com.m_w_k.synapse.common.menu.EndpointMenu;
 import com.m_w_k.synapse.registry.SynapseBlockEntityRegistry;
 import com.m_w_k.synapse.registry.SynapseBlockRegistry;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -48,12 +51,9 @@ import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraftforge.network.NetworkHooks;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nullable;
-import java.util.BitSet;
-import java.util.EnumMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class EndpointBlock extends AxonBlock implements SimpleWaterloggedBlock {
     public static final BooleanProperty NORTH = BlockStateProperties.NORTH;
@@ -119,29 +119,24 @@ public class EndpointBlock extends AxonBlock implements SimpleWaterloggedBlock {
     }
 
     @Override
-    protected BitSet knifeAffectedSlots(@NotNull BlockState state, @NotNull Level level, @NotNull BlockPos pos, @NotNull Player player, @NotNull InteractionHand hand, @NotNull BlockHitResult hit, @NotNull IAxonBlockEntity usAxon, @NotNull KnifeItem knife, @NotNull ItemStack knifeStack) {
-        BitSet set = new BitSet();
+    protected Set<ResourceLocation> knifeAffectedSlots(@NotNull BlockState state, @NotNull Level level, @NotNull BlockPos pos, @NotNull Player player, @NotNull InteractionHand hand, @NotNull BlockHitResult hit, @NotNull IAxonBlockEntity usAxon, @NotNull KnifeItem knife, @NotNull ItemStack knifeStack) {
+        Set<ResourceLocation> set = new ObjectOpenHashSet<>();
         Vec3 rel = hit.getLocation().subtract(pos.getCenter());
         Direction dir = Direction.getNearest(rel.x, rel.y, rel.z);
         for (AxonType type : AxonType.values()) {
-            int slot = AxonDeviceDefinitions.endpoint(type, dir);
-            if (slot > 0) set.set(slot);
+            ResourceLocation slot = AxonDeviceDefinitions.endpoint(type, dir, false);
+            if (slot != null) set.add(slot);
         }
         return set;
     }
 
     @Override
-    protected int determineHitSlot(@NotNull BlockState state, @NotNull Level level, @NotNull BlockPos pos, @NotNull Player player, @NotNull InteractionHand hand, @NotNull BlockHitResult hit) {
+    protected @Nullable ResourceLocation determineHitSlot(@NotNull BlockState state, @NotNull Level level, @NotNull BlockPos pos, @NotNull Player player, @NotNull InteractionHand hand, @NotNull BlockHitResult hit) {
         if (player.getItemInHand(hand).getItem() instanceof AxonItem iAxon) {
             Vec3 rel = hit.getLocation().subtract(hit.getBlockPos().getCenter());
-            return AxonDeviceDefinitions.endpoint(iAxon.getType(), Direction.getNearest(rel.x, rel.y, rel.z));
+            return AxonDeviceDefinitions.endpoint(iAxon.getType(), Direction.getNearest(rel.x, rel.y, rel.z), false);
         }
-        return hit.getDirection().ordinal();
-    }
-
-    @Override
-    protected int getSlotCount() {
-        return AxonDeviceDefinitions.ENDPOINTS_INV.size();
+        return null;
     }
 
     @Override

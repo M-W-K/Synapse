@@ -39,6 +39,7 @@ public class AxonConnection {
     }
 
     public long getCapacity(Level level, long requested, boolean simulate) {
+        if (axonType.getProvider() == null) return requested;
         long tick = level.getGameTime();
         long prev = data.getLong("LastTick");
         long cap = axonType.getProvider().getCapacity(requested, data, (int) (tick - prev), simulate);

@@ -1,5 +1,7 @@
 package com.m_w_k.synapse.api.block;
 
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
 import com.m_w_k.synapse.api.block.ruleset.EnergyTransferRuleset;
 import com.m_w_k.synapse.api.block.ruleset.FluidTransferRuleset;
 import com.m_w_k.synapse.api.block.ruleset.ItemTransferRuleset;
@@ -11,30 +13,25 @@ import com.m_w_k.synapse.common.connect.IEndpointCapability;
 import com.m_w_k.synapse.common.connect.ItemExposer;
 import it.unimi.dsi.fastutil.Pair;
 import it.unimi.dsi.fastutil.ints.IntObjectPair;
-import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
-import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import it.unimi.dsi.fastutil.objects.Reference2IntOpenHashMap;
-import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.objects.*;
 import net.minecraft.core.Direction;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Range;
 
 import java.util.List;
 import java.util.function.Function;
 
-public final class AxonDeviceDefinitions {
+public class AxonDeviceDefinitions {
 
-    public static final Reference2IntOpenHashMap<AxonType> STANDARD = new Reference2IntOpenHashMap<>(AxonType.values().length);
-    public static final List<AxonType> STANDARD_INV = new ObjectArrayList<>(AxonType.values().length);
-    public static final Object2IntOpenHashMap<Pair<AxonType, Direction>> ENDPOINTS =
-            new Object2IntOpenHashMap<>(Direction.values().length * AxonType.values().length);
-    public static final List<Pair<AxonType, Direction>> ENDPOINTS_INV =
-            new ObjectArrayList<>(Direction.values().length * AxonType.values().length);
-    public static final Object2IntOpenHashMap<IntObjectPair<AxonType>> RELAYS =
-            new Object2IntOpenHashMap<>(Direction.values().length * AxonType.values().length);
-    public static final List<IntObjectPair<AxonType>> RELAYS_INV =
-            new ObjectArrayList<>(Direction.values().length * 4);
+    public static final BiMap<AxonType, ResourceLocation> STANDARD = HashBiMap.create(AxonType.values().length);
+    public static final BiMap<Pair<AxonType, Direction>, ResourceLocation> ENDPOINTS =
+            HashBiMap.create(Direction.values().length * AxonType.values().length);
+    public static final BiMap<IntObjectPair<AxonType>, ResourceLocation> RELAYS =
+            HashBiMap.create(Direction.values().length * AxonType.values().length);
 
     public static final Reference2ObjectOpenHashMap<AxonType, TransferRuleset> ENDPOINT_RULES =
             new Reference2ObjectOpenHashMap<>(AxonType.values().length);
@@ -43,17 +40,14 @@ public final class AxonDeviceDefinitions {
 
     static {
         for (AxonType type : AxonType.values()) {
-            STANDARD.put(type, type.ordinal());
-            STANDARD_INV.add(type.ordinal(), type);
+            STANDARD.put(type, type.getResloc());
             for (Direction dir : Direction.values()) {
                 Pair<AxonType, Direction> pair = Pair.of(type, dir);
-                ENDPOINTS.put(pair, dir.ordinal() + Direction.values().length * type.ordinal());
-                ENDPOINTS_INV.add(dir.ordinal() + Direction.values().length * type.ordinal(), pair);
+                ENDPOINTS.put(pair, type.getResloc().withSuffix("_" + dir.getName()));
             }
             for (int i = 0; i < 4; i++) {
                 IntObjectPair<AxonType> pair = IntObjectPair.of(i, type);
-                RELAYS.put(pair, i + 4 * type.ordinal());
-                RELAYS_INV.add(i + 4 * type.ordinal(), pair);
+                RELAYS.put(pair, type.getResloc().withSuffix("_" + i));
             }
         }
         ENDPOINT_RULES.put(AxonType.ITEM, new ItemTransferRuleset(Dist.DEDICATED_SERVER));
@@ -62,22 +56,56 @@ public final class AxonDeviceDefinitions {
         ENDPOINT_CAPABILITIES.put(AxonType.ITEM, ItemExposer::new);
         ENDPOINT_CAPABILITIES.put(AxonType.FLUID, FluidExposer::new);
         ENDPOINT_CAPABILITIES.put(AxonType.ENERGY, EnergyExposer::new);
-
-        STANDARD.defaultReturnValue(-1);
-        ENDPOINTS.defaultReturnValue(-1);
-        RELAYS.defaultReturnValue(-1);
     }
 
-    public static int standard(AxonType type) {
-        return STANDARD.getInt(type);
+    @Contract("_,true->!null")
+    public static @Nullable ResourceLocation standard(@NotNull AxonType type, boolean throwIfNull) {
+        if (throwIfNull && !STANDARD.containsKey(type)) {
+            throw new IllegalArgumentException("Attempted to get the resloc for a nonexistent definition!");
+        }
+        return STANDARD.get(type);
     }
 
-    public static int endpoint(AxonType type, Direction direction) {
-        return ENDPOINTS.getInt(Pair.of(type, direction));
+    @Contract("_,true->!null")
+    public static @Nullable AxonType standard(@NotNull ResourceLocation resloc, boolean throwIfNull) {
+        if (throwIfNull && !STANDARD.inverse().containsKey(resloc)) {
+            throw new IllegalArgumentException("Attempted to get a nonexistent definition for a resloc!");
+        }
+        return STANDARD.inverse().get(resloc);
     }
 
-    public static int relay(AxonType type, @Range(from = 0, to = 3) int index) {
-        return RELAYS.getInt(IntObjectPair.of(index, type));
+    @Contract("_,_,true->!null")
+    public static @Nullable ResourceLocation endpoint(@NotNull AxonType type, @NotNull Direction direction, boolean throwIfNull) {
+        var key = Pair.of(type, direction);
+        if (throwIfNull && !ENDPOINTS.containsKey(key)) {
+            throw new IllegalArgumentException("Attempted to get the resloc for a nonexistent definition!");
+        }
+        return ENDPOINTS.get(key);
+    }
+
+    @Contract("_,true->!null")
+    public static @Nullable Pair<AxonType, Direction> endpoint(@NotNull ResourceLocation resloc, boolean throwIfNull) {
+        if (throwIfNull && !ENDPOINTS.inverse().containsKey(resloc)) {
+            throw new IllegalArgumentException("Attempted to get a nonexistent definition for a resloc!");
+        }
+        return ENDPOINTS.inverse().get(resloc);
+    }
+
+    @Contract("_,_,true->!null")
+    public static @Nullable ResourceLocation relay(@NotNull AxonType type, @Range(from = 0, to = 3) int index, boolean throwIfNull) {
+        var key = IntObjectPair.of(index, type);
+        if (throwIfNull && !RELAYS.containsKey(key)) {
+            throw new IllegalArgumentException("Attempted to get the resloc for a nonexistent definition!");
+        }
+        return RELAYS.get(key);
+    }
+
+    @Contract("_,true->!null")
+    public static @Nullable IntObjectPair<AxonType> relay(@NotNull ResourceLocation resloc, boolean throwIfNull) {
+        if (throwIfNull && !RELAYS.inverse().containsKey(resloc)) {
+            throw new IllegalArgumentException("Attempted to get a nonexistent definition for a resloc!");
+        }
+        return RELAYS.inverse().get(resloc);
     }
 
     public static @Nullable TransferRuleset newEndpointRuleset(AxonType type, Dist dist) {

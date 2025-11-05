@@ -7,7 +7,10 @@ import com.m_w_k.synapse.common.block.entity.EndpointBlockEntity;
 import com.m_w_k.synapse.network.EndpointRulesetSyncPacket;
 import com.m_w_k.synapse.network.SynapsePacketHandler;
 import com.m_w_k.synapse.registry.SynapseMenuRegistry;
+import it.unimi.dsi.fastutil.booleans.BooleanObjectMutablePair;
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.ContainerLevelAccess;
@@ -16,6 +19,7 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.network.PacketDistributor;
 
 import java.nio.charset.Charset;
+import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.IntFunction;
 
@@ -24,31 +28,23 @@ public class EndpointMenu extends InitFilterMenu {
     @OnlyIn(Dist.CLIENT)
     protected TransferRuleset selectedRuleset;
 
-    public EndpointMenu(int containerID, Inventory playerInv, ContainerLevelAccess access, IntFunction<String> deviceNames, int deviceCount) {
-        super(SynapseMenuRegistry.ENDPOINT.get(), containerID, playerInv, access, deviceNames, deviceCount);
+    public EndpointMenu(int containerID, Inventory playerInv, ContainerLevelAccess access,
+                        Map<ResourceLocation, BooleanObjectMutablePair<String>> devices) {
+        super(SynapseMenuRegistry.ENDPOINT.get(), containerID, playerInv, access, devices);
     }
 
     public static EndpointMenu of(int containerID, Inventory playerInv, IAxonBlockEntity be) {
-        EndpointMenu menu = new EndpointMenu(containerID, playerInv, ContainerLevelAccess.create(be.level(), be.blockPos()), be::getNameBySlot, be.getSlots());
+        EndpointMenu menu = new EndpointMenu(containerID, playerInv, ContainerLevelAccess.create(be.level(), be.blockPos()), map(be));
         menu.be = be;
         return menu;
     }
 
     public static EndpointMenu read(int containerID, Inventory playerInv, FriendlyByteBuf buf) {
-        int slots = buf.readVarInt();
-        String[] names = new String[slots];
-        for (int i = 0; i < slots; i++) {
-            int length = buf.readVarInt();
-            names[i] = buf.readCharSequence(length, Charset.defaultCharset()).toString();
-        }
-        EndpointMenu ret = new EndpointMenu(containerID, playerInv, ContainerLevelAccess.NULL, i -> names[i], slots);
-        ret.setActiveDevices(buf.readBitSet());
-        ret.readStartingFilter(buf);
-        return ret;
+        return new EndpointMenu(containerID, playerInv, ContainerLevelAccess.NULL, map(buf)).readStartingFilter(buf);
     }
 
     @Override
-    public void sendToClient(ServerPlayer player, int device, IDSetResult result) {
+    public void sendToClient(ServerPlayer player, ResourceLocation device, IDSetResult result) {
         super.sendToClient(player, device, result);
         TransferRuleset ruleset = getRulesetServerside(device);
         if (ruleset == null) return;
@@ -56,7 +52,7 @@ public class EndpointMenu extends InitFilterMenu {
                 new EndpointRulesetSyncPacket(ruleset.getType(), ruleset.clientSyncData(), Dist.CLIENT, device));
     }
 
-    public TransferRuleset getRulesetServerside(int device) {
+    public TransferRuleset getRulesetServerside(ResourceLocation device) {
         if (be == null || be.level() == null || !(be instanceof EndpointBlockEntity endpoint)) return null;
         if (be.slotIsActive(device)) {
             return endpoint.rulesetForSlot(device);
@@ -66,7 +62,7 @@ public class EndpointMenu extends InitFilterMenu {
 
     @OnlyIn(Dist.CLIENT)
     @Override
-    public void setSelectedDevice(int selectedDevice) {
+    public void setSelectedDevice(ResourceLocation selectedDevice) {
         super.setSelectedDevice(selectedDevice);
         setSelectedRuleset(null);
     }

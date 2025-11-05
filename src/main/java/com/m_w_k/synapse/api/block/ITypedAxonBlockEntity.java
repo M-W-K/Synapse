@@ -2,11 +2,12 @@ package com.m_w_k.synapse.api.block;
 
 import com.m_w_k.synapse.api.connect.AxonType;
 import com.m_w_k.synapse.common.connect.LocalConnectorDevice;
+import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.NotNull;
 
 public interface ITypedAxonBlockEntity extends IAxonBlockEntity {
 
-    int getSlotForType(@NotNull AxonType type);
+    @NotNull ResourceLocation getSlotForType(@NotNull AxonType type);
 
     default @NotNull LocalConnectorDevice getByType(@NotNull AxonType type) {
         return getBySlot(getSlotForType(type));

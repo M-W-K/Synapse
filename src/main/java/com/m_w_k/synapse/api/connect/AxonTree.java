@@ -36,7 +36,7 @@ public class AxonTree<T> extends SavedData {
      * @return the loaded axon tree.
      * @param <T> the capability type
      */
-    public static <T> @NotNull Optional<AxonTree<T>> load(@Nullable LevelAccessor level, @NotNull AxonType type, Capability<T> cap) {
+    public static <T> @NotNull Optional<AxonTree<T>> load(@Nullable LevelAccessor level, @NotNull AxonType type, @Nullable Capability<T> cap) {
         if (level == null || level.getServer() == null) return Optional.empty();
         return Optional.of(level.getServer().overworld().getDataStorage().computeIfAbsent(
                 t -> new AxonTree<>(type, cap, t),
@@ -44,7 +44,7 @@ public class AxonTree<T> extends SavedData {
                 "synapse:" + type.getSerializedName()));
     }
 
-    protected AxonTree(@NotNull AxonType type, Capability<T> cap) {
+    protected AxonTree(@NotNull AxonType type, @Nullable Capability<T> cap) {
         if (cap != type.getCapability()) throw new IllegalArgumentException("Capability must match type capability!");
         this.type = type;
         this.members = new Object2ObjectOpenHashMap<>();
@@ -303,7 +303,8 @@ public class AxonTree<T> extends SavedData {
             data = new Object2ObjectOpenHashMap<>();
         }
 
-        private ConnectorDevice(@NotNull AxonAddress address, @NotNull ConnectorLevel level, Map<DeviceDataKey<?>, Object> data) {
+        private ConnectorDevice(@NotNull AxonAddress address, @NotNull ConnectorLevel level,
+                                @NotNull Map<DeviceDataKey<?>, Object> data) {
             this.address = address;
             this.level = level;
             this.upstream = NO_UPSTREAM;
@@ -371,7 +372,7 @@ public class AxonTree<T> extends SavedData {
         }
 
         /**
-         * Set the capability instance for this connector. Used during route finding.
+         * Get the capability instance for this connector. Used during route finding.
          * @return the capability
          */
         public @Nullable T getCap() {

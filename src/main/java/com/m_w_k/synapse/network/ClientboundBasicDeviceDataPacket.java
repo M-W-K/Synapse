@@ -5,22 +5,24 @@ import com.m_w_k.synapse.api.connect.ConnectorLevel;
 import com.m_w_k.synapse.api.connect.IDSetResult;
 import com.m_w_k.synapse.common.connect.LocalConnectorDevice;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.ResourceLocation;
 
 import java.util.BitSet;
+import java.util.Set;
 
 public class ClientboundBasicDeviceDataPacket extends ClientboundDeviceSyncPacket {
 
-    protected final int slot;
+    protected final ResourceLocation slot;
     protected final AxonAddress address;
     protected final ConnectorLevel level;
 
     protected final IDSetResult setResult;
 
-    public ClientboundBasicDeviceDataPacket(BitSet activeDevices, int slot, LocalConnectorDevice device, IDSetResult setResult) {
+    public ClientboundBasicDeviceDataPacket(Set<ResourceLocation> activeDevices, ResourceLocation slot, LocalConnectorDevice device, IDSetResult setResult) {
         this(activeDevices, slot, device.getAddress(), device.getLevel(), setResult);
     }
 
-    public ClientboundBasicDeviceDataPacket(BitSet activeDevices, int slot, AxonAddress address, ConnectorLevel level, IDSetResult setResult) {
+    public ClientboundBasicDeviceDataPacket(Set<ResourceLocation> activeDevices, ResourceLocation slot, AxonAddress address, ConnectorLevel level, IDSetResult setResult) {
         super(activeDevices);
         this.slot = slot;
         this.address = address;
@@ -30,7 +32,7 @@ public class ClientboundBasicDeviceDataPacket extends ClientboundDeviceSyncPacke
 
     public ClientboundBasicDeviceDataPacket(FriendlyByteBuf buf) {
         super(buf);
-        slot = buf.readVarInt();
+        slot = buf.readResourceLocation();
         if (buf.readBoolean()) {
             address = new AxonAddress();
             address.read(buf);
@@ -44,7 +46,7 @@ public class ClientboundBasicDeviceDataPacket extends ClientboundDeviceSyncPacke
 
     public void encode(FriendlyByteBuf buf) {
         super.encode(buf);
-        buf.writeVarInt(slot);
+        buf.writeResourceLocation(slot);
         buf.writeBoolean(address != null);
         if (address != null) {
             address.write(buf);
@@ -53,7 +55,7 @@ public class ClientboundBasicDeviceDataPacket extends ClientboundDeviceSyncPacke
         buf.writeEnum(setResult);
     }
 
-    public int getSlot() {
+    public ResourceLocation getSlot() {
         return slot;
     }
 

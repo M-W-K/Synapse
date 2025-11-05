@@ -1,6 +1,7 @@
 package com.m_w_k.synapse.common.connect;
 
 import com.m_w_k.synapse.api.connect.*;
+import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
@@ -15,6 +16,7 @@ import org.jetbrains.annotations.UnmodifiableView;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.UnaryOperator;
 
 public final class LocalConnectorDevice implements ConnectorLevel.Provider {
     public static final Codec<LocalConnectorDevice> CODEC = RecordCodecBuilder.create(instance ->
@@ -22,7 +24,10 @@ public final class LocalConnectorDevice implements ConnectorLevel.Provider {
                     AxonType.CODEC.fieldOf("type").forGetter(LocalConnectorDevice::type),
                     ConnectorLevel.CODEC.fieldOf("level").forGetter(LocalConnectorDevice::getLevel),
                     UUIDUtil.CODEC.fieldOf("treeID").forGetter(LocalConnectorDevice::treeID),
-                    LocalAxonConnection.CODEC.optionalFieldOf("upstream").forGetter(d -> Optional.ofNullable(d.upstream())),
+                    Codec.either(LocalAxonConnection.CODEC, OldLocalAxonConnection.CODEC)
+                            .xmap(either -> either.map(UnaryOperator.identity(), UnaryOperator.identity()),
+                                    c -> c instanceof OldLocalAxonConnection o ? Either.right(o) : Either.left(c))
+                            .optionalFieldOf("upstream").forGetter(d -> Optional.ofNullable(d.upstream())),
                     DeviceDataKey.MAP_CODEC.fieldOf("data").forGetter(LocalConnectorDevice::getData)
             ).apply(instance, LocalConnectorDevice::new));
     private final @NotNull AxonType type;

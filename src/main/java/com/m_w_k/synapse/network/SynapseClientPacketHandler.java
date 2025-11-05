@@ -1,6 +1,7 @@
 package com.m_w_k.synapse.network;
 
 import com.m_w_k.synapse.api.block.AxonDeviceDefinitions;
+import com.m_w_k.synapse.api.block.OldAxonDeviceDefinitions;
 import com.m_w_k.synapse.api.block.ruleset.TransferRuleset;
 import com.m_w_k.synapse.common.menu.BasicConnectorMenu;
 import com.m_w_k.synapse.common.menu.EndpointMenu;

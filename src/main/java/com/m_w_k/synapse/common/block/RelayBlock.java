@@ -3,6 +3,7 @@ package com.m_w_k.synapse.common.block;
 import com.m_w_k.synapse.SynapseUtil;
 import com.m_w_k.synapse.api.KnifeAction;
 import com.m_w_k.synapse.api.block.AxonDeviceDefinitions;
+import com.m_w_k.synapse.api.block.OldAxonDeviceDefinitions;
 import com.m_w_k.synapse.api.block.IAxonBlockEntity;
 import com.m_w_k.synapse.api.connect.AxonType;
 import com.m_w_k.synapse.common.block.entity.RelayBlockEntity;
@@ -12,10 +13,12 @@ import com.m_w_k.synapse.common.menu.RelayMenu;
 import com.m_w_k.synapse.registry.SynapseBlockRegistry;
 import it.unimi.dsi.fastutil.ints.IntObjectPair;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -52,6 +55,7 @@ import javax.annotation.Nullable;
 import java.util.BitSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class RelayBlock extends AxonBlock implements SimpleWaterloggedBlock {
 
@@ -140,33 +144,28 @@ public class RelayBlock extends AxonBlock implements SimpleWaterloggedBlock {
     }
 
     @Override
-    protected BitSet knifeAffectedSlots(@NotNull BlockState state, @NotNull Level level, @NotNull BlockPos pos, @NotNull Player player, @NotNull InteractionHand hand, @NotNull BlockHitResult hit, @NotNull IAxonBlockEntity usAxon, @NotNull KnifeItem knife, @NotNull ItemStack knifeStack) {
-        BitSet set = new BitSet();
+    protected Set<ResourceLocation> knifeAffectedSlots(@NotNull BlockState state, @NotNull Level level, @NotNull BlockPos pos, @NotNull Player player, @NotNull InteractionHand hand, @NotNull BlockHitResult hit, @NotNull IAxonBlockEntity usAxon, @NotNull KnifeItem knife, @NotNull ItemStack knifeStack) {
+        Set<ResourceLocation> set = new ObjectOpenHashSet<>();
         Vec3 relative = hit.getLocation().subtract(pos.getCenter());
         int nearest = SynapseUtil.getNearest(relative, RelayBlockEntity.centers(state.getValue(MOUNT_DIRECTION)));
         if (knife.getAction() == KnifeAction.REMOVE && nearest != state.getValue(RELAYS) - 1) {
             return set;
         }
         for (AxonType type : AxonType.values()) {
-            int slot = AxonDeviceDefinitions.relay(type, nearest);
-            if (slot > 0) set.set(slot);
+            ResourceLocation slot = AxonDeviceDefinitions.relay(type, nearest, false);
+            if (slot != null) set.add(slot);
         }
         return set;
     }
 
     @Override
-    protected int determineHitSlot(@NotNull BlockState state, @NotNull Level level, @NotNull BlockPos pos, @NotNull Player player, @NotNull InteractionHand hand, @NotNull BlockHitResult hit) {
+    protected ResourceLocation determineHitSlot(@NotNull BlockState state, @NotNull Level level, @NotNull BlockPos pos, @NotNull Player player, @NotNull InteractionHand hand, @NotNull BlockHitResult hit) {
         if (player.getItemInHand(hand).getItem() instanceof AxonItem iAxon) {
             Vec3 relative = hit.getLocation().subtract(pos.getCenter());
             return AxonDeviceDefinitions.relay(iAxon.getType(),
-                    SynapseUtil.getNearest(relative, RelayBlockEntity.centers(state.getValue(MOUNT_DIRECTION))));
+                    SynapseUtil.getNearest(relative, RelayBlockEntity.centers(state.getValue(MOUNT_DIRECTION))), false);
         }
-        return 0;
-    }
-
-    @Override
-    protected int getSlotCount() {
-        return AxonDeviceDefinitions.RELAYS_INV.size();
+        return null;
     }
 
     @Nullable

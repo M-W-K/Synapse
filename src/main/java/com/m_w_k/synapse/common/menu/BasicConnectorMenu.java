@@ -7,7 +7,11 @@ import com.m_w_k.synapse.api.connect.IDSetResult;
 import com.m_w_k.synapse.common.block.AxonBlock;
 import com.m_w_k.synapse.network.*;
 import com.m_w_k.synapse.registry.SynapseMenuRegistry;
+import it.unimi.dsi.fastutil.booleans.BooleanObjectMutablePair;
+import it.unimi.dsi.fastutil.booleans.BooleanObjectPair;
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -24,8 +28,11 @@ import org.jetbrains.annotations.Nullable;
 
 import java.nio.charset.Charset;
 import java.util.BitSet;
+import java.util.Map;
+import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.IntFunction;
+import java.util.stream.Collectors;
 
 public class BasicConnectorMenu extends AbstractContainerMenu {
     protected static final int INV_SLOT_START = 0;
@@ -34,18 +41,14 @@ public class BasicConnectorMenu extends AbstractContainerMenu {
     protected static final int USE_ROW_SLOT_END = 36;
 
     protected final ContainerLevelAccess access;
-    protected final IntFunction<String> deviceNames;
-
-    protected final int deviceCount;
+    protected final Map<ResourceLocation, BooleanObjectMutablePair<String>> devices;
 
     protected @Nullable IAxonBlockEntity be;
 
     @OnlyIn(Dist.CLIENT)
     protected byte sync;
     @OnlyIn(Dist.CLIENT)
-    protected BitSet activeDevices;
-    @OnlyIn(Dist.CLIENT)
-    protected int selectedDevice;
+    protected ResourceLocation selectedDevice;
     @OnlyIn(Dist.CLIENT)
     protected short selectedID;
     @OnlyIn(Dist.CLIENT)
@@ -55,16 +58,13 @@ public class BasicConnectorMenu extends AbstractContainerMenu {
     @OnlyIn(Dist.CLIENT)
     protected IDSetResult setResult;
 
-    public BasicConnectorMenu(int containerID, Inventory playerInv, ContainerLevelAccess access, IntFunction<String> deviceNames,
-                              int deviceCount) {
-        this(SynapseMenuRegistry.BASIC_CONNECTOR.get(), containerID, playerInv, access, deviceNames, deviceCount);
+    public BasicConnectorMenu(int containerID, Inventory playerInv, ContainerLevelAccess access, Map<ResourceLocation, BooleanObjectMutablePair<String>> devices) {
+        this(SynapseMenuRegistry.BASIC_CONNECTOR.get(), containerID, playerInv, access, devices);
     }
 
-    protected BasicConnectorMenu(MenuType<?> type, int containerID, Inventory playerInv, ContainerLevelAccess access, IntFunction<String> deviceNames,
-                              int deviceCount) {
+    protected BasicConnectorMenu(MenuType<?> type, int containerID, Inventory playerInv, ContainerLevelAccess access, Map<ResourceLocation, BooleanObjectMutablePair<String>> devices) {
         super(type, containerID);
-        this.deviceCount = deviceCount;
-        this.deviceNames = deviceNames;
+        this.devices = devices;
 
         this.access = access;
         int i = 36;
@@ -82,41 +82,48 @@ public class BasicConnectorMenu extends AbstractContainerMenu {
     }
 
     public static BasicConnectorMenu of(int containerID, Inventory playerInv, IAxonBlockEntity be) {
-        BasicConnectorMenu menu = new BasicConnectorMenu(containerID, playerInv, ContainerLevelAccess.create(be.level(), be.blockPos()), be::getNameBySlot, be.getSlots());
+        BasicConnectorMenu menu = new BasicConnectorMenu(containerID, playerInv, ContainerLevelAccess.create(be.level(), be.blockPos()), map(be));
         menu.be = be;
         return menu;
     }
 
-    public static BasicConnectorMenu read(int containerID, Inventory playerInv, FriendlyByteBuf buf) {
-        int slots = buf.readVarInt();
-        String[] names = new String[slots];
-        for (int i = 0; i < slots; i++) {
-            int length = buf.readVarInt();
-            names[i] = buf.readCharSequence(length, Charset.defaultCharset()).toString();
+    protected static Object2ObjectOpenHashMap<ResourceLocation, BooleanObjectMutablePair<String>> map(IAxonBlockEntity be) {
+        Object2ObjectOpenHashMap<ResourceLocation, BooleanObjectMutablePair<String>> m = new Object2ObjectOpenHashMap<>();
+        for (ResourceLocation k : be.getSlots().keySet()) {
+            m.put(k, BooleanObjectMutablePair.of(be.slotIsActive(k), be.getNameBySlot(k)));
         }
-        BasicConnectorMenu ret = new BasicConnectorMenu(containerID, playerInv, ContainerLevelAccess.NULL, i -> names[i], slots);
-        ret.setActiveDevices(buf.readBitSet());
-        return ret;
+        return m;
+    }
+
+    public static BasicConnectorMenu read(int containerID, Inventory playerInv, FriendlyByteBuf buf) {
+        return new BasicConnectorMenu(containerID, playerInv, ContainerLevelAccess.NULL, map(buf));
+    }
+
+    protected static Map<ResourceLocation, BooleanObjectMutablePair<String>> map(FriendlyByteBuf buf) {
+        int slots = buf.readVarInt();
+        Map<ResourceLocation, BooleanObjectMutablePair<String>> devices = new Object2ObjectOpenHashMap<>();
+        for (int i = 0; i < slots; i++) {
+            ResourceLocation key = buf.readResourceLocation();
+            String name = buf.readUtf();
+            boolean active = buf.readBoolean();
+            devices.put(key, BooleanObjectMutablePair.of(active, name));
+        }
+        return devices;
     }
 
     public static Consumer<FriendlyByteBuf> writer(IAxonBlockEntity be) {
         return buf -> {
-            buf.writeVarInt(be.getSlots());
-            for (int i = 0; i < be.getSlots(); i++) {
-                String name = be.getNameBySlot(i);
-                buf.writeVarInt(name.length());
-                buf.writeCharSequence(name, Charset.defaultCharset());
-            }
-            buf.writeBitSet(evaluateActiveness(be));
+            buf.writeVarInt(be.getSlots().size());
+            be.getSlots().forEach((resloc, device) -> {
+                buf.writeResourceLocation(resloc);
+                buf.writeUtf(be.getNameBySlot(resloc));
+                buf.writeBoolean(be.slotIsActive(resloc));
+            });
         };
     }
 
-    public int getDeviceCount() {
-        return deviceCount;
-    }
-
-    public IntFunction<String> getDeviceNames() {
-        return deviceNames;
+    public Map<ResourceLocation, BooleanObjectMutablePair<String>> getDevices() {
+        return devices;
     }
 
     public @NotNull ItemStack quickMoveStack(@NotNull Player p_39051_, int p_39052_) {
@@ -159,26 +166,16 @@ public class BasicConnectorMenu extends AbstractContainerMenu {
                 && player.distanceToSqr((double) pos.getX() + 0.5D, (double) pos.getY() + 0.5D, (double) pos.getZ() + 0.5D) <= 64.0D, true);
     }
 
-    protected static BitSet evaluateActiveness(@Nullable IAxonBlockEntity be) {
-        BitSet set = new BitSet();
-        if (be != null) {
-        for (int i = 0; i < be.getSlots(); i++) {
-            set.set(i, be.slotIsActive(i));
-        }
-        }
-        return set;
-    }
-
-    public void sendToClient(ServerPlayer player, int device, IDSetResult result) {
+    public void sendToClient(ServerPlayer player, ResourceLocation device, IDSetResult result) {
         if (be == null || be.level() == null) return;
-        BitSet active = evaluateActiveness(be);
-        ClientboundBasicDeviceDataPacket packet = active.get(device) ?
+        Set<ResourceLocation> active = be.getSlots().keySet().stream().filter(be::slotIsActive).collect(Collectors.toSet());
+        ClientboundBasicDeviceDataPacket packet = be.slotIsActive(device) ?
                 new ClientboundBasicDeviceDataPacket(active, device, be.getBySlot(device).ensureRegistered(be.level()), result)
                 : new ClientboundBasicDeviceDataPacket(active, device, null, ConnectorLevel.CORRUPTED, result);
         SynapsePacketHandler.INSTANCE.send(PacketDistributor.PLAYER.with(() -> player), packet);
     }
 
-    public void updateID(ServerPlayer player, int device, short id) {
+    public void updateID(ServerPlayer player, ResourceLocation device, short id) {
         if (be == null) return;
         IDSetResult result = be.getBySlot(device).setAddressID(id);
         sendToClient(player, device, result);
@@ -195,27 +192,22 @@ public class BasicConnectorMenu extends AbstractContainerMenu {
     }
 
     @OnlyIn(Dist.CLIENT)
-    public void setActiveDevices(BitSet activeDevices) {
-        this.activeDevices = activeDevices;
+    public void setActiveDevices(Set<ResourceLocation> activeDevices) {
+        this.devices.forEach((resloc, pair) -> pair.first(activeDevices.contains(resloc)));
     }
 
     @OnlyIn(Dist.CLIENT)
-    public void setSelectedDevice(int selectedDevice) {
+    public void setSelectedDevice(ResourceLocation selectedDevice) {
         this.selectedDevice = selectedDevice;
     }
 
     @OnlyIn(Dist.CLIENT)
-    public void sendSelectedDevice(int selectedDevice) {
+    public void sendSelectedDevice(ResourceLocation selectedDevice) {
         SynapsePacketHandler.INSTANCE.sendToServer(new ServerboundSetSelectedConnectorPacket(selectedDevice));
     }
 
     @OnlyIn(Dist.CLIENT)
-    public BitSet getActiveDevices() {
-        return activeDevices;
-    }
-
-    @OnlyIn(Dist.CLIENT)
-    public int getSelectedDevice() {
+    public ResourceLocation getSelectedDevice() {
         return selectedDevice;
     }
 
@@ -269,7 +261,7 @@ public class BasicConnectorMenu extends AbstractContainerMenu {
         SynapsePacketHandler.INSTANCE.sendToServer(new ServerboundRemoveConnectionPacket(getSelectedDevice()));
     }
 
-    public void receiveRemoveConnection(ServerPlayer player, int slot) {
+    public void receiveRemoveConnection(ServerPlayer player, ResourceLocation slot) {
         if (be == null || be.removed()) return;
         if (be.removeUpstreamFrom(slot)) {
             sendToClient(player, slot, IDSetResult.NO_SET);

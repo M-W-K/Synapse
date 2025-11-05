@@ -21,21 +21,8 @@ public class EndpointScreen extends AbstractConnectorScreen<EndpointMenu> {
     @Override
     protected void updateSelectedDeviceScreen() {
         super.updateSelectedDeviceScreen();
-        if (selected != null) {
-            if (getMenu().getSelectedRuleset() != lastRuleset) {
-                lastRuleset = getMenu().getSelectedRuleset();
-                if (rulesetWidget != null) {
-                    removeWidget(rulesetWidget);
-                    rulesetWidget = null;
-                }
-                if (lastRuleset != null) {
-                    rulesetWidget = lastRuleset.createWidget(this, adjX(85), adjY(44));
-                    addWidget(rulesetWidget);
-                }
-            }
-            if (rulesetWidget != null) {
-                rulesetWidget.updateSelectedDevice();
-            }
+        if (selected != null && rulesetWidget != null) {
+            rulesetWidget.updateSelectedDevice();
         }
     }
 
@@ -59,6 +46,18 @@ public class EndpointScreen extends AbstractConnectorScreen<EndpointMenu> {
     @Override
     protected void containerTick() {
         super.containerTick();
+        if (getMenu().getSelectedRuleset() != lastRuleset) {
+            lastRuleset = getMenu().getSelectedRuleset();
+            if (rulesetWidget != null) {
+                removeWidget(rulesetWidget);
+                rulesetWidget = null;
+            }
+            if (lastRuleset != null) {
+                rulesetWidget = lastRuleset.createWidget(this, adjX(85), adjY(44));
+                addWidget(rulesetWidget);
+                rulesetWidget.updateSelectedDevice();
+            }
+        }
         if (rulesetWidget != null && lastRuleset != null) {
             rulesetWidget.containerTick();
             if (lastRuleset.hasPendingSync(rulesetWidget)) {

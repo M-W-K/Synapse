@@ -8,6 +8,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.player.Player;
@@ -82,13 +83,13 @@ public class AxonItem extends Item {
      * @param stack the stack in question
      * @param slot the slot to connect to
      */
-    public void setConnectSlot(@NotNull ItemStack stack, int slot) {
+    public void setConnectSlot(@NotNull ItemStack stack, ResourceLocation slot) {
         CompoundTag tag = connectTag(stack);
-        if (slot == Integer.MIN_VALUE) {
+        if (slot == null) {
             tag.remove("Slot");
             return;
         }
-        tag.putInt("Slot", slot);
+        tag.putString("Slot", slot.toString());
     }
 
     /**
@@ -96,10 +97,10 @@ public class AxonItem extends Item {
      * @param stack the stack in question
      * @return the slot to connect to
      */
-    public int getConnectSlot(@NotNull ItemStack stack) {
+    public ResourceLocation getConnectSlot(@NotNull ItemStack stack) {
         CompoundTag tag = connectTag(stack);
-        if (!tag.contains("Slot")) return Integer.MIN_VALUE;
-        return tag.getInt("Slot");
+        if (!tag.contains("Slot")) return null;
+        return ResourceLocation.tryParse(tag.getString("Slot"));
     }
 
     public @NotNull AxonType getType() {
@@ -145,11 +146,11 @@ public class AxonItem extends Item {
         if (hasConnectData(stack)) {
             BlockPos pos = getConnectPos(stack);
             if (pos == null) return;
-            int slot = getConnectSlot(stack);
-            String slotName = String.valueOf(slot);
+            ResourceLocation slot = getConnectSlot(stack);
+            String slotName = slot.toString();
             if (level != null) {
                 BlockEntity be = level.getExistingBlockEntity(pos);
-                if (be instanceof IAxonBlockEntity axon) {
+                if (be instanceof IAxonBlockEntity axon && axon.hasSlot(slot)) {
                     slotName = axon.getNameBySlot(slot);
                 }
             }

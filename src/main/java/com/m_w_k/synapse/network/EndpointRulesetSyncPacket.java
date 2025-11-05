@@ -1,10 +1,12 @@
 package com.m_w_k.synapse.network;
 
 import com.m_w_k.synapse.api.block.AxonDeviceDefinitions;
+import com.m_w_k.synapse.api.block.OldAxonDeviceDefinitions;
 import com.m_w_k.synapse.api.block.ruleset.TransferRuleset;
 import com.m_w_k.synapse.api.connect.AxonType;
 import com.mojang.datafixers.util.Either;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 
 import java.util.Optional;
@@ -15,10 +17,10 @@ public class EndpointRulesetSyncPacket {
     protected final AxonType type;
     protected final Either<Consumer<TransferRuleset>, Consumer<FriendlyByteBuf>> syncAction;
 
-    protected final int device;
+    protected final ResourceLocation device;
     protected final Dist destination;
 
-    public EndpointRulesetSyncPacket(AxonType type, Consumer<FriendlyByteBuf> sync, Dist destination, int device) {
+    public EndpointRulesetSyncPacket(AxonType type, Consumer<FriendlyByteBuf> sync, Dist destination, ResourceLocation device) {
         this.type = type;
         this.syncAction = Either.right(sync);
         this.destination = destination;
@@ -33,14 +35,14 @@ public class EndpointRulesetSyncPacket {
         } else {
             syncAction = Either.right(r -> {});
         }
-        device = buf.readVarInt();
+        device = buf.readResourceLocation();
     }
 
     public void encode(FriendlyByteBuf buf) {
         buf.writeEnum(type);
         buf.writeEnum(destination);
         syncAction.ifRight(c -> c.accept(buf));
-        buf.writeVarInt(device);
+        buf.writeResourceLocation(device);
     }
 
     public AxonType getType() {
@@ -55,7 +57,7 @@ public class EndpointRulesetSyncPacket {
         return destination;
     }
 
-    public int getDevice() {
+    public ResourceLocation getDevice() {
         return device;
     }
 }

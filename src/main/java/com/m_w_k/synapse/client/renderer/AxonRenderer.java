@@ -36,11 +36,11 @@ public class AxonRenderer implements BlockEntityRenderer<AxonBlockEntity> {
         Vec3 source = be.blockPos().getCenter();
         pose.translate(-pos.getX(), -pos.getY(), -pos.getZ());
         VertexConsumer buffer = bufferSource.getBuffer(RenderType.solid());
-        for (int i = 0; i < be.getSlots(); i++) {
-            LocalAxonConnection connected = be.getBySlot(i).upstream();
-            if (connected == null) continue;
+        be.getSlots().forEach((resloc, device) -> {
+            LocalAxonConnection connected = device.upstream();
+            if (connected == null) return;
             renderConnection(source, connected, pose, be.level(), buffer, overlay);
-        }
+        });
         pose.popPose();
     }
 
