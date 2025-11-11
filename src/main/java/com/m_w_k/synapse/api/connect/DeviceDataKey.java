@@ -1,6 +1,5 @@
 package com.m_w_k.synapse.api.connect;
 
-import com.m_w_k.synapse.SynapseUtil;
 import com.mojang.serialization.Codec;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.nbt.CompoundTag;
@@ -11,6 +10,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.Supplier;
 
 public abstract class DeviceDataKey<T> {
     public static final Map<ResourceLocation, DeviceDataKey<?>> REGISTRY = new Object2ObjectOpenHashMap<>();
@@ -30,25 +30,6 @@ public abstract class DeviceDataKey<T> {
                 return m;
             });
 
-    public static final DeviceDataKey<ConnectorLevel> RELAYING =
-            new DeviceDataKey<>(SynapseUtil.resLoc("relay")) {
-                @Override
-                public @NotNull CompoundTag save(@NotNull ConnectorLevel level) {
-                    CompoundTag tag = new CompoundTag();
-                    tag.putString("level", level.getSerializedName());
-                    return tag;
-                }
-
-                @Override
-                public @NotNull ConnectorLevel load(@NotNull CompoundTag tag) {
-                    String name = tag.getString("level");
-                    for (ConnectorLevel level : ConnectorLevel.values()) {
-                        if (level.name().equals(name)) return level;
-                    }
-                    return ConnectorLevel.CORRUPTED;
-                }
-            };
-
     private final ResourceLocation loc;
 
     public DeviceDataKey(ResourceLocation loc) {
@@ -63,8 +44,12 @@ public abstract class DeviceDataKey<T> {
     }
 
     @Contract("_,!null->!null")
-    public T getFromMap(@NotNull Map<DeviceDataKey<?>, Object> map, @Nullable T fallback) {
+    public @Nullable T getFromMap(@NotNull Map<DeviceDataKey<?>, Object> map, @Nullable T fallback) {
         return cast(map.getOrDefault(this, fallback));
+    }
+
+    public T computeIfAbsent(@NotNull Map<DeviceDataKey<?>, Object> map, @NotNull Supplier<T> compute) {
+        return cast(map.computeIfAbsent(this, k -> compute.get()));
     }
 
     public T cast(Object o) {

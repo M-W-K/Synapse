@@ -49,6 +49,9 @@ public sealed class LocalAxonConnection extends AxonConnection permits OldLocalA
                                BlockPos targetPos, ResourceLocation targetSlot, Vec3 targetRenderOffset, Vec3 targetRenderDirection,
                                AxonType axonType, @Nullable ConnectionType connectionType) {
         super(axonType, connectionType);
+        if (!this.getConnectionType().upstream()) {
+            throw new IllegalArgumentException("Local axon connections are assumed to always be upstream!");
+        }
         this.item = item;
         this.sourceSlot = sourceSlot;
         this.sourceRenderOffset = sourceRenderOffset;
@@ -61,7 +64,7 @@ public sealed class LocalAxonConnection extends AxonConnection permits OldLocalA
 
     protected LocalAxonConnection(@NotNull AxonItem item, ResourceLocation sourceSlot, Vec3 sourceRenderOffset, Vec3 sourceRenderDirection,
                                 BlockPos targetPos, ResourceLocation targetSlot, Vec3 targetRenderOffset, Vec3 targetRenderDirection,
-                                AxonType axonType, CompoundTag tag, @Nullable ConnectionType connectionType) {
+                                AxonType axonType, CompoundTag tag, ConnectionType connectionType) {
         super(axonType, tag, connectionType);
         this.item = item;
         this.sourceSlot = sourceSlot;

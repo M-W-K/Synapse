@@ -13,7 +13,6 @@ import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnmodifiableView;
 
 import java.util.Map;
-import java.util.function.BiConsumer;
 
 public interface IAxonBlockEntity extends ICapabilityProvider, IForgeBlockEntity {
 
@@ -51,11 +50,9 @@ public interface IAxonBlockEntity extends ICapabilityProvider, IForgeBlockEntity
 
     @Nullable LocalAxonConnection setUpstream(@NotNull LocalAxonConnection connection, boolean dropOld);
 
-    boolean removeDownstream(@NotNull BlockPos pos);
+    boolean removeDownstream(@NotNull BlockPos source, @NotNull LocalAxonConnection connection);
 
-    boolean addDownstream(@NotNull BlockPos pos);
-
-    void onUpstreamRemoved();
+    boolean addDownstream(@NotNull BlockPos source, @NotNull LocalAxonConnection connection);
 
     boolean removeUpstreamFrom(ResourceLocation slot);
 

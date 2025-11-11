@@ -3,7 +3,6 @@ package com.m_w_k.synapse.common.block;
 import com.m_w_k.synapse.SynapseUtil;
 import com.m_w_k.synapse.api.KnifeAction;
 import com.m_w_k.synapse.api.block.AxonDeviceDefinitions;
-import com.m_w_k.synapse.api.block.OldAxonDeviceDefinitions;
 import com.m_w_k.synapse.api.block.IAxonBlockEntity;
 import com.m_w_k.synapse.api.connect.AxonTree;
 import com.m_w_k.synapse.api.connect.AxonType;
@@ -34,7 +33,6 @@ import net.minecraftforge.network.NetworkHooks;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.BitSet;
 import java.util.Set;
 
 public abstract class AxonBlock extends BaseEntityBlock {
@@ -191,7 +189,7 @@ public abstract class AxonBlock extends BaseEntityBlock {
                                                        @NotNull InteractionHand hand, @NotNull BlockHitResult hit,
                                                        @NotNull IAxonBlockEntity usAxon, @NotNull KnifeItem knife,
                                                        @NotNull ItemStack knifeStack) {
-        return AxonDeviceDefinitions.STANDARD.values();
+        return knife.getAction() == KnifeAction.REMOVE ? null : AxonDeviceDefinitions.STANDARD.values();
     }
 
     protected @Nullable ResourceLocation determineHitSlot(@NotNull BlockState state, @NotNull Level level,

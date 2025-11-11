@@ -2,17 +2,27 @@ package com.m_w_k.synapse;
 
 import com.m_w_k.synapse.api.connect.ConnectionType;
 import com.m_w_k.synapse.api.connect.ConnectorLevel;
-import com.m_w_k.synapse.api.connect.DeviceDataKey;
+import com.m_w_k.synapse.api.connect.DeviceDataKeys;
+import com.mojang.serialization.Codec;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Set;
 import java.util.function.Function;
 import java.util.function.ToDoubleBiFunction;
 
 public final class SynapseUtil {
+
+    public static final ResourceLocation UNKNOWN = SynapseUtil.resLoc("unknown");
+
+    public static <T> Codec<Set<T>> setCodec(Codec<T> elementCodec) {
+        return Codec.list(elementCodec).xmap(ObjectOpenHashSet::new, ObjectArrayList::new);
+    }
 
     public static Direction facingTo(BlockPos from, BlockPos to) {
         BlockPos diff = to.subtract(from);
@@ -29,9 +39,7 @@ public final class SynapseUtil {
     }
 
     public static @NotNull ConnectorLevel actualLevel(@NotNull ConnectorLevel.Provider provider) {
-        var data = provider.getData();
-        if (data == null) return provider.getLevel();
-        return DeviceDataKey.RELAYING.getFromMap(data, provider.getLevel());
+        return provider.getData(DeviceDataKeys.RELAYING, provider.getLevel());
     }
 
     public static @NotNull ConnectionType actualTypeOf(@NotNull ConnectorLevel.Provider a, @NotNull ConnectorLevel.Provider b) {

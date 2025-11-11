@@ -2,10 +2,9 @@ package com.m_w_k.synapse.common.block.entity;
 
 import com.m_w_k.synapse.SynapseUtil;
 import com.m_w_k.synapse.api.block.AxonDeviceDefinitions;
-import com.m_w_k.synapse.api.block.OldAxonDeviceDefinitions;
 import com.m_w_k.synapse.api.block.IAxonBlockEntity;
 import com.m_w_k.synapse.api.connect.ConnectorLevel;
-import com.m_w_k.synapse.api.connect.DeviceDataKey;
+import com.m_w_k.synapse.api.connect.DeviceDataKeys;
 import com.m_w_k.synapse.common.block.RelayBlock;
 import com.m_w_k.synapse.common.connect.LocalAxonConnection;
 import com.m_w_k.synapse.common.connect.LocalConnectorDevice;
@@ -99,10 +98,10 @@ public class RelayBlockEntity extends AxonBlockEntity {
             BlockEntity be = getLevel().getBlockEntity(connection.getTargetPos());
             if (be instanceof IAxonBlockEntity a) {
                 LocalConnectorDevice device = getBySlot(connection.getSourceSlot());
-                device.getData().put(DeviceDataKey.RELAYING, SynapseUtil.actualLevel(a.getBySlot(connection.getTargetSlot())));
+                device.getData().put(DeviceDataKeys.RELAYING, SynapseUtil.actualLevel(a.getBySlot(connection.getTargetSlot())));
                 var treeDevice = device.cache();
                 if (treeDevice != null && treeDevice.hasUpstream()) {
-                    treeDevice.getData().put(DeviceDataKey.RELAYING, SynapseUtil.actualLevel(treeDevice.getUpstream()));
+                    treeDevice.getData().put(DeviceDataKeys.RELAYING, SynapseUtil.actualLevel(treeDevice.getUpstream()));
                 }
             }
         }

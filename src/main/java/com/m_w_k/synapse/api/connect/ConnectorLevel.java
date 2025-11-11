@@ -4,6 +4,7 @@ import com.mojang.serialization.Codec;
 import it.unimi.dsi.fastutil.objects.ObjectRBTreeSet;
 import net.minecraft.util.StringRepresentable;
 import net.minecraftforge.common.IExtensibleEnum;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -74,6 +75,13 @@ public enum ConnectorLevel implements StringRepresentable, IExtensibleEnum {
         @Nullable
         default Map<DeviceDataKey<?>, Object> getData() {
             return null;
+        }
+
+        @Contract("_,!null->!null")
+        default @Nullable <T> T getData(@NotNull DeviceDataKey<T> key, @Nullable T fallback) {
+            var map = getData();
+            if (map == null) return fallback;
+            return key.getFromMap(map, fallback);
         }
     }
 }
