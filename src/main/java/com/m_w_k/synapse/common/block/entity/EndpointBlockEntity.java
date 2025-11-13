@@ -1,9 +1,6 @@
 package com.m_w_k.synapse.common.block.entity;
 
-import com.m_w_k.synapse.api.block.AxonDeviceDefinitions;
-import com.m_w_k.synapse.api.block.OldAxonDeviceDefinitions;
-import com.m_w_k.synapse.api.block.IAxonBlockEntity;
-import com.m_w_k.synapse.api.block.IFacedAxonBlockEntity;
+import com.m_w_k.synapse.api.block.*;
 import com.m_w_k.synapse.api.block.ruleset.TransferRuleset;
 import com.m_w_k.synapse.api.connect.AxonType;
 import com.m_w_k.synapse.api.connect.ConnectorLevel;
@@ -12,6 +9,7 @@ import com.m_w_k.synapse.common.connect.AbstractExposer;
 import com.m_w_k.synapse.common.connect.IEndpointCapability;
 import com.m_w_k.synapse.common.connect.LocalAxonConnection;
 import com.m_w_k.synapse.common.connect.LocalConnectorDevice;
+import com.m_w_k.synapse.common.item.AxonBlockItem;
 import com.m_w_k.synapse.registry.SynapseBlockEntityRegistry;
 import it.unimi.dsi.fastutil.Pair;
 import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
@@ -19,6 +17,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
@@ -26,6 +25,9 @@ import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.Map;
+import java.util.Optional;
 
 /**
  * Endpoints are a network's connection with the rest of the minecraft world, and serve requests
@@ -37,9 +39,6 @@ public class EndpointBlockEntity extends AxonBlockEntity implements IFacedAxonBl
 
     public EndpointBlockEntity(BlockPos pos, BlockState state) {
         super(SynapseBlockEntityRegistry.ENDPOINT_BLOCK.get(), pos, state);
-        AxonDeviceDefinitions.ENDPOINTS.forEach((pair, resloc) -> {
-            devices.put(resloc, new LocalConnectorDevice(pair.key(), ConnectorLevel.ENDPOINT));
-        });
         AxonDeviceDefinitions.ENDPOINT_CAPABILITIES.forEach((t, f) -> capabilites.put(t.getCapability(), LazyOptional.of(() -> f.apply(this))));
     }
 
@@ -69,14 +68,9 @@ public class EndpointBlockEntity extends AxonBlockEntity implements IFacedAxonBl
     }
 
     @Override
-    public @NotNull String getNameBySlot(ResourceLocation slot) {
+    public @NotNull String getNameBySlot(@NotNull ResourceLocation slot) {
         var pair = AxonDeviceDefinitions.endpoint(slot, true);
         return pair.value().name() + "_" + pair.key().name();
-    }
-
-    @Override
-    public boolean slotIsActive(ResourceLocation slot) {
-        return super.slotIsActive(slot) && activeOnSide(null, AxonDeviceDefinitions.endpoint(slot, true).right());
     }
 
     @Override
@@ -93,7 +87,10 @@ public class EndpointBlockEntity extends AxonBlockEntity implements IFacedAxonBl
 
     public boolean activeOnSide(@Nullable Capability<?> cap, Direction side) {
         if (side == null) return false;
-        return getBlockState().getValue(EndpointBlock.PROPERTY_BY_DIRECTION.get(side));
+        AxonType type = AxonDeviceDefinitions.ENDPOINT_TYPES_BY_CAPABILITY.get(cap);
+        if (type == null) return false;
+        ResourceLocation resloc = AxonDeviceDefinitions.endpoint(type, side, false);
+        return resloc != null && slotIsActive(resloc);
     }
 
     @Override
@@ -138,7 +135,29 @@ public class EndpointBlockEntity extends AxonBlockEntity implements IFacedAxonBl
         }
     }
 
+    @Override
+    public void installModules(@NotNull AxonBlockItem item, @NotNull BlockPlaceContext context) {
+        ModuleDataProtocols.readEndpointModules(this::installModule, context.getItemInHand(),
+                EndpointBlock.getKeyComponent(context.getHitResult(), getBlockPos()));
+    }
+
+    @Override
+    public @NotNull LocalConnectorDevice installModule(@NotNull ResourceLocation slotToAdd) {
+        return devices.computeIfAbsent(slotToAdd, k -> new LocalConnectorDevice(AxonDeviceDefinitions.endpoint((ResourceLocation) k, true).key(), ConnectorLevel.ENDPOINT));
+    }
+
+    @Override
+    protected Optional<CompoundTag> writeModuleData() {
+        CompoundTag tag = new CompoundTag();
+        for (Direction dir : Direction.values()) {
+            ModuleDataProtocols.writeEndpointModules(devices, dir)
+                    .ifPresent(t -> tag.put(ModuleDataProtocols.endpointBEKey(dir), t));
+        }
+        return tag.isEmpty() ? Optional.empty() : Optional.of(tag);
+    }
+
     protected <T> void updateDevice(AxonType type, Capability<T> cap, Direction side) {
+        if (!hasByFace(side, type)) return;
         LocalConnectorDevice device = getByFace(side, type);
         if (getLevel() != null) {
             BlockEntity be = getLevel().getBlockEntity(getBlockPos().relative(side));

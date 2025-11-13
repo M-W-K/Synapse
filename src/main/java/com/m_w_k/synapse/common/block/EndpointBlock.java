@@ -3,9 +3,9 @@ package com.m_w_k.synapse.common.block;
 import com.m_w_k.synapse.SynapseUtil;
 import com.m_w_k.synapse.api.KnifeAction;
 import com.m_w_k.synapse.api.block.AxonDeviceDefinitions;
-import com.m_w_k.synapse.api.block.OldAxonDeviceDefinitions;
 import com.m_w_k.synapse.api.block.IAxonBlockEntity;
 import com.m_w_k.synapse.api.connect.AxonType;
+import com.m_w_k.synapse.api.item.AxonTypeItem;
 import com.m_w_k.synapse.common.block.entity.EndpointBlockEntity;
 import com.m_w_k.synapse.common.item.AxonItem;
 import com.m_w_k.synapse.common.item.KnifeItem;
@@ -36,6 +36,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.PipeBlock;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.SimpleWaterloggedBlock;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -100,29 +101,12 @@ public class EndpointBlock extends AxonBlock implements SimpleWaterloggedBlock {
     }
 
     @Override
-    protected InteractionResult handleKnife(@NotNull BlockState state, @NotNull Level level, @NotNull BlockPos pos, @NotNull Player player, @NotNull InteractionHand hand, @NotNull BlockHitResult hit, @NotNull IAxonBlockEntity usAxon, @NotNull KnifeItem knife, @NotNull ItemStack knifeStack) {
-        InteractionResult res = super.handleKnife(state, level, pos, player, hand, hit, usAxon, knife, knifeStack);
-        if (res.consumesAction() && knife.getAction() == KnifeAction.REMOVE) {
-            if (state.getValue(ENDPOINTS) == 1) {
-                dropResources(state, level, pos);
-                level.removeBlock(pos, false);
-            } else {
-                Vec3 rel = hit.getLocation().subtract(pos.getCenter());
-                Direction dir = Direction.getNearest(rel.x, rel.y, rel.z);
-                if (state.getValue(PROPERTY_BY_DIRECTION.get(dir))) {
-                    level.setBlock(pos, state.setValue(PROPERTY_BY_DIRECTION.get(dir), false).setValue(ENDPOINTS, state.getValue(ENDPOINTS) - 1), Block.UPDATE_ALL);
-                    Block.popResource(level, pos, new ItemStack(SynapseBlockRegistry.ENDPOINT_BASIC.get()));
-                }
-            }
-        }
-        return res;
-    }
-
-    @Override
     protected Set<ResourceLocation> knifeAffectedSlots(@NotNull BlockState state, @NotNull Level level, @NotNull BlockPos pos, @NotNull Player player, @NotNull InteractionHand hand, @NotNull BlockHitResult hit, @NotNull IAxonBlockEntity usAxon, @NotNull KnifeItem knife, @NotNull ItemStack knifeStack) {
+        if (knife.getAction() == KnifeAction.REMOVE && state.getValue(ENDPOINTS) == 1) {
+            return null;
+        }
         Set<ResourceLocation> set = new ObjectOpenHashSet<>();
-        Vec3 rel = hit.getLocation().subtract(pos.getCenter());
-        Direction dir = Direction.getNearest(rel.x, rel.y, rel.z);
+        Direction dir = getKeyComponent(hit, pos);
         for (AxonType type : AxonType.values()) {
             ResourceLocation slot = AxonDeviceDefinitions.endpoint(type, dir, false);
             if (slot != null) set.add(slot);
@@ -131,12 +115,33 @@ public class EndpointBlock extends AxonBlock implements SimpleWaterloggedBlock {
     }
 
     @Override
+    protected void beforeKnifeActions(@NotNull BlockState state, @NotNull Level level, @NotNull BlockPos pos, @NotNull Player player, @NotNull InteractionHand hand, @NotNull BlockHitResult hit, @NotNull IAxonBlockEntity usAxon, @NotNull KnifeItem knife, @NotNull ItemStack knifeStack, @Nullable Set<ResourceLocation> affectedSlots) {
+        if (affectedSlots == null || knife.getAction() != KnifeAction.REMOVE) return;
+        Direction dir = getKeyComponent(hit, pos);
+        if (state.getValue(PROPERTY_BY_DIRECTION.get(dir))) {
+            level.setBlock(pos, state.setValue(PROPERTY_BY_DIRECTION.get(dir), false).setValue(ENDPOINTS, state.getValue(ENDPOINTS) - 1), Block.UPDATE_ALL);
+            BlockState dropState = state.setValue(ENDPOINTS, 1);
+            for (Direction d : Direction.values()) {
+                dropState = dropState.setValue(PROPERTY_BY_DIRECTION.get(d), d == dir);
+            }
+            dropResources(dropState, level, pos, (BlockEntity) usAxon);
+        }
+    }
+
+    @Override
     protected @Nullable ResourceLocation determineHitSlot(@NotNull BlockState state, @NotNull Level level, @NotNull BlockPos pos, @NotNull Player player, @NotNull InteractionHand hand, @NotNull BlockHitResult hit) {
-        if (player.getItemInHand(hand).getItem() instanceof AxonItem iAxon) {
-            Vec3 rel = hit.getLocation().subtract(hit.getBlockPos().getCenter());
-            return AxonDeviceDefinitions.endpoint(iAxon.getType(), Direction.getNearest(rel.x, rel.y, rel.z), false);
+        if (player.getItemInHand(hand).getItem() instanceof AxonTypeItem iAxon) {
+            Direction dir = getKeyComponent(hit, pos);
+            if (state.getValue(PROPERTY_BY_DIRECTION.get(dir))) {
+                return AxonDeviceDefinitions.endpoint(iAxon.getType(), dir, false);
+            }
         }
         return null;
+    }
+
+    public static @NotNull Direction getKeyComponent(@NotNull BlockHitResult hit, @NotNull BlockPos pos) {
+        Vec3 rel = hit.getLocation().subtract(pos.getCenter());
+        return Direction.getNearest(rel.x, rel.y, rel.z);
     }
 
     @Override
@@ -148,23 +153,21 @@ public class EndpointBlock extends AxonBlock implements SimpleWaterloggedBlock {
     @Nullable
     public BlockState getStateForPlacement(BlockPlaceContext ctx) {
         BlockState blockstate = ctx.getLevel().getBlockState(ctx.getClickedPos());
-        Direction face = ctx.getClickedFace();
-        if (ctx.isInside()) face = face.getOpposite();
         if (!blockstate.is(this)) {
-            face = face.getOpposite();
             FluidState fluidstate = ctx.getLevel().getFluidState(ctx.getClickedPos());
             boolean flag = fluidstate.getType() == Fluids.WATER;
             blockstate = defaultBlockState().setValue(WATERLOGGED, flag);
         } else {
             blockstate = blockstate.setValue(ENDPOINTS, Math.min(6, blockstate.getValue(ENDPOINTS) + 1));
         }
-        return blockstate.setValue(PROPERTY_BY_DIRECTION.get(face), true);
+        return blockstate.setValue(PROPERTY_BY_DIRECTION.get(getKeyComponent(ctx.getHitResult(), ctx.getClickedPos())), true);
     }
 
     @Override
     public boolean canBeReplaced(@NotNull BlockState state, BlockPlaceContext ctx) {
         return !ctx.isSecondaryUseActive() && ctx.getItemInHand().is(this.asItem()) &&
-                !state.getValue(PROPERTY_BY_DIRECTION.get(ctx.getClickedFace())) || super.canBeReplaced(state, ctx);
+                !state.getValue(PROPERTY_BY_DIRECTION.get(getKeyComponent(ctx.getHitResult(), ctx.getClickedPos())))
+                || super.canBeReplaced(state, ctx);
     }
 
     @Override

@@ -16,6 +16,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.EnumMap;
 import java.util.List;
 
@@ -65,7 +66,8 @@ public abstract class AbstractExposer<T, V extends AbstractExposer<T, V, G>, G> 
     }
 
     protected @NotNull List<AxonTree.Connection<T>> getConnections() {
-        if (associated.left().isEmpty()) return List.of();
+        if (associated.left().isEmpty() ||
+                !getOwner().hasByFace(associated.left().get().getFirst(), getType())) return List.of();
         if (!getOwner().removed() && getOwner().level() != null) {
             long time = getOwner().level().getGameTime();
             if (time != cacheTick || cache == null) {

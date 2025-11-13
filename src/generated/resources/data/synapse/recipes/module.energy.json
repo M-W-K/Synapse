@@ -1,0 +1,22 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "i": {
+      "item": "minecraft:gold_ingot"
+    },
+    "n": {
+      "item": "synapse:biosteel_nugget"
+    }
+  },
+  "pattern": [
+    " n ",
+    "nin",
+    " n "
+  ],
+  "result": {
+    "count": 2,
+    "item": "synapse:module.energy"
+  },
+  "show_notification": true
+}

@@ -3,21 +3,33 @@ package com.m_w_k.synapse.common.block.entity;
 import com.m_w_k.synapse.SynapseUtil;
 import com.m_w_k.synapse.api.block.AxonDeviceDefinitions;
 import com.m_w_k.synapse.api.block.IAxonBlockEntity;
+import com.m_w_k.synapse.api.block.ModuleDataProtocols;
+import com.m_w_k.synapse.api.connect.AxonType;
 import com.m_w_k.synapse.api.connect.ConnectorLevel;
 import com.m_w_k.synapse.api.connect.DeviceDataKeys;
+import com.m_w_k.synapse.common.block.EndpointBlock;
 import com.m_w_k.synapse.common.block.RelayBlock;
 import com.m_w_k.synapse.common.connect.LocalAxonConnection;
 import com.m_w_k.synapse.common.connect.LocalConnectorDevice;
+import com.m_w_k.synapse.common.item.AxonBlockItem;
 import com.m_w_k.synapse.registry.SynapseBlockEntityRegistry;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.Map;
+import java.util.Optional;
 
 /**
  * Relays are a critical component of any large network that allows extending the effective
@@ -63,9 +75,21 @@ public class RelayBlockEntity extends AxonBlockEntity {
 
     public RelayBlockEntity(BlockPos pos, BlockState state) {
         super(SynapseBlockEntityRegistry.RELAY_BLOCK.get(), pos, state);
-        AxonDeviceDefinitions.RELAYS.forEach((pair, resloc) -> {
-            devices.put(resloc, new LocalConnectorDevice(pair.value(), ConnectorLevel.RELAY));
-        });
+    }
+
+    @Override
+    public void onLoad() {
+        super.onLoad();
+        if (getLevel() == null) return;
+        // check for improper blockstate as a backwards compatibility datafix
+        BlockState state = getBlockState();
+        for (BooleanProperty prop : RelayBlock.PROPERTY_BY_INT) {
+            if (state.getValue(prop)) return;
+        }
+        for (int i = 0; i < state.getValue(RelayBlock.RELAYS); i++) {
+            state = state.setValue(RelayBlock.PROPERTY_BY_INT[i], true);
+        }
+        getLevel().setBlock(getBlockPos(), state, Block.UPDATE_CLIENTS + Block.UPDATE_KNOWN_SHAPE);
     }
 
     @Override
@@ -94,9 +118,9 @@ public class RelayBlockEntity extends AxonBlockEntity {
 
     @Override
     public @Nullable LocalAxonConnection setUpstream(@NotNull LocalAxonConnection connection, boolean dropOld) {
-        if (getLevel() != null) {
+        if (getLevel() != null && hasSlot(connection.getSourceSlot())) {
             BlockEntity be = getLevel().getBlockEntity(connection.getTargetPos());
-            if (be instanceof IAxonBlockEntity a) {
+            if (be instanceof IAxonBlockEntity a && a.hasSlot(connection.getTargetSlot())) {
                 LocalConnectorDevice device = getBySlot(connection.getSourceSlot());
                 device.getData().put(DeviceDataKeys.RELAYING, SynapseUtil.actualLevel(a.getBySlot(connection.getTargetSlot())));
                 var treeDevice = device.cache();
@@ -109,7 +133,7 @@ public class RelayBlockEntity extends AxonBlockEntity {
     }
 
     @Override
-    public boolean allowsUpstream(ResourceLocation slot, LocalConnectorDevice upstream) {
+    public boolean allowsUpstream(@NotNull ResourceLocation slot, LocalConnectorDevice upstream) {
         if (!super.allowsUpstream(slot, upstream)) return false;
         LocalConnectorDevice us = getBySlot(slot);
         if (SynapseUtil.actualLevel(us) != ConnectorLevel.RELAY) {
@@ -120,21 +144,38 @@ public class RelayBlockEntity extends AxonBlockEntity {
     }
 
     @Override
-    public boolean allowsDownstream(ResourceLocation slot, LocalConnectorDevice downstream) {
-        if (getLevel() == null) return false;
+    public boolean allowsDownstream(@NotNull ResourceLocation slot, LocalConnectorDevice downstream) {
+        if (getLevel() == null || !hasSlot(slot)) return false;
         LocalConnectorDevice device = getBySlot(slot).ensureRegistered(getLevel());
         return super.allowsDownstream(slot, downstream) && device.upstream() != null
                 && (device.cache() == null || !device.cache().downstream().hasNext());
     }
 
     @Override
-    public @NotNull String getNameBySlot(ResourceLocation slot) {
+    public @NotNull String getNameBySlot(@NotNull ResourceLocation slot) {
         var pair = AxonDeviceDefinitions.relay(slot, true);
         return pair.value().name() + "_" + pair.keyInt();
     }
 
     @Override
-    public boolean slotIsActive(ResourceLocation slot) {
-        return super.slotIsActive(slot) && getBlockState().getValue(RelayBlock.RELAYS) > AxonDeviceDefinitions.relay(slot, true).firstInt();
+    public void installModules(@NotNull AxonBlockItem item, @NotNull BlockPlaceContext context) {
+        ModuleDataProtocols.readRelayModules(this::installModule, context.getItemInHand(),
+                RelayBlock.getKeyComponent(context.getHitResult(), getBlockPos(), getBlockState()));
+    }
+
+    @Override
+    public @NotNull LocalConnectorDevice installModule(@NotNull ResourceLocation slotToAdd) {
+        return devices.computeIfAbsent(slotToAdd, k -> new LocalConnectorDevice(AxonDeviceDefinitions.relay((ResourceLocation) k, true).value(), ConnectorLevel.RELAY));
+    }
+
+    @Override
+    protected Optional<CompoundTag> writeModuleData() {
+        CompoundTag tag = new CompoundTag();
+        for (int i = 0; i < 4; i++) {
+            int finalI = i;
+            ModuleDataProtocols.writeRelayModules(devices, i)
+                    .ifPresent(t -> tag.put(ModuleDataProtocols.relayBEKey(finalI), t));
+        }
+        return tag.isEmpty() ? Optional.empty() : Optional.of(tag);
     }
 }

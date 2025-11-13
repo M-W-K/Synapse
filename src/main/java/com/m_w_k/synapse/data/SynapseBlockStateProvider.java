@@ -49,16 +49,16 @@ public class SynapseBlockStateProvider extends BlockStateProvider {
         }
         relayBuilder.part().modelFile(models().getExistingFile(modLoc("block/relay_1")))
                 .rotationX(x).rotationY((int) sector.toYRot()).addModel()
-                .condition(RelayBlock.MOUNT_DIRECTION, sector).condition(RelayBlock.RELAYS, 1, 2, 3, 4).end();
+                .condition(RelayBlock.MOUNT_DIRECTION, sector).condition(RelayBlock.ONE, true).end();
         relayBuilder.part().modelFile(models().getExistingFile(modLoc("block/relay_2")))
                 .rotationX(x).rotationY((int) sector.toYRot()).addModel()
-                .condition(RelayBlock.MOUNT_DIRECTION, sector).condition(RelayBlock.RELAYS, 2, 3, 4).end();
+                .condition(RelayBlock.MOUNT_DIRECTION, sector).condition(RelayBlock.TWO, true).end();
         relayBuilder.part().modelFile(models().getExistingFile(modLoc("block/relay_3")))
                 .rotationX(x).rotationY((int) sector.toYRot()).addModel()
-                .condition(RelayBlock.MOUNT_DIRECTION, sector).condition(RelayBlock.RELAYS, 3, 4).end();
+                .condition(RelayBlock.MOUNT_DIRECTION, sector).condition(RelayBlock.THREE, true).end();
         relayBuilder.part().modelFile(models().getExistingFile(modLoc("block/relay_4")))
                 .rotationX(x).rotationY((int) sector.toYRot()).addModel()
-                .condition(RelayBlock.MOUNT_DIRECTION, sector).condition(RelayBlock.RELAYS, 4).end();
+                .condition(RelayBlock.MOUNT_DIRECTION, sector).condition(RelayBlock.FOUR, true).end();
     }
 
     private void simple(Block block, String file) {

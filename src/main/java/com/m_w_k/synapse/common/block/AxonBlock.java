@@ -7,10 +7,13 @@ import com.m_w_k.synapse.api.block.IAxonBlockEntity;
 import com.m_w_k.synapse.api.connect.AxonTree;
 import com.m_w_k.synapse.api.connect.AxonType;
 import com.m_w_k.synapse.api.connect.ConnectionType;
+import com.m_w_k.synapse.api.item.AxonTypeItem;
 import com.m_w_k.synapse.common.connect.LocalAxonConnection;
 import com.m_w_k.synapse.common.connect.LocalConnectorDevice;
+import com.m_w_k.synapse.common.item.AxonBlockItem;
 import com.m_w_k.synapse.common.item.AxonItem;
 import com.m_w_k.synapse.common.item.KnifeItem;
+import com.m_w_k.synapse.common.item.ModuleItem;
 import com.m_w_k.synapse.common.menu.BasicConnectorMenu;
 import com.m_w_k.synapse.config.SynapseConfigs;
 import net.minecraft.core.BlockPos;
@@ -23,6 +26,7 @@ import net.minecraft.world.MenuProvider;
 import net.minecraft.world.SimpleMenuProvider;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BaseEntityBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -52,6 +56,14 @@ public abstract class AxonBlock extends BaseEntityBlock {
         if (!(stack.getItem() instanceof AxonItem iAxon)) {
             if (stack.getItem() instanceof KnifeItem knife) {
                 return handleKnife(state, level, pos, player, hand, hit, usAxon, knife, stack);
+            } else if (stack.getItem() instanceof ModuleItem m) {
+                ResourceLocation slot = determineHitSlot(state, level, pos, player, hand, hit);
+                if (slot == null || !allowModuleInstallBlock(m.getType(), usAxon, slot)) {
+                    return InteractionResult.FAIL;
+                }
+                usAxon.installModule(slot);
+                if (!player.getAbilities().instabuild) stack.shrink(1);
+                return InteractionResult.sidedSuccess(level.isClientSide);
             }
             if (noMenuItem(stack)) return InteractionResult.PASS;
             if (hand == InteractionHand.OFF_HAND || !hasInteractMenu()) return InteractionResult.PASS;
@@ -158,29 +170,38 @@ public abstract class AxonBlock extends BaseEntityBlock {
         NetworkHooks.openScreen(player, prov, BasicConnectorMenu.writer(be));
     }
 
-    protected InteractionResult handleKnife(@NotNull BlockState state, @NotNull Level level,
-                               @NotNull BlockPos pos, @NotNull Player player,
-                               @NotNull InteractionHand hand, @NotNull BlockHitResult hit,
-                               @NotNull IAxonBlockEntity usAxon, @NotNull KnifeItem knife,
-                                            @NotNull ItemStack knifeStack) {
+    protected InteractionResult handleKnife(@NotNull BlockState state, @NotNull Level level, @NotNull BlockPos pos,
+                                            @NotNull Player player, @NotNull InteractionHand hand, @NotNull BlockHitResult hit,
+                                            @NotNull IAxonBlockEntity usAxon, @NotNull KnifeItem knife, @NotNull ItemStack knifeStack) {
         if (knife.getAction() == KnifeAction.NONE) return InteractionResult.PASS;
         Set<ResourceLocation> slots = knifeAffectedSlots(state, level, pos, player, hand, hit, usAxon, knife, knifeStack);
+        beforeKnifeActions(state, level, pos, player, hand, hit, usAxon, knife, knifeStack, slots);
         if (slots == null) {
-            dropResources(state, level, pos);
+            dropResources(state, level, pos, (BlockEntity) usAxon);
             level.removeBlock(pos, false);
         } else {
             if (slots.isEmpty()) return InteractionResult.FAIL;
             for (ResourceLocation resloc : slots) {
                 switch (knife.getAction()) {
-                    case SEVER -> {
-                        usAxon.removeUpstreamFrom(resloc);
-                        usAxon.removeDownstreamFrom(resloc);
-                    }
-                    case REMOVE -> usAxon.retireSlot(resloc);
+                    case SEVER -> handleKnifeSever(state, level, pos, player, hand, hit, usAxon, resloc);
+                    case REMOVE -> handleKnifeRemove(state, level, pos, player, hand, hit, usAxon, resloc);
                 }
             }
         }
         return InteractionResult.sidedSuccess(level.isClientSide);
+    }
+
+    protected void handleKnifeSever(@NotNull BlockState state, @NotNull Level level, @NotNull BlockPos pos,
+                                    @NotNull Player player, @NotNull InteractionHand hand, @NotNull BlockHitResult hit,
+                                    @NotNull IAxonBlockEntity usAxon, @NotNull ResourceLocation resloc) {
+        usAxon.removeUpstreamFrom(resloc);
+        usAxon.removeDownstreamFrom(resloc);
+    }
+
+    protected void handleKnifeRemove(@NotNull BlockState state, @NotNull Level level, @NotNull BlockPos pos,
+                                     @NotNull Player player, @NotNull InteractionHand hand, @NotNull BlockHitResult hit,
+                                     @NotNull IAxonBlockEntity usAxon, @NotNull ResourceLocation resloc) {
+        usAxon.retireSlot(resloc);
     }
 
     // note -- only return null if the block should be removed by this knife action, otherwise return an empty set.
@@ -192,12 +213,28 @@ public abstract class AxonBlock extends BaseEntityBlock {
         return knife.getAction() == KnifeAction.REMOVE ? null : AxonDeviceDefinitions.STANDARD.values();
     }
 
+    protected void beforeKnifeActions(@NotNull BlockState state, @NotNull Level level,
+                                                                  @NotNull BlockPos pos, @NotNull Player player,
+                                                                  @NotNull InteractionHand hand, @NotNull BlockHitResult hit,
+                                                                  @NotNull IAxonBlockEntity usAxon, @NotNull KnifeItem knife,
+                                                                  @NotNull ItemStack knifeStack, @Nullable Set<ResourceLocation> affectedSlots) {}
+
     protected @Nullable ResourceLocation determineHitSlot(@NotNull BlockState state, @NotNull Level level,
                                                           @NotNull BlockPos pos, @NotNull Player player,
                                                           @NotNull InteractionHand hand, @NotNull BlockHitResult hit) {
-        if (player.getItemInHand(hand).getItem() instanceof AxonItem iAxon) {
+        if (player.getItemInHand(hand).getItem() instanceof AxonTypeItem iAxon) {
             return AxonDeviceDefinitions.standard(iAxon.getType(), false);
         }
         return null;
+    }
+
+    public boolean allowModuleInstallItem(Set<AxonType> modules, AxonBlockItem item, ItemStack stack) {
+        // ensure the intersection is empty
+        modules.retainAll(item.installedModules(stack).keySet());
+        return modules.isEmpty();
+    }
+
+    public boolean allowModuleInstallBlock(AxonType module, IAxonBlockEntity usAxon, ResourceLocation slot) {
+        return !usAxon.hasSlot(slot);
     }
 }

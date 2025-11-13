@@ -1,4 +1,8 @@
-// 1.20.1	2025-11-01T13:53:50.614604	Item Models: synapse
+// 1.20.1	2025-11-11T16:42:12.199782	Item Models: synapse
+57c2a7e5146f3e24d4fcee55b7126a902100257f assets/synapse/models/item/axon.energy.json
+ed6874c90a9882b46f792dfe6b9cc3744ee4d931 assets/synapse/models/item/axon.fluid.json
+99a9f362f8b5fcf524c7cb90a3380f8ebed35ebb assets/synapse/models/item/axon.item.json
+863ef715b5c8bba2ba10fbfdc8be8a80992aec37 assets/synapse/models/item/axon.redstone.json
 49957518fd8e64a6bdc75c52c7d395b7e1937b3c assets/synapse/models/item/biosteel_ingot.json
 199e47a54d90e0c69df93b8028f8c013033af2a8 assets/synapse/models/item/biosteel_knife.json
 5dcd2dff03cb4a4d7e01b1eb9c2a885d818677ff assets/synapse/models/item/biosteel_nugget.json
@@ -7,6 +11,10 @@
 41fe6791aae137b41c12d9c394fdcf0d5e06467d assets/synapse/models/item/duned_gold_nugget.json
 007f2d5f0d8cf8a95accb9deb5b63ee73f0f802a assets/synapse/models/item/ender_crystal.json
 671cb9f5181bd8681150ec706820e5c3465555b0 assets/synapse/models/item/magma_crystal.json
+a96f6e8286c45be5d414d3c05cf978abc15ca610 assets/synapse/models/item/module.energy.json
+b654a58ee85186369f55ed05cc3eed13fa20e6d5 assets/synapse/models/item/module.fluid.json
+98409a2675776f624da9af7a775fbdd6f7b68ddb assets/synapse/models/item/module.item.json
+38e2f01f762e2ffe8f8a87d0d85213addc3049f4 assets/synapse/models/item/module.redstone.json
 65d4b750bee97805089b388c1728567942eff9ca assets/synapse/models/item/neural_thread.json
 76646adc4f803a1db0561825d7c49a93c9e1ba76 assets/synapse/models/item/piezoelectric_crystal.json
 0fb3f10b8bbb4ada17d71da87397cc85cbea6a8f assets/synapse/models/item/transfer_powder.json

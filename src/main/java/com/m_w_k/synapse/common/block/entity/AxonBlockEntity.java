@@ -2,6 +2,7 @@ package com.m_w_k.synapse.common.block.entity;
 
 import com.m_w_k.synapse.SynapseUtil;
 import com.m_w_k.synapse.api.block.IAxonBlockEntity;
+import com.m_w_k.synapse.api.block.ModuleDataProtocols;
 import com.m_w_k.synapse.api.block.OldAxonDeviceDefinitions;
 import com.m_w_k.synapse.api.connect.AxonTree;
 import com.m_w_k.synapse.api.connect.DeviceDataKeys;
@@ -10,13 +11,12 @@ import com.m_w_k.synapse.common.connect.LocalConnectorDevice;
 import com.mojang.datafixers.util.Either;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
-import it.unimi.dsi.fastutil.objects.Object2ReferenceOpenHashMap;
-import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
+import it.unimi.dsi.fastutil.objects.*;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
@@ -30,14 +30,12 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import org.jetbrains.annotations.MustBeInvokedByOverriders;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnmodifiableView;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.function.IntFunction;
 import java.util.function.UnaryOperator;
 
@@ -58,6 +56,7 @@ public abstract class AxonBlockEntity extends BlockEntity implements IAxonBlockE
         }
         return map;
     }), Either::left);
+
     protected final @NotNull Object2ReferenceOpenHashMap<ResourceLocation, LocalConnectorDevice> devices = new Object2ReferenceOpenHashMap<>();
 
     public AxonBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
@@ -104,6 +103,7 @@ public abstract class AxonBlockEntity extends BlockEntity implements IAxonBlockE
 
     @Override
     public @Nullable LocalAxonConnection setUpstream(@NotNull LocalAxonConnection connection, boolean dropOld) {
+        if (!hasSlot(connection.getSourceSlot())) return null;
         LocalAxonConnection prev = getBySlot(connection.getSourceSlot()).setUpstream(connection);
         if (getLevel() != null) {
             BlockEntity be = getLevel().getBlockEntity(connection.getTargetPos());
@@ -141,12 +141,13 @@ public abstract class AxonBlockEntity extends BlockEntity implements IAxonBlockE
     }
 
     protected Set<Pair<BlockPos, ResourceLocation>> getDownstream(@NotNull ResourceLocation slot) {
+        if (!hasSlot(slot)) return Collections.emptySet();
         return DeviceDataKeys.DOWNSTREAM.computeIfAbsent(getBySlot(slot).getData(), ObjectOpenHashSet::new);
     }
 
     @Override
     public boolean removeUpstreamFrom(ResourceLocation slot) {
-        if (getLevel() == null) return false;
+        if (getLevel() == null || !hasSlot(slot)) return false;
         LocalConnectorDevice device = getBySlot(slot);
         LocalAxonConnection connection = device.upstream();
         if (connection == null) return false;
@@ -154,7 +155,7 @@ public abstract class AxonBlockEntity extends BlockEntity implements IAxonBlockE
         Block.popResource(getLevel(), getBlockPos(), connection.getItem().getItemWhenRemoved(connection));
         clientSyncDataChanged();
         device.setUpstream(null);
-        if ((be instanceof IAxonBlockEntity a) && !be.isRemoved()) {
+        if ((be instanceof IAxonBlockEntity a) && !be.isRemoved() && a.hasSlot(connection.getTargetSlotOldDataSafe(a))) {
             AxonTree.load(getLevel(), connection.getAxonType(), connection.getAxonType().getCapability())
                     .ifPresent(tree -> tree.removeConnection(device.treeID(), null, a.getBySlot(connection.getTargetSlotOldDataSafe(a)).treeID(), null));
             a.removeDownstream(this.getBlockPos(), connection);
@@ -164,7 +165,7 @@ public abstract class AxonBlockEntity extends BlockEntity implements IAxonBlockE
 
     @Override
     public void removeDownstreamFrom(ResourceLocation slot) {
-        if (getLevel() == null) return;
+        if (getLevel() == null || !hasSlot(slot)) return;
         LocalConnectorDevice device = getBySlot(slot);
         handleRemovingDownstreamUpstream(slot, device);
         AxonTree.load(getLevel(), device.type(), device.type().getCapability())
@@ -179,8 +180,8 @@ public abstract class AxonBlockEntity extends BlockEntity implements IAxonBlockE
 
     @Override
     public void retireSlot(ResourceLocation slot) {
-        if (!(getLevel() instanceof ServerLevel)) return;
-        var d1 = devices.get(slot);
+        if (!(getLevel() instanceof ServerLevel) || !hasSlot(slot)) return;
+        var d1 = getBySlot(slot);
         handleRemovingDownstreamUpstream(slot, d1);
         AxonTree.load(getLevel(), d1.type(), d1.type().getCapability())
                 .ifPresent(t -> t.retire(d1.treeID()));
@@ -191,6 +192,7 @@ public abstract class AxonBlockEntity extends BlockEntity implements IAxonBlockE
             a.removeDownstream(getBlockPos(), connection);
         }
         Block.popResource(getLevel(), getBlockPos(), connection.getItem().getItemWhenRemoved(connection));
+        devices.remove(slot);
     }
 
     protected void handleRemovingDownstreamUpstream(ResourceLocation slot, LocalConnectorDevice device) {
@@ -215,11 +217,6 @@ public abstract class AxonBlockEntity extends BlockEntity implements IAxonBlockE
     }
 
     @Override
-    public boolean slotIsActive(ResourceLocation slot) {
-        return hasSlot(slot);
-    }
-
-    @Override
     public @NotNull CompoundTag getUpdateTag() {
         CompoundTag tag = super.getUpdateTag();
         DEVICE_CODEC.encodeStart(NbtOps.INSTANCE, devices)
@@ -227,6 +224,7 @@ public abstract class AxonBlockEntity extends BlockEntity implements IAxonBlockE
         return tag;
     }
 
+    @MustBeInvokedByOverriders
     @Override
     public void load(@NotNull CompoundTag tag) {
         super.load(tag);
@@ -247,12 +245,16 @@ public abstract class AxonBlockEntity extends BlockEntity implements IAxonBlockE
         }
     }
 
+    @MustBeInvokedByOverriders
     @Override
     protected void saveAdditional(@NotNull CompoundTag tag) {
         super.saveAdditional(tag);
         DEVICE_CODEC.encodeStart(NbtOps.INSTANCE, devices)
                 .get().ifLeft(t -> tag.put("Devices", t));
+        writeModuleData().ifPresent(t -> tag.put(ModuleDataProtocols.BE_KEY, t));
     }
+
+    protected abstract Optional<? extends Tag> writeModuleData();
 
     @Override
     public void onChunkUnloaded() {

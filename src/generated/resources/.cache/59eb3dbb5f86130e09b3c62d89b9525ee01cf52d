@@ -1,6 +1,6 @@
-// 1.20.1	2025-10-19T17:09:24.629896	Loot Tables
-d475eca23de80ce206c0deff6ba25ccf24a7b2e0 data/synapse/loot_tables/blocks/distributor_block_1.json
-2c2534d0cc687617375cc7881607af3ceebe0a9f data/synapse/loot_tables/blocks/distributor_block_2.json
-86fd5d5121082d6d66f32311382d5b997a73327c data/synapse/loot_tables/blocks/distributor_block_3.json
-571cd5eff6984b1d840e14b09c5723073b9724bd data/synapse/loot_tables/blocks/endpoint_basic.json
-eb0874fd36ae6441b6eaf1d54085cca104021f7e data/synapse/loot_tables/blocks/relay.json
+// 1.20.1	2025-11-12T20:07:00.457197	Loot Tables
+76d36aac9dd252d8ca8cfa25a110fe8a8b59c69f data/synapse/loot_tables/blocks/distributor_block_1.json
+a86114a13464fd9c1accfd3bcff73ce8bcf2f611 data/synapse/loot_tables/blocks/distributor_block_2.json
+3b476257f8230418e8a45a2aa9ad749657150959 data/synapse/loot_tables/blocks/distributor_block_3.json
+e07647c196636f3e1559a334e4852f822069a74a data/synapse/loot_tables/blocks/endpoint_basic.json
+2845a34fe93a28f8b29c90b533ae4ceaeb6b38ac data/synapse/loot_tables/blocks/relay.json

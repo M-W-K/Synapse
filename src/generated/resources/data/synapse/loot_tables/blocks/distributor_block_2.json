@@ -3,14 +3,25 @@
   "pools": [
     {
       "bonus_rolls": 0.0,
-      "conditions": [
-        {
-          "condition": "minecraft:survives_explosion"
-        }
-      ],
       "entries": [
         {
           "type": "minecraft:item",
+          "functions": [
+            {
+              "function": "minecraft:copy_nbt",
+              "ops": [
+                {
+                  "op": "replace",
+                  "source": "ModuleInfo",
+                  "target": "ModuleInfo"
+                }
+              ],
+              "source": "block_entity"
+            },
+            {
+              "function": "minecraft:explosion_decay"
+            }
+          ],
           "name": "synapse:distributor_block_2"
         }
       ],

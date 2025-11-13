@@ -1,9 +1,12 @@
-// 1.20.1	2025-11-02T16:14:38.00273	Recipes
+// 1.20.1	2025-11-12T21:18:17.418376	Recipes
+cb58c8f6a6eab9aa283b94bbec1b8b43d785d2f6 data/minecraft/recipes/add_module.json
+d0a8649e716b174f7cc690d1f33d9e009fa670ab data/minecraft/recipes/remove_module.json
 66e5083cafac99357c2a71c49560067846a29c4c data/synapse/advancements/recipes/combat/biosteel_knife.json
 d256d5efbc88a22fcd1f332897a617f4cfa10d05 data/synapse/advancements/recipes/combat/duned_gold_knife.json
 d79d98184e7d1d240eed1449b8857d92cbe2f7c4 data/synapse/advancements/recipes/misc/axon.energy.json
 07ad865ea908a7c52281cf894dacfa66298e49a0 data/synapse/advancements/recipes/misc/axon.fluid.json
 e09c18f8f42b5e89ea451726fd043f4789f77027 data/synapse/advancements/recipes/misc/axon.item.json
+2dab37decc9911a4e9d2bab98d1187c8fa364230 data/synapse/advancements/recipes/misc/axon.redstone.json
 7e9682a5f58e68b2de3608b7ec21b17c53cdceb0 data/synapse/advancements/recipes/misc/biosteel_ingot.json
 844cb73fd9d26a7ae18a991dd99f63e800d8e3e4 data/synapse/advancements/recipes/misc/biosteel_ingot_from_nuggets.json
 d00db6195316e43cf96c0e4edf42704d9cd46b9a data/synapse/advancements/recipes/misc/biosteel_nugget.json
@@ -16,6 +19,10 @@ e66fdaff586b9cd2a7df66345024638e70fa2db1 data/synapse/advancements/recipes/misc/
 e521d78f0f031f1dc78087a7e163f71aecf8671b data/synapse/advancements/recipes/misc/ender_crystal.json
 196d60bdc480a8a994e5bed557fa8f883e6f42e0 data/synapse/advancements/recipes/misc/endpoint_basic.json
 4f75cd54a7fc22c7cc25e72312bfbdd556efc615 data/synapse/advancements/recipes/misc/magma_crystal.json
+16a758176c43435d6752e713bf2bddedf60df926 data/synapse/advancements/recipes/misc/module.energy.json
+cd21db980164d9fdbda389173c0126f3d3b6222a data/synapse/advancements/recipes/misc/module.fluid.json
+3f1736d12ba421fca7567006bed747d103c9e143 data/synapse/advancements/recipes/misc/module.item.json
+55439354eb2fa4057e359b4e9fab292284e247eb data/synapse/advancements/recipes/misc/module.redstone.json
 57ee242b453d9b076ed06bab093db064363d2762 data/synapse/advancements/recipes/misc/neural_thread.json
 4d7d46271c8e382eb6a3b534231df4b099a6971c data/synapse/advancements/recipes/misc/piezoelectric_crystal.json
 389a91fd92de99cf4b6b95ab9c0761ad4d1e179b data/synapse/advancements/recipes/misc/relay.json
@@ -24,6 +31,7 @@ e521d78f0f031f1dc78087a7e163f71aecf8671b data/synapse/advancements/recipes/misc/
 6ee13d275fdfda0453a5ee2adef976d097e8584b data/synapse/recipes/axon.energy.json
 154a11010a32b064949ca8e2324dbd25997370b0 data/synapse/recipes/axon.fluid.json
 0b043f092fba097eec77d75d12172cf9f0e91a3f data/synapse/recipes/axon.item.json
+f1516e1834f0a21be0b7c1eb8d4d1450a5fb94e2 data/synapse/recipes/axon.redstone.json
 cee79a30b906e512e5c02ce65e3e832c6be55c80 data/synapse/recipes/biosteel_ingot.json
 2e741502fc4df0f1ea17abe2ddca7e4c38c83970 data/synapse/recipes/biosteel_ingot_from_nuggets.json
 0f200ec59cf861c9d37d5d71bd65be05d0977ec7 data/synapse/recipes/biosteel_knife.json
@@ -38,6 +46,10 @@ ace292fc19cdce1d9e18e5fb4f68902bbeee8f75 data/synapse/recipes/duned_gold_knife.j
 0c0ab8d6861feaaf383aa16fc0243815a5050949 data/synapse/recipes/ender_crystal.json
 2049b8b01cbff3b4c6a9749131feb96e34ec09d1 data/synapse/recipes/endpoint_basic.json
 04799e01d829295984aacb875e862051a896daab data/synapse/recipes/magma_crystal.json
+4faf3ecd6b2ce1988f525133295961f130186e27 data/synapse/recipes/module.energy.json
+53d61647f04f27a542b2f9145de43a9fe4c4965f data/synapse/recipes/module.fluid.json
+9d6d11c518788f83602507aa0ed5679dba2b5f66 data/synapse/recipes/module.item.json
+0f6dfbf22ca25b179b07b5c3eb1e8b2695055107 data/synapse/recipes/module.redstone.json
 b020175b8dee6aa186acbda35c34dc79cd184237 data/synapse/recipes/neural_thread.json
 3a0ed5eef88370c7e2da4e432eedf258ee7bedc4 data/synapse/recipes/piezoelectric_crystal.json
 f1e9b3770aa79847b05ae612b1bae4691efb42ba data/synapse/recipes/relay.json

@@ -2,6 +2,7 @@ package com.m_w_k.synapse.common.item;
 
 import com.m_w_k.synapse.api.block.IAxonBlockEntity;
 import com.m_w_k.synapse.api.connect.AxonType;
+import com.m_w_k.synapse.api.item.AxonTypeItem;
 import com.m_w_k.synapse.common.connect.LocalAxonConnection;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
@@ -23,7 +24,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-public class AxonItem extends Item {
+public class AxonItem extends Item implements AxonTypeItem {
     protected final @NotNull AxonType type;
 
     public AxonItem(Properties p_41383_, @NotNull AxonType type) {
@@ -103,6 +104,7 @@ public class AxonItem extends Item {
         return ResourceLocation.tryParse(tag.getString("Slot"));
     }
 
+    @Override
     public @NotNull AxonType getType() {
         return type;
     }
@@ -137,7 +139,7 @@ public class AxonItem extends Item {
      */
     public boolean consumeToPlace(@NotNull LocalAxonConnection placing, @NotNull ItemStack stack, @NotNull Player player, boolean consume) {
         if (stack.isEmpty()) return false;
-        if (consume && !player.isCreative()) stack.shrink(1);
+        if (consume && !player.getAbilities().instabuild) stack.shrink(1);
         return true;
     }
 

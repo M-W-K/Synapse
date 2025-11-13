@@ -8,7 +8,7 @@
       },
       "when": {
         "facing": "down",
-        "relays": "1|2|3|4"
+        "one": "true"
       }
     },
     {
@@ -19,7 +19,7 @@
       },
       "when": {
         "facing": "down",
-        "relays": "2|3|4"
+        "two": "true"
       }
     },
     {
@@ -30,7 +30,7 @@
       },
       "when": {
         "facing": "down",
-        "relays": "3|4"
+        "three": "true"
       }
     },
     {
@@ -41,7 +41,7 @@
       },
       "when": {
         "facing": "down",
-        "relays": "4"
+        "four": "true"
       }
     },
     {
@@ -51,7 +51,7 @@
       },
       "when": {
         "facing": "up",
-        "relays": "1|2|3|4"
+        "one": "true"
       }
     },
     {
@@ -61,7 +61,7 @@
       },
       "when": {
         "facing": "up",
-        "relays": "2|3|4"
+        "two": "true"
       }
     },
     {
@@ -71,7 +71,7 @@
       },
       "when": {
         "facing": "up",
-        "relays": "3|4"
+        "three": "true"
       }
     },
     {
@@ -81,7 +81,7 @@
       },
       "when": {
         "facing": "up",
-        "relays": "4"
+        "four": "true"
       }
     },
     {
@@ -92,7 +92,7 @@
       },
       "when": {
         "facing": "north",
-        "relays": "1|2|3|4"
+        "one": "true"
       }
     },
     {
@@ -103,7 +103,7 @@
       },
       "when": {
         "facing": "north",
-        "relays": "2|3|4"
+        "two": "true"
       }
     },
     {
@@ -114,7 +114,7 @@
       },
       "when": {
         "facing": "north",
-        "relays": "3|4"
+        "three": "true"
       }
     },
     {
@@ -125,7 +125,7 @@
       },
       "when": {
         "facing": "north",
-        "relays": "4"
+        "four": "true"
       }
     },
     {
@@ -135,7 +135,7 @@
       },
       "when": {
         "facing": "south",
-        "relays": "1|2|3|4"
+        "one": "true"
       }
     },
     {
@@ -145,7 +145,7 @@
       },
       "when": {
         "facing": "south",
-        "relays": "2|3|4"
+        "two": "true"
       }
     },
     {
@@ -155,7 +155,7 @@
       },
       "when": {
         "facing": "south",
-        "relays": "3|4"
+        "three": "true"
       }
     },
     {
@@ -165,7 +165,7 @@
       },
       "when": {
         "facing": "south",
-        "relays": "4"
+        "four": "true"
       }
     },
     {
@@ -176,7 +176,7 @@
       },
       "when": {
         "facing": "west",
-        "relays": "1|2|3|4"
+        "one": "true"
       }
     },
     {
@@ -187,7 +187,7 @@
       },
       "when": {
         "facing": "west",
-        "relays": "2|3|4"
+        "two": "true"
       }
     },
     {
@@ -198,7 +198,7 @@
       },
       "when": {
         "facing": "west",
-        "relays": "3|4"
+        "three": "true"
       }
     },
     {
@@ -209,7 +209,7 @@
       },
       "when": {
         "facing": "west",
-        "relays": "4"
+        "four": "true"
       }
     },
     {
@@ -220,7 +220,7 @@
       },
       "when": {
         "facing": "east",
-        "relays": "1|2|3|4"
+        "one": "true"
       }
     },
     {
@@ -231,7 +231,7 @@
       },
       "when": {
         "facing": "east",
-        "relays": "2|3|4"
+        "two": "true"
       }
     },
     {
@@ -242,7 +242,7 @@
       },
       "when": {
         "facing": "east",
-        "relays": "3|4"
+        "three": "true"
       }
     },
     {
@@ -253,7 +253,7 @@
       },
       "when": {
         "facing": "east",
-        "relays": "4"
+        "four": "true"
       }
     }
   ]

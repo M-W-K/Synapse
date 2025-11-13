@@ -2,17 +2,25 @@ package com.m_w_k.synapse.api.block;
 
 import com.m_w_k.synapse.common.connect.LocalAxonConnection;
 import com.m_w_k.synapse.common.connect.LocalConnectorDevice;
+import com.m_w_k.synapse.common.item.AxonBlockItem;
+import com.m_w_k.synapse.common.item.ModuleItem;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.minecraftforge.common.extensions.IForgeBlockEntity;
+import org.jetbrains.annotations.MustBeInvokedByOverriders;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnmodifiableView;
 
 import java.util.Map;
+import java.util.Optional;
+import java.util.function.Consumer;
 
 public interface IAxonBlockEntity extends ICapabilityProvider, IForgeBlockEntity {
 
@@ -24,21 +32,30 @@ public interface IAxonBlockEntity extends ICapabilityProvider, IForgeBlockEntity
 
     @NotNull @UnmodifiableView Map<ResourceLocation, LocalConnectorDevice> getSlots();
 
+    // should throw a descriptive error if hasSlot returns false
     @NotNull LocalConnectorDevice getBySlot(ResourceLocation slot);
 
     boolean hasSlot(@Nullable ResourceLocation slot);
 
-    default boolean slotIsActive(ResourceLocation slot) {
-        return true;
+    default @NotNull Optional<LocalConnectorDevice> ifBySlot(ResourceLocation slot) {
+        if (!hasSlot(slot)) return Optional.empty();
+        return Optional.of(getBySlot(slot));
     }
 
-    @NotNull String getNameBySlot(ResourceLocation slot);
+    @MustBeInvokedByOverriders
+    default boolean slotIsActive(@NotNull ResourceLocation slot) {
+        return hasSlot(slot);
+    }
 
-    default boolean allowsUpstream(ResourceLocation slot, LocalConnectorDevice upstream) {
+    @NotNull String getNameBySlot(@NotNull ResourceLocation slot);
+
+    @MustBeInvokedByOverriders
+    default boolean allowsUpstream(@NotNull ResourceLocation slot, LocalConnectorDevice upstream) {
         return slotIsActive(slot);
     }
 
-    default boolean allowsDownstream(ResourceLocation slot, LocalConnectorDevice downstream) {
+    @MustBeInvokedByOverriders
+    default boolean allowsDownstream(@NotNull ResourceLocation slot, LocalConnectorDevice downstream) {
         return slotIsActive(slot);
     }
 
@@ -59,4 +76,8 @@ public interface IAxonBlockEntity extends ICapabilityProvider, IForgeBlockEntity
     void removeDownstreamFrom(ResourceLocation slot);
 
     void retireSlot(ResourceLocation slot);
+
+    void installModules(@NotNull AxonBlockItem item, @NotNull BlockPlaceContext context);
+
+    @NotNull LocalConnectorDevice installModule(@NotNull ResourceLocation slotToAdd);
 }

@@ -176,7 +176,7 @@ public class BasicConnectorMenu extends AbstractContainerMenu {
     }
 
     public void updateID(ServerPlayer player, ResourceLocation device, short id) {
-        if (be == null) return;
+        if (be == null || !be.hasSlot(device)) return;
         IDSetResult result = be.getBySlot(device).setAddressID(id);
         sendToClient(player, device, result);
     }

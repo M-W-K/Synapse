@@ -2,11 +2,12 @@ package com.m_w_k.synapse.registry;
 
 import com.m_w_k.synapse.SynapseMod;
 import com.m_w_k.synapse.api.connect.ConnectorLevel;
+import com.m_w_k.synapse.common.block.AxonBlock;
 import com.m_w_k.synapse.common.block.DistributorBlock;
 import com.m_w_k.synapse.common.block.EndpointBlock;
 import com.m_w_k.synapse.common.block.RelayBlock;
+import com.m_w_k.synapse.common.item.AxonBlockItem;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockBehaviour;
@@ -36,19 +37,19 @@ public final class SynapseBlockRegistry {
 
     public static void init(IEventBus bus) {
         BLOCKS.register(bus);
-        register(DISTRIBUTOR_BLOCK_1, new Item.Properties());
-        register(DISTRIBUTOR_BLOCK_2, new Item.Properties());
-        register(DISTRIBUTOR_BLOCK_3, new Item.Properties());
+        registerAxonBlock(DISTRIBUTOR_BLOCK_1, new Item.Properties());
+        registerAxonBlock(DISTRIBUTOR_BLOCK_2, new Item.Properties());
+        registerAxonBlock(DISTRIBUTOR_BLOCK_3, new Item.Properties());
 
 //        register(DISTRIBUTOR_ALIAS_SYSTEM_SERVER, new Item.Properties());
 
-        register(ENDPOINT_BASIC, new Item.Properties());
+        registerAxonBlock(ENDPOINT_BASIC, new Item.Properties());
 
-        register(RELAY, new Item.Properties());
+        registerAxonBlock(RELAY, new Item.Properties());
     }
 
-    private static void register(RegistryObject<? extends Block> block, Item.Properties props) {
-        SynapseItemRegistry.ITEMS.register(block.getId().getPath(), () -> new BlockItem(block.get(), props));
+    private static void registerAxonBlock(RegistryObject<? extends AxonBlock> block, Item.Properties props) {
+        SynapseItemRegistry.ITEMS.register(block.getId().getPath(), () -> new AxonBlockItem(block.get(), props));
     }
 
 }

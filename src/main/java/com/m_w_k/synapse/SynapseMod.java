@@ -44,6 +44,7 @@ public final class SynapseMod {
         SynapseBlockEntityRegistry.init(bus);
         SynapseCreativeTabsRegistry.init(bus);
         SynapseMenuRegistry.init(bus);
+        SynapseRecipeSerializerRegistry.init(bus);
     }
 
     private void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {
@@ -77,5 +78,9 @@ public final class SynapseMod {
                     MenuScreens.register(SynapseMenuRegistry.RELAY.get(), RelayScreen::new);
                 }
         );
+    }
+
+    public static Logger getLogger() {
+        return LOGGER;
     }
 }

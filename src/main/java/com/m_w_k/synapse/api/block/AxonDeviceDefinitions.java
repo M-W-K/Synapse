@@ -17,6 +17,7 @@ import it.unimi.dsi.fastutil.objects.*;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.common.capabilities.Capability;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -25,7 +26,7 @@ import org.jetbrains.annotations.Range;
 import java.util.List;
 import java.util.function.Function;
 
-public class AxonDeviceDefinitions {
+public final class AxonDeviceDefinitions {
 
     public static final BiMap<AxonType, ResourceLocation> STANDARD = HashBiMap.create(AxonType.values().length);
     public static final BiMap<Pair<AxonType, Direction>, ResourceLocation> ENDPOINTS =
@@ -36,6 +37,8 @@ public class AxonDeviceDefinitions {
     public static final Reference2ObjectOpenHashMap<AxonType, TransferRuleset> ENDPOINT_RULES =
             new Reference2ObjectOpenHashMap<>(AxonType.values().length);
     public static final Reference2ObjectOpenHashMap<AxonType, Function<IFacedAxonBlockEntity, IEndpointCapability>> ENDPOINT_CAPABILITIES =
+            new Reference2ObjectOpenHashMap<>(AxonType.values().length);
+    public static final Reference2ObjectOpenHashMap<Capability<?>, AxonType> ENDPOINT_TYPES_BY_CAPABILITY =
             new Reference2ObjectOpenHashMap<>(AxonType.values().length);
 
     static {
@@ -54,8 +57,11 @@ public class AxonDeviceDefinitions {
         ENDPOINT_RULES.put(AxonType.FLUID, new FluidTransferRuleset(Dist.DEDICATED_SERVER));
         ENDPOINT_RULES.put(AxonType.ENERGY, new EnergyTransferRuleset(Dist.DEDICATED_SERVER));
         ENDPOINT_CAPABILITIES.put(AxonType.ITEM, ItemExposer::new);
+        ENDPOINT_TYPES_BY_CAPABILITY.put(AxonType.ITEM.getCapability(), AxonType.ITEM);
         ENDPOINT_CAPABILITIES.put(AxonType.FLUID, FluidExposer::new);
+        ENDPOINT_TYPES_BY_CAPABILITY.put(AxonType.FLUID.getCapability(), AxonType.FLUID);
         ENDPOINT_CAPABILITIES.put(AxonType.ENERGY, EnergyExposer::new);
+        ENDPOINT_TYPES_BY_CAPABILITY.put(AxonType.ENERGY.getCapability(), AxonType.ENERGY);
     }
 
     @Contract("_,true->!null")

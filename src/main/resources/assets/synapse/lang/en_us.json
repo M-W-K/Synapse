@@ -37,13 +37,23 @@
   "item.synapse.magma_crystal": "Magma Crystal",
   "item.synapse.ender_crystal": "Ender Crystal",
   "item.synapse.axon.item": "Item Axon",
+  "item.synapse.module.item": "Item Module",
   "item.synapse.axon.fluid": "Fluid Axon",
+  "item.synapse.module.fluid": "Fluid Module",
   "item.synapse.axon.energy": "Energy Axon",
+  "item.synapse.module.energy": "Energy Module",
+  "item.synapse.axon.redstone": "Redstone Axon",
+  "item.synapse.module.redstone": "Redstone Module",
   "item.synapse.axon.connecting": "Connecting to %s %s %s at device %s",
+  "item.synapse.module.installed.1": "Has the following modules installed:",
+  "item.synapse.module.installed.2": "- %s",
+  "item.synapse.module.desc": "Allows Distributors, Relays, Endpoints, etc. to handle this axon type when installed via crafting or by clicking in-world.",
   "item.synapse.biosteel_knife": "Biosteel Knife",
   "item.synapse.duned_gold_knife": "Duned Gold Knife",
-  "item.synapse.severing_knife": "Severs all connections from clicked device",
-  "item.synapse.removing_knife": "Removes clicked device",
+  "item.synapse.severing_knife.1": "Severs all connections from clicked device",
+  "item.synapse.severing_knife.2": "Removes the top module when crafted with a device",
+  "item.synapse.removing_knife.1": "Removes clicked device",
+  "item.synapse.removing_knife.2": "Removes all modules when crafted with a device",
 
   "block.synapse.distributor_block_1": "Mk1 Distributor",
   "block.synapse.distributor_block_2": "Mk2 Distributor",
@@ -55,5 +65,5 @@
   "block.synapse.relay": "Distributor Relay",
   "block.synapse.relay_desc_1": "Connects to 1 Distributor, and 'relays' that connection to 1 Endpoint or lower MK number Distributor",
   "block.synapse.relay_desc_2": "If its connection to a Distributor is removed, it can only be reconnected to a distributor of equal or higher MK number",
-  "block.synapse.relay_desc_3": "Up to 4 per block"
+  "block.synapse.relay_desc_3": "Up to 4 per block. At most 1 Module per relay."
 }

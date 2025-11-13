@@ -2,9 +2,11 @@ package com.m_w_k.synapse.data;
 
 import com.m_w_k.synapse.registry.SynapseBlockRegistry;
 import com.m_w_k.synapse.registry.SynapseItemRegistry;
+import com.m_w_k.synapse.registry.SynapseRecipeSerializerRegistry;
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.recipes.*;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.level.ItemLike;
 import net.minecraftforge.common.Tags;
 import org.jetbrains.annotations.NotNull;
@@ -84,33 +86,13 @@ public final class SynapseRecipeProvider extends RecipeProvider {
         knife(writer, SynapseItemRegistry.BIOSTEEL_KNIFE.get(), SynapseItemRegistry.BIOSTEEL.get(), SynapseItemRegistry.BIOSTEEL_NUGGET.get());
         knife(writer, SynapseItemRegistry.DUNED_GOLD_KNIFE.get(), SynapseItemRegistry.DUNED_GOLD.get(), SynapseItemRegistry.DUNED_GOLD_NUGGET.get());
 
-        ShapedRecipeBuilder.shaped(RecipeCategory.MISC, SynapseItemRegistry.ENERGY_AXON.get(), 3)
-                .pattern("sis")
-                .pattern("iti")
-                .pattern("sis")
-                .define('i', Items.GOLD_INGOT)
-                .define('s', SynapseItemRegistry.NEURAL_THREAD.get())
-                .define('t', SynapseItemRegistry.TRANSFER_POWDER.get())
-                .unlockedBy("has_thread", has(SynapseItemRegistry.NEURAL_THREAD.get()))
-                .save(writer);
-        ShapedRecipeBuilder.shaped(RecipeCategory.MISC, SynapseItemRegistry.ITEM_AXON.get(), 3)
-                .pattern("sis")
-                .pattern("iti")
-                .pattern("sis")
-                .define('i', Items.IRON_INGOT)
-                .define('s', SynapseItemRegistry.NEURAL_THREAD.get())
-                .define('t', SynapseItemRegistry.TRANSFER_POWDER.get())
-                .unlockedBy("has_thread", has(SynapseItemRegistry.NEURAL_THREAD.get()))
-                .save(writer);
-        ShapedRecipeBuilder.shaped(RecipeCategory.MISC, SynapseItemRegistry.FLUID_AXON.get(), 3)
-                .pattern("sis")
-                .pattern("iti")
-                .pattern("sis")
-                .define('i', Items.COPPER_INGOT)
-                .define('s', SynapseItemRegistry.NEURAL_THREAD.get())
-                .define('t', SynapseItemRegistry.TRANSFER_POWDER.get())
-                .unlockedBy("has_thread", has(SynapseItemRegistry.NEURAL_THREAD.get()))
-                .save(writer);
+        axonType(writer, Items.GOLD_INGOT, SynapseItemRegistry.ENERGY_AXON.get(), SynapseItemRegistry.ENERGY_MODULE.get());
+        axonType(writer, Items.IRON_INGOT, SynapseItemRegistry.ITEM_AXON.get(), SynapseItemRegistry.ITEM_MODULE.get());
+        axonType(writer, Items.COPPER_INGOT, SynapseItemRegistry.FLUID_AXON.get(), SynapseItemRegistry.FLUID_MODULE.get());
+        axonType(writer, Items.REDSTONE, SynapseItemRegistry.REDSTONE_AXON.get(), SynapseItemRegistry.REDSTONE_MODULE.get());
+
+        SpecialRecipeBuilder.special(SynapseRecipeSerializerRegistry.ADD_MODULE.get()).save(writer, "add_module");
+        SpecialRecipeBuilder.special(SynapseRecipeSerializerRegistry.REMOVE_MODULE.get()).save(writer, "remove_module");
 
         ShapedRecipeBuilder.shaped(RecipeCategory.MISC, SynapseBlockRegistry.ENDPOINT_BASIC.get(), 2)
                 .pattern("btb")
@@ -169,6 +151,26 @@ public final class SynapseRecipeProvider extends RecipeProvider {
                 RecipeCategory.MISC, SynapseItemRegistry.BIOSTEEL.get(), "synapse:biosteel_ingot_from_nuggets", "synapse:biosteel_ingot", "synapse:biosteel_nugget", null);
         nineBlockStorageRecipes(writer, RecipeCategory.MISC, SynapseItemRegistry.DUNED_GOLD_NUGGET.get(),
                 RecipeCategory.MISC, SynapseItemRegistry.DUNED_GOLD.get(), "synapse:duned_gold_ingot_from_nuggets", "synapse:duned_gold_ingot", "synapse:duned_gold_nugget", null);
+    }
+
+    private void axonType(@NotNull Consumer<FinishedRecipe> writer, ItemLike mat, ItemLike axon, ItemLike module) {
+        ShapedRecipeBuilder.shaped(RecipeCategory.MISC, axon, 3)
+                .pattern("sis")
+                .pattern("iti")
+                .pattern("sis")
+                .define('i', mat)
+                .define('s', SynapseItemRegistry.NEURAL_THREAD.get())
+                .define('t', SynapseItemRegistry.TRANSFER_POWDER.get())
+                .unlockedBy("has_thread", has(SynapseItemRegistry.NEURAL_THREAD.get()))
+                .save(writer);
+        ShapedRecipeBuilder.shaped(RecipeCategory.MISC, module, 2)
+                .pattern(" n ")
+                .pattern("nin")
+                .pattern(" n ")
+                .define('i', mat)
+                .define('n', SynapseItemRegistry.BIOSTEEL_NUGGET.get())
+                .unlockedBy("has_biosteel", has(SynapseItemRegistry.BIOSTEEL.get()))
+                .save(writer);
     }
 
     private void knife(@NotNull Consumer<FinishedRecipe> writer, ItemLike knife, ItemLike ingot, ItemLike nugget) {

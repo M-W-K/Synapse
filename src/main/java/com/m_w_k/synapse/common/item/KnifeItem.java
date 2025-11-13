@@ -3,6 +3,7 @@ package com.m_w_k.synapse.common.item;
 import com.m_w_k.synapse.api.KnifeAction;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.SwordItem;
 import net.minecraft.world.item.Tier;
@@ -10,12 +11,14 @@ import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.common.ToolAction;
 import net.minecraftforge.common.ToolActions;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class KnifeItem extends SwordItem {
     protected @NotNull KnifeAction action;
@@ -37,8 +40,14 @@ public class KnifeItem extends SwordItem {
     @Override
     public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> list, TooltipFlag flag) {
         switch (action) {
-            case SEVER -> list.add(Component.translatable("item.synapse.severing_knife").withStyle(ChatFormatting.GRAY));
-            case REMOVE -> list.add(Component.translatable("item.synapse.removing_knife").withStyle(ChatFormatting.GRAY));
+            case SEVER -> {
+                list.add(Component.translatable("item.synapse.severing_knife.1").withStyle(ChatFormatting.GRAY));
+                list.add(Component.translatable("item.synapse.severing_knife.2").withStyle(ChatFormatting.GRAY));
+            }
+            case REMOVE -> {
+                list.add(Component.translatable("item.synapse.removing_knife.1").withStyle(ChatFormatting.GRAY));
+                list.add(Component.translatable("item.synapse.removing_knife.2").withStyle(ChatFormatting.GRAY));
+            }
         }
     }
 
@@ -51,5 +60,17 @@ public class KnifeItem extends SwordItem {
     @Override
     public boolean canApplyAtEnchantingTable(ItemStack stack, Enchantment enchantment) {
         return super.canApplyAtEnchantingTable(stack, enchantment);
+    }
+
+    @Override
+    public boolean hasCraftingRemainingItem(ItemStack stack) {
+        return true;
+    }
+
+    @Override
+    public ItemStack getCraftingRemainingItem(ItemStack itemStack) {
+        ItemStack copy = itemStack.copy();
+        copy.hurtAndBreak(1, ForgeHooks.getCraftingPlayer(), e -> e.broadcastBreakEvent(EquipmentSlot.MAINHAND));
+        return copy;
     }
 }

@@ -1,0 +1,22 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "i": {
+      "item": "minecraft:redstone"
+    },
+    "n": {
+      "item": "synapse:biosteel_nugget"
+    }
+  },
+  "pattern": [
+    " n ",
+    "nin",
+    " n "
+  ],
+  "result": {
+    "count": 2,
+    "item": "synapse:module.redstone"
+  },
+  "show_notification": true
+}
